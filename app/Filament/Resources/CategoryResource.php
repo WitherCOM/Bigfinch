@@ -6,6 +6,7 @@ use App\Enums\Direction;
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Filament\Resources\CategoryResource\RelationManagers;
 use App\Models\Category;
+use App\Rules\NotDefaultCategoryName;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -19,11 +20,11 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-newspaper';
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('user_id',Auth::id());
+        return parent::getEloquentQuery()->where('user_id',Auth::id())->orWhereNull('user_id');
     }
 
     public static function form(Form $form): Form
@@ -31,6 +32,7 @@ class CategoryResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->rule(new NotDefaultCategoryName())
                     ->required(),
                 Forms\Components\Select::make('direction')
                     ->required()

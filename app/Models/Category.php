@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Direction;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,5 +38,20 @@ class Category extends Model
     public static function predict(array $data)
     {
         return null;
+    }
+
+    public function scopeDefault(Builder $query)
+    {
+        return $query->whereNull('user_id');
+    }
+
+    public function scopeIncome(Builder $query)
+    {
+        return $query->where('direction', Direction::INCOME);
+    }
+
+    public function scopeExpense(Builder $query)
+    {
+        return $query->where('direction', Direction::EXPENSE);
     }
 }

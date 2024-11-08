@@ -2,8 +2,15 @@
 
 namespace App\Enums;
 
-enum CurrencyPosition: string
+use Filament\Support\Contracts\HasLabel;
+
+enum CurrencyPosition: string implements HasLabel
 {
     case PREFIX = 'prefix';
     case SUFFIX = 'suffix';
+
+    public function getLabel(): ?string
+    {
+        return $this->value;
+    }
 }

@@ -6,6 +6,7 @@ use App\Enums\CurrencyPosition;
 use App\Filament\Resources\CurrencyResource\Pages;
 use App\Filament\Resources\CurrencyResource\RelationManagers;
 use App\Models\Currency;
+use App\Rules\CurrencyCodeRule;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -18,7 +19,7 @@ class CurrencyResource extends Resource
 {
     protected static ?string $model = Currency::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
     public static function form(Form $form): Form
     {
@@ -33,6 +34,7 @@ class CurrencyResource extends Resource
                 Forms\Components\TextInput::make('symbol')
                     ->required(),
                 Forms\Components\TextInput::make('iso_format')
+                    ->rule(new CurrencyCodeRule())
                     ->required(),
                 Forms\Components\TextInput::make('rate_to_huf')
                     ->required()

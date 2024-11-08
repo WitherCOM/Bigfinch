@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Enums\Direction;
 use App\Filament\Resources\TransactionResource\Pages;
-use App\Filament\Resources\TransactionResource\RelationManagers;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Filament\Forms;
@@ -20,7 +19,12 @@ class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('user_id', Auth::id());
+    }
 
     public static function form(Form $form): Form
     {
@@ -37,6 +41,7 @@ class TransactionResource extends Resource
                     ->searchable(),
                 Forms\Components\Select::make('direction')
                     ->required()
+                    ->live()
                     ->options(Direction::class)
                     ->enum(Direction::class),
                 Forms\Components\DateTimePicker::make('date')
@@ -48,8 +53,10 @@ class TransactionResource extends Resource
                     })
                     ->searchable(),
                 Forms\Components\Select::make('category_id')
-                    ->relationship('category','name', function (Builder $query) {
-                        $query->where('user_id', Auth::id())->orWhereNull('user_id');
+                    ->relationship('category','name', function (Builder $query, Forms\Get $get) {
+                        $query->where(function (Builder $query) {
+                            $query->where('user_id', Auth::id())->orWhereNull('user_id');
+                        })->where('direction',$get('direction'));
                     })
                     ->searchable()
             ]);
