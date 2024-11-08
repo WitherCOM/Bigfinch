@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('currencies', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
-            $table->string('iso_format');
+            $table->string('iso_code');
             $table->enum('position', array_column(\App\Enums\CurrencyPosition::cases(), 'value'));
             $table->string('symbol');
             $table->double('rate_to_huf');

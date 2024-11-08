@@ -30,7 +30,7 @@ class SyncTransactions implements ShouldQueue
      */
     public function handle(): void
     {
-        $currencies = Currency::all(['iso_format', 'id'])->pluck('id','iso_format');
+        $currencies = Currency::all(['iso_code', 'id'])->pluck('id','iso_code');
         $transactionIds = $this->integration->all_transactions->pluck('id');
         $toCreate = $this->integration->getTransactions()->whereNotIn('common_id', $transactionIds)
             ->map(fn ($transaction) => [
@@ -39,7 +39,7 @@ class SyncTransactions implements ShouldQueue
                 'value' => abs(floatval($transaction['transactionAmount']['amount'])),
                 'direction' => floatval($transaction['transactionAmount']['amount']) > 0 ? Direction::INCOME : Direction::EXPENSE,
                 'date' => Carbon::parse($transaction['bookingDate']),
-                'currency_id' => $currencies[Str::lower($transaction['transactionAmount']['currency'])],
+                'currency_id' => $currencies[$transaction['transactionAmount']['currency']],
                 'integration_id' => $this->integration->id,
                 'user_id' => $this->integration->user_id,
                 'common_id' => $transaction['transactionId'],
