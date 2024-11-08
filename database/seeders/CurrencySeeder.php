@@ -16,31 +16,31 @@ class CurrencySeeder extends Seeder
     public function run(): void
     {
         Currency::create([
-            'iso_format' => 'HUF',
+            'iso_code' => 'HUF',
             'position' => CurrencyPosition::SUFFIX,
             'symbol' => 'Ft',
             'rate_to_huf' => 1
         ]);
         Currency::create([
-            'iso_format' => 'EUR',
+            'iso_code' => 'EUR',
             'position' => CurrencyPosition::PREFIX,
             'symbol' => '€',
             'rate_to_huf' => 1
         ]);
         Currency::create([
-            'iso_format' => 'USD',
+            'iso_code' => 'USD',
             'position' => CurrencyPosition::PREFIX,
             'symbol' => '$',
             'rate_to_huf' => 1
         ]);
         Currency::create([
-            'iso_format' => 'PLN',
+            'iso_code' => 'PLN',
             'position' => CurrencyPosition::SUFFIX,
             'symbol' => 'zł',
             'rate_to_huf' => 1
         ]);
         Currency::create([
-            'iso_format' => 'CZK',
+            'iso_code' => 'CZK',
             'position' => CurrencyPosition::SUFFIX,
             'symbol' => 'Kč',
             'rate_to_huf' => 1

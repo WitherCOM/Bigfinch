@@ -25,15 +25,13 @@ class CurrencyResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required(),
                 Forms\Components\Select::make('position')
                     ->required()
                     ->options(CurrencyPosition::class)
                     ->enum(CurrencyPosition::class),
                 Forms\Components\TextInput::make('symbol')
                     ->required(),
-                Forms\Components\TextInput::make('iso_format')
+                Forms\Components\TextInput::make('iso_code')
                     ->rule(new CurrencyCodeRule())
                     ->required(),
                 Forms\Components\TextInput::make('rate_to_huf')
