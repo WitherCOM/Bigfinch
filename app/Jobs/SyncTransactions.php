@@ -7,16 +7,21 @@ use App\Models\Category;
 use App\Models\Currency;
 use App\Models\Integration;
 use App\Models\Merchant;
+use App\Models\Rule;
 use App\Models\Transaction;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class SyncTransactions implements ShouldQueue
 {
     use Queueable;
+
     private Integration $integration;
+
     /**
      * Create a new job instance.
      */
@@ -30,34 +35,36 @@ class SyncTransactions implements ShouldQueue
      */
     public function handle(): void
     {
-        $currencies = Currency::all(['iso_code', 'id'])->pluck('id','iso_code');
+        $currencies = Currency::all(['iso_code', 'id'])->pluck('id', 'iso_code');
+        $rules = Rule::category()->get();
         $transactionIds = $this->integration->all_transactions->pluck('id');
         $toCreate = $this->integration->getTransactions()->whereNotIn('common_id', $transactionIds)
-            ->map(fn ($transaction) => [
-                'id' => Str::uuid(),
-                'description' => collect($transaction['remittanceInformationUnstructured'])->implode(' '),
-                'value' => abs(floatval($transaction['transactionAmount']['amount'])),
-                'direction' => floatval($transaction['transactionAmount']['amount']) > 0 ? Direction::INCOME : Direction::EXPENSE,
-                'date' => Carbon::parse($transaction['bookingDate']),
-                'currency_id' => $currencies[$transaction['transactionAmount']['currency']],
-                'integration_id' => $this->integration->id,
-                'open_banking_transaction' => $transaction,
-                'user_id' => $this->integration->user_id,
-                'common_id' => $transaction['transactionId'],
-                'category_id' => Category::predict($transaction),
-                'merchant_id' => $this->getMerchant($transaction)
-            ])
-            ->toArray();
+            ->map(function ($transaction) use ($currencies, $rules) {
+                $data = [
+                    'id' => Str::uuid(),
+                    'description' => collect($transaction['remittanceInformationUnstructured'])->implode(' '),
+                    'value' => abs(floatval($transaction['transactionAmount']['amount'])),
+                    'direction' => floatval($transaction['transactionAmount']['amount']) > 0 ? Direction::INCOME : Direction::EXPENSE,
+                    'date' => Carbon::parse($transaction['bookingDate']),
+                    'currency_id' => $currencies[$transaction['transactionAmount']['currency']],
+                    'integration_id' => $this->integration->id,
+                    'open_banking_transaction' => $transaction,
+                    'user_id' => $this->integration->user_id,
+                    'common_id' => $transaction['transactionId'],
+                    'merchant_id' => $this->getMerchant($transaction)
+                ];
+                $data['category_id'] = $rules->filter(fn($rule) => $rule->categoryFilter($data))->first()?->target_id;
+                return $data;
+            });
+
         Transaction::insert($toCreate);
     }
 
     public function getMerchant(array $data)
     {
-        if (Str::of($data['proprietaryBankTransactionCode'])->contains('CARD',true))
-        {
-            $merchant = Merchant::where('user_id',$this->integration->user_id)->where('name', $data['creditorName'])->first();
-            if (is_null($merchant))
-            {
+        if (Str::of($data['proprietaryBankTransactionCode'])->contains('CARD', true)) {
+            $merchant = Merchant::where('user_id', $this->integration->user_id)->where('name', $data['creditorName'])->first();
+            if (is_null($merchant)) {
                 $merchant = new Merchant;
                 $merchant->name = $data['creditorName'];
                 $merchant->user_id = $this->integration->user_id;

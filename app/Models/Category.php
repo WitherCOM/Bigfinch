@@ -35,11 +35,6 @@ class Category extends Model
         return $this->hasMany(Transaction::class);
     }
 
-    public static function predict(array $data)
-    {
-        return null;
-    }
-
     public function scopeDefault(Builder $query)
     {
         return $query->whereNull('user_id');
