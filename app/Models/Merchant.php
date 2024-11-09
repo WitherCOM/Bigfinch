@@ -12,13 +12,11 @@ class Merchant extends Model
     use HasFactory;
     use HasUuids;
 
-    const transactionCodes = [
-        'CARD_PAYMENT'
-    ];
-
     protected $fillable = [
         'name'
     ];
+
+    public $timestamps = false;
 
     public function transactions()
     {

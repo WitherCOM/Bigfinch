@@ -41,6 +41,7 @@ class SyncTransactions implements ShouldQueue
                 'date' => Carbon::parse($transaction['bookingDate']),
                 'currency_id' => $currencies[$transaction['transactionAmount']['currency']],
                 'integration_id' => $this->integration->id,
+                'open_banking_transaction' => $transaction,
                 'user_id' => $this->integration->user_id,
                 'common_id' => $transaction['transactionId'],
                 'category_id' => Category::predict($transaction),

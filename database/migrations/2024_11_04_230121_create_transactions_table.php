@@ -18,6 +18,7 @@ return new class extends Migration
             $table->dateTime('date');
             $table->string('common_id');
             $table->enum('direction',array_column(\App\Enums\Direction::cases(), 'value'));
+            $table->json('open_banking_transaction')->nullable();
             $table->foreignUuid('merchant_id')->nullable()->constrained('merchants')->nullOnDelete();
             $table->foreignUuid('integration_id')->nullable()->constrained('integrations')->nullOnDelete();
             $table->foreignUuid('currency_id')->constrained('currencies')->cascadeOnDelete();

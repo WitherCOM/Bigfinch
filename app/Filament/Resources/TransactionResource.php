@@ -12,7 +12,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 
 class TransactionResource extends Resource
@@ -36,7 +35,8 @@ class TransactionResource extends Resource
                     ->required()
                     ->numeric(),
                 Forms\Components\Select::make('currency_id')
-                    ->relationship('currency','name')
+                    ->relationship('currency','iso_code')
+                    ->preload()
                     ->required()
                     ->searchable(),
                 Forms\Components\Select::make('direction')

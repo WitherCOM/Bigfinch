@@ -20,6 +20,7 @@ class Transaction extends Model
 
     protected $fillable = [
         'description',
+        'direction',
         'value',
         'date',
         'merchant_id',
@@ -31,8 +32,20 @@ class Transaction extends Model
 
     protected $casts = [
         'date' => 'datetime',
-        'direction' => Direction::class,
+        'open_banking_transaction' => 'array',
+        'direction' => Direction::class
     ];
+
+    protected static function booted()
+    {
+        parent::booted();
+        parent::deleting(function (Transaction $transaction) {
+            if (is_null($transaction->integration_id))
+            {
+                $transaction->forceDeleting = true;
+            }
+        });
+    }
 
     public function merchant(): BelongsTo
     {
