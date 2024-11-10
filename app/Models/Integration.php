@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\GocardlessException;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -47,7 +48,7 @@ class Integration extends Model
             $access_token = self::getAccessToken();
             $response = Http::withHeader('Authorization', "Bearer $access_token")
                 ->get('https://bankaccountdata.gocardless.com/api/v2/institutions/');
-            throw_if($response->failed(), new \Exception("Gocardless error with getting institutions!"));
+            throw_if($response->failed(), new GocardlessException($response));
 
             return collect($response->json())->mapWithKeys(fn($bank) => [
                 $bank['id'] => $bank['name'] . ' (' . collect($bank['countries'])->implode(', ') . ')'
@@ -98,18 +99,6 @@ class Integration extends Model
         }
     }
 
-    public function getRequisition(): array|null
-    {
-        $access_token = self::getAccessToken();
-        $requisition_id = $this->requisition_id;
-        // Create requisition
-        $response = Http::withHeader('Authorization', "Bearer $access_token")
-            ->get("https://bankaccountdata.gocardless.com/api/v2/requisitions/$requisition_id/");
-        throw_if($response->failed(), new \Exception("Gocardless error with getting requisition!"));
-
-        return $response->json();
-    }
-
     public function deleteRequisition()
     {
         $access_token = self::getAccessToken();
@@ -117,7 +106,7 @@ class Integration extends Model
         // Create requisition
         $response = Http::withHeader('Authorization', "Bearer $access_token")
             ->delete("https://bankaccountdata.gocardless.com/api/v2/requisitions/$requisition_id/");
-        throw_if($response->failed(), new \Exception("Gocardless error with deleting requisition!"));
+        throw_if($response->failed(), new GocardlessException($response));
     }
 
 
@@ -128,7 +117,7 @@ class Integration extends Model
         // Get institution
         $response = Http::withHeader('Authorization', "Bearer $access_token")
             ->get("https://bankaccountdata.gocardless.com/api/v2/institutions/$institution_id");
-        throw_if($response->failed(), new \Exception("Gocardless error with instituion!"));
+        throw_if($response->failed(), new GocardlessException($response));
         $this->institution_name = $response->json('name');
         $this->institution_logo = $response->json('logo');
 
@@ -143,7 +132,7 @@ class Integration extends Model
                 ]
             ]);
         throw_if($response->paymentRequired(), new \Exception("Gocardless payment required!"));
-        throw_if($response->failed(), new \Exception("Gocardless error with end user agreement!"));
+        throw_if($response->failed(), new GocardlessException($response));
         $agreement_id = $response->json('id');
         // Create requisition
         $response = Http::withHeader('Authorization', "Bearer $access_token")
@@ -152,7 +141,7 @@ class Integration extends Model
                 'redirect' => route('gocardless.callback'),
                 'agreement' => $agreement_id
             ]);
-        throw_if($response->failed(), new \Exception("Gocardless error with creating requisition!"));
+        throw_if($response->failed(), new GocardlessException($response));
         $this->requisition_id = $response->json('id');
         $this->link = $response->json('link');
     }
@@ -160,12 +149,17 @@ class Integration extends Model
     public function fillExtra()
     {
         $access_token = self::getAccessToken();
-        $data = $this->getRequisition();
+        $requisition_id = $this->requisition_id;
+        // Create requisition
+        $response = Http::withHeader('Authorization', "Bearer $access_token")
+            ->get("https://bankaccountdata.gocardless.com/api/v2/requisitions/$requisition_id/");
+        throw_if($response->failed(), new GocardlessException($response));
+        $data = $response->json();
         $agreement_id = $data['agreement'];
         // Get agreement
         $response = Http::withHeader('Authorization', "Bearer $access_token")
             ->get("https://bankaccountdata.gocardless.com/api/v2/agreements/enduser/$agreement_id/");
-        throw_if($response->failed(), new \Exception("Gocardless error with getting agreement!"));
+        throw_if($response->failed(), new GocardlessException($response));
         $this->accounts = $data['accounts'];
         $this->expires_at = Carbon::now()->addDays($response->json('access_valid_for_days'));
     }
@@ -177,7 +171,7 @@ class Integration extends Model
         $transactions = collect($this->accounts)->flatMap(function ($account) use ($access_token) {
             $response = Http::withHeader('Authorization', "Bearer $access_token")
                 ->get("https://bankaccountdata.gocardless.com/api/v2/accounts/$account/transactions");
-            throw_if($response->failed(), new \Exception("Gocardless error with getting transactions!"));
+            throw_if($response->failed(), new GocardlessException($response));
             return $response->json('transactions.booked');
         });
         return $transactions;
