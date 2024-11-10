@@ -128,10 +128,10 @@ class Integration extends Model
                 'max_historical_days' => $max_historical_days,
                 'access_valid_for_days' => $access_valid_for_days,
                 'access_scope' => [
-                    'transactions'
+                    'transactions',
+                    'details'
                 ]
             ]);
-        throw_if($response->paymentRequired(), new \Exception("Gocardless payment required!"));
         throw_if($response->failed(), new GocardlessException($response));
         $agreement_id = $response->json('id');
         // Create requisition

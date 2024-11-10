@@ -35,10 +35,14 @@ class IntegrationResource extends Resource
                     ->searchable(),
                 Forms\Components\TextInput::make('max_historical_days')
                     ->required()
-                    ->numeric(180),
+                    ->default(180)
+                    ->numeric(),
                 Forms\Components\TextInput::make('access_valid_for_days')
                     ->required()
-                    ->numeric(90)
+                    ->minValue(1)
+                    ->maxValue(90)
+                    ->default(90)
+                    ->numeric()
             ]);
     }
 
