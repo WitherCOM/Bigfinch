@@ -32,7 +32,13 @@ class IntegrationResource extends Resource
                 Forms\Components\TextInput::make('name'),
                 Forms\Components\Select::make('institution_id')
                     ->options(Integration::listBanks())
-                    ->searchable()
+                    ->searchable(),
+                Forms\Components\TextInput::make('max_historical_days')
+                    ->required()
+                    ->numeric(180),
+                Forms\Components\TextInput::make('access_valid_for_days')
+                    ->required()
+                    ->numeric(90)
             ]);
     }
 
@@ -50,6 +56,10 @@ class IntegrationResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\EditAction::make()
+                    ->form([
+                        Forms\Components\TextInput::make('name')
+                    ]),
                 Tables\Actions\DeleteAction::make()
             ])
             ->bulkActions([
