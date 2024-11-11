@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class MerchantResource extends Resource
@@ -30,6 +31,9 @@ class MerchantResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->required(),
+                Forms\Components\TagsInput::make('search_keys')
+                    ->required()
             ]);
     }
 
@@ -48,6 +52,24 @@ class MerchantResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\Action::make('merge')
+                        ->form([
+                            Forms\Components\TextInput::make('name')
+                                ->required()
+                        ])
+                        ->action(function(Collection $records, array $data) {
+                            $merchant = Merchant::create([
+                                'user_id' => Auth::id(),
+                                'name' => $data['name'],
+                                'search_keys' => $records->flatMap(fn ($record) => $record->search_keys)
+                            ]);
+                            $records->each(function ($record) use ($merchant) {
+                                $record->transactions()->update([
+                                    'merchant_id' => $merchant->id
+                                ]);
+                                $record->delete();
+                            });
+                        })
                 ]),
             ]);
     }

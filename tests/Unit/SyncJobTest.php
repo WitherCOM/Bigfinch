@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Jobs\SyncTransactions;
 use App\Models\Integration;
+use App\Models\Merchant;
 use App\Models\Transaction;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
@@ -57,6 +58,32 @@ class SyncJobTest extends TestCase
                             "proprietaryBankTransactionCode" => "TRANSFER",
                         ],
                         [
+                            "transactionId" => "id4",
+                            "bookingDate" => "2024-11-11",
+                            "bookingDateTime" => "2024-11-11T10:43:16.685Z",
+                            "transactionAmount" => [
+                                "amount" => "10000.00",
+                                "currency" => "HUF"
+                            ],
+                            "debtorName" => "Ékezet ebben Ááá",
+                            "debtorAccount" => [],
+                            "remittanceInformationUnstructured" => "John Doe2",
+                            "proprietaryBankTransactionCode" => "TRANSFER",
+                        ],
+                        [
+                            "transactionId" => "id6",
+                            "bookingDate" => "2024-11-11",
+                            "bookingDateTime" => "2024-11-11T10:43:16.685Z",
+                            "transactionAmount" => [
+                                "amount" => "10000.00",
+                                "currency" => "HUF"
+                            ],
+                            "debtorName" => "Ékezet ebben Ááá",
+                            "debtorAccount" => [],
+                            "remittanceInformationUnstructured" => "John Doe2",
+                            "proprietaryBankTransactionCode" => "TRANSFER",
+                        ],
+                        [
                             "transactionId" => "id3",
                             "bookingDate" => "2024-10-20",
                             "valueDate" => "2024-10-20",
@@ -101,6 +128,7 @@ class SyncJobTest extends TestCase
         ]);
         $job = new SyncTransactions(Integration::first());
         $job->handle();
-        $this->assertDatabaseCount(Transaction::class,3);
+        $this->assertDatabaseCount(Transaction::class,5);
+        $this->assertDatabaseCount(Merchant::class,3);
     }
 }

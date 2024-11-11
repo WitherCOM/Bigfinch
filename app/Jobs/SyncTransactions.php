@@ -45,10 +45,10 @@ class SyncTransactions implements ShouldQueue
                     'description' => $this->getDescription($transaction),
                     'value' => abs(floatval($transaction['transactionAmount']['amount'])),
                     'direction' => floatval($transaction['transactionAmount']['amount']) > 0 ? Direction::INCOME->value : Direction::EXPENSE->value,
-                    'date' => Carbon::parse($transaction['bookingDate']),
+                    'date' => Carbon::parse($transaction['bookingDateTime']),
                     'currency_id' => $currencies[$transaction['transactionAmount']['currency']],
                     'integration_id' => $this->integration->id,
-                    'open_banking_transaction' => json_encode($transaction),
+                    'open_banking_transaction' => json_encode($transaction, JSON_UNESCAPED_UNICODE),
                     'user_id' => $this->integration->user_id,
                     'common_id' => $transaction['transactionId'],
                     'merchant_id' => $this->getMerchant($transaction)
@@ -84,11 +84,11 @@ class SyncTransactions implements ShouldQueue
     public function getMerchant(array $data)
     {
         $value = floatval($data['transactionAmount']['amount']);
-        if ($value > 0 && array_key_exists('debtorName',$data) && !array_key_exists('creditorName',$data))
+        if (($value > 0) && array_key_exists('debtorName',$data) && !array_key_exists('creditorName',$data))
         {
             $name = $data['debtorName'];
         }
-        else if ($value < 0 && array_key_exists('creditorName',$data) && !array_key_exists('debtorName',$data))
+        else if (($value < 0) && array_key_exists('creditorName',$data) && !array_key_exists('debtorName',$data))
         {
             $name = $data['creditorName'];
         }
