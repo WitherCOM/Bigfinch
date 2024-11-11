@@ -21,7 +21,7 @@ class CategoryPolicy
      */
     public function view(User $user, Category $category): bool
     {
-        return is_null($category->user_id) || $category->user_id === $user->id;
+        return $category->user_id === $user->id;
     }
 
     /**

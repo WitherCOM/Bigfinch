@@ -83,17 +83,33 @@ class SyncTransactions implements ShouldQueue
 
     public function getMerchant(array $data)
     {
-        if (array_key_exists('creditorName',$data) && !array_key_exists('debtorName',$data)) {
-            $merchant = Merchant::where('user_id', $this->integration->user_id)->where('name', $data['creditorName'])->first();
+        $value = floatval($data['transactionAmount']['amount']);
+        if ($value > 0 && array_key_exists('debtorName',$data) && !array_key_exists('creditorName',$data))
+        {
+            $name = $data['debtorName'];
+        }
+        else if ($value < 0 && array_key_exists('creditorName',$data) && !array_key_exists('debtorName',$data))
+        {
+            $name = $data['creditorName'];
+        }
+        else
+        {
+            $name = null;
+        }
+        if (!is_null($name))
+        {
+            $merchant = Merchant::where('user_id', $this->integration->user_id)->whereJsonContains('search_keys', $name)->first();
             if (is_null($merchant)) {
                 $merchant = new Merchant;
-                $merchant->name = $data['creditorName'];
+                $merchant->name = $name;
+                $merchant->search_keys = [$name];
                 $merchant->user_id = $this->integration->user_id;
                 $merchant->save();
                 $merchant->refresh();
             }
             return $merchant->id;
         }
+
         return null;
     }
 }

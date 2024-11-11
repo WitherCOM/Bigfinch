@@ -16,7 +16,8 @@ class Category extends Model
 
     protected $fillable = [
         'name',
-        'direction'
+        'direction',
+        'user_id'
     ];
 
     protected $casts = [
@@ -33,11 +34,6 @@ class Category extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
-    }
-
-    public function scopeDefault(Builder $query)
-    {
-        return $query->whereNull('user_id');
     }
 
     public function scopeIncome(Builder $query)

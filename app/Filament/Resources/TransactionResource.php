@@ -71,6 +71,11 @@ class TransactionResource extends Resource
                 Tables\Columns\TextColumn::make('description'),
                 Tables\Columns\TextColumn::make('category.name'),
             ])
+            ->recordClasses(fn (Transaction $record) => match ($record->direction) {
+                Direction::INCOME => 'bg-green-600',
+                Direction::EXPENSE => 'bg-red-600',
+                default => null,
+            })
             ->filters([
                 //
             ])

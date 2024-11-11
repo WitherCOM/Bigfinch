@@ -13,7 +13,12 @@ class Merchant extends Model
     use HasUuids;
 
     protected $fillable = [
-        'name'
+        'name',
+        'search_keys'
+    ];
+
+    protected $casts = [
+        'search_keys' => 'array'
     ];
 
     public $timestamps = false;

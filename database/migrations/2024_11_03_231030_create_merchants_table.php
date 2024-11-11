@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('merchants', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
+            $table->json('search_keys')->default('[]');
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
         });
     }
