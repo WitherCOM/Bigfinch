@@ -18,32 +18,27 @@ class CurrencySeeder extends Seeder
         Currency::create([
             'iso_code' => 'HUF',
             'position' => CurrencyPosition::SUFFIX,
-            'symbol' => 'Ft',
-            'rate_to_huf' => 1
+            'symbol' => 'Ft'
         ]);
         Currency::create([
             'iso_code' => 'EUR',
             'position' => CurrencyPosition::PREFIX,
             'symbol' => '€',
-            'rate_to_huf' => 1
         ]);
         Currency::create([
             'iso_code' => 'USD',
             'position' => CurrencyPosition::PREFIX,
-            'symbol' => '$',
-            'rate_to_huf' => 1
+            'symbol' => '$'
         ]);
         Currency::create([
             'iso_code' => 'PLN',
             'position' => CurrencyPosition::SUFFIX,
-            'symbol' => 'zł',
-            'rate_to_huf' => 1
+            'symbol' => 'zł'
         ]);
         Currency::create([
             'iso_code' => 'CZK',
             'position' => CurrencyPosition::SUFFIX,
-            'symbol' => 'Kč',
-            'rate_to_huf' => 1
+            'symbol' => 'Kč'
         ]);
     }
 }

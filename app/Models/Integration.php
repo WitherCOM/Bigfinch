@@ -167,7 +167,6 @@ class Integration extends Model
     public function getTransactions(): Collection
     {
         $access_token = self::getAccessToken();
-
         $transactions = collect($this->accounts)->flatMap(function ($account) use ($access_token) {
             $response = Http::withHeader('Authorization', "Bearer $access_token")
                 ->get("https://bankaccountdata.gocardless.com/api/v2/accounts/$account/transactions");

@@ -42,27 +42,48 @@ class SyncTransactions implements ShouldQueue
             ->map(function ($transaction) use ($currencies, $rules) {
                 $data = [
                     'id' => Str::uuid(),
-                    'description' => collect($transaction['remittanceInformationUnstructured'])->implode(' '),
+                    'description' => $this->getDescription($transaction),
                     'value' => abs(floatval($transaction['transactionAmount']['amount'])),
-                    'direction' => floatval($transaction['transactionAmount']['amount']) > 0 ? Direction::INCOME : Direction::EXPENSE,
+                    'direction' => floatval($transaction['transactionAmount']['amount']) > 0 ? Direction::INCOME->value : Direction::EXPENSE->value,
                     'date' => Carbon::parse($transaction['bookingDate']),
                     'currency_id' => $currencies[$transaction['transactionAmount']['currency']],
                     'integration_id' => $this->integration->id,
-                    'open_banking_transaction' => $transaction,
+                    'open_banking_transaction' => json_encode($transaction),
                     'user_id' => $this->integration->user_id,
                     'common_id' => $transaction['transactionId'],
                     'merchant_id' => $this->getMerchant($transaction)
                 ];
-                $data['category_id'] = $rules->filter(fn($rule) => $rule->categoryFilter($data))->first()?->target_id;
+                $data['category_id'] = $rules->filter(fn($rule) => $rule->checkRuleIsAppliedToData($data))->sortByDesc('priority')->first()?->target_id;
                 return $data;
             });
+        foreach(Rule::exclude()->get() as $rule)
+        {
+            $toCreate = $rule->excludeCollectionFilter($toCreate);
+        }
+        Transaction::insert($toCreate->toArray());
+    }
 
-        Transaction::insert($toCreate);
+    public function getDescription(array $data)
+    {
+        $name = Str::of($data['proprietaryBankTransactionCode'])->lower()->camel()->title()->toString();
+        if (array_key_exists('additionalInformation',$data))
+        {
+            $name .= " " . $data['additionalInformation'];
+        }
+        if (array_key_exists('remittanceInformationUnstructuredArray',$data))
+        {
+            $name .= " " . implode(" ", $data['remittanceInformationUnstructuredArray']);
+        }
+        if (array_key_exists('remittanceInformationUnstructured',$data))
+        {
+            $name .= " " . $data['remittanceInformationUnstructured'];
+        }
+        return $name;
     }
 
     public function getMerchant(array $data)
     {
-        if (Str::of($data['proprietaryBankTransactionCode'])->contains('CARD', true)) {
+        if (array_key_exists('creditorName',$data) && !array_key_exists('debtorName',$data)) {
             $merchant = Merchant::where('user_id', $this->integration->user_id)->where('name', $data['creditorName'])->first();
             if (is_null($merchant)) {
                 $merchant = new Merchant;

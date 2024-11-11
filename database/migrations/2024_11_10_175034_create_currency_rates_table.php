@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('currencies', function (Blueprint $table) {
+        Schema::create('currency_rates', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('iso_code');
-            $table->enum('position', array_column(\App\Enums\CurrencyPosition::cases(), 'value'));
-            $table->string('symbol');
+            $table->double('rate_to_huf');
+            $table->foreignUuid('currency_id')->constrained('currencies')->cascadeOnDelete();
+            $table->timestamps();
         });
     }
 
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('currencies');
+        Schema::dropIfExists('currency_rates');
     }
 };

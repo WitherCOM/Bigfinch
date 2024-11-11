@@ -24,14 +24,15 @@ class Rule extends Model
         'direction_lookup',
         'min_value_lookup',
         'max_value_lookup',
-        'target_id'
+        'target_id',
+        'user_id'
     ];
 
     protected $casts = [
         'direction_lookup' => Direction::class
     ];
 
-    public function categoryFilter($data): bool
+    public function checkRuleIsAppliedToData($data): bool
     {
         return (is_null($this->description_lookup) || Str::of($data['description'])->contains($this->description_lookup)) &&
             (is_null($this->merchant_id_lookup) || $data['merchant_id'] === $this->merchant_id_lookup) &&
@@ -42,7 +43,7 @@ class Rule extends Model
             (is_null($this->max_value_lookup) || $data['value'] <= $this->max_value_lookup);
     }
 
-    public function excludeFilter(Builder $query): Builder
+    public function excludeQueryFilter(Builder $query): Builder
     {
         return $query->whereNot(function (Builder $query) {
             return $query
@@ -68,6 +69,11 @@ class Rule extends Model
                     $query->where('value', '<=', $this->max_value_lookup);
                 });
         });
+    }
+
+    public function excludeCollectionFilter(Collection $collection): Collection
+    {
+        return $collection->filter(fn ($data) => !$this->checkRuleIsAppliedToData($data));
     }
 
     public function user()

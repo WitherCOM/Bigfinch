@@ -33,11 +33,7 @@ class CurrencyResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('iso_code')
                     ->rule(new CurrencyCodeRule())
-                    ->required(),
-                Forms\Components\TextInput::make('rate_to_huf')
                     ->required()
-                    ->numeric()
-
             ]);
     }
 
@@ -46,7 +42,7 @@ class CurrencyResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('rate_to_huf')
+                Tables\Columns\TextColumn::make('rate')
             ])
             ->filters([
                 //
@@ -65,7 +61,7 @@ class CurrencyResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\RatesRelationManager::make()
         ];
     }
 

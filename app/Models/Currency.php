@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use App\Enums\CurrencyPosition;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
+use PHPUnit\Util\Xml;
 
 class Currency extends Model
 {
@@ -21,8 +24,7 @@ class Currency extends Model
     protected $fillable = [
         'iso_code',
         'position',
-        'symbol',
-        'rate_to_huf',
+        'symbol'
     ];
 
     protected $casts = [
@@ -37,10 +39,64 @@ class Currency extends Model
         });
     }
 
+    public function rate(): Attribute
+    {
+        return Attribute::get(fn() => $this->rates()->latest()->first()?->rate_to_huf ?? 1);
+    }
+
+    public function nearestRate(Carbon $day)
+    {
+        $lower = $this->rates()->whereDay('created_at','<=', $day)->latest()->first();
+        $upper = $this->rates()->whereDay('created_at','>=', $day)->orderBy('created_at')->first();
+        if (is_null($lower) && is_null($upper))
+        {
+            return 1;
+        }
+        else if (is_null($lower) && !is_null($upper))
+        {
+            return $upper->rate_to_huf;
+        }
+        else if (!is_null($lower) && is_null($upper))
+        {
+            return $lower->rate_to_huf;
+        }
+        else
+        {
+            return ($lower->rate_to_huf + $upper->rate_to_huf) / 2;
+        }
+
+    }
+
     public static function iso_codes(): Collection
     {
         $bundle = \ResourceBundle::create('en', 'ICUDATA-curr');
         $currencies = collect($bundle->get('Currencies'));
         return $currencies->keys();
+    }
+
+    public function rates(): HasMany
+    {
+        return $this->hasMany(CurrencyRate::class);
+    }
+
+    public static function syncCurrencies()
+    {
+        $codes = Currency::all()->pluck('id','iso_code');
+        $soap_client = new \SoapClient("http://www.mnb.hu/arfolyamok.asmx?wsdl");
+        $raw_rates = $soap_client->GetCurrentExchangeRates()->GetCurrentExchangeRatesResult;
+        $rates = collect([]);
+        foreach(simplexml_load_string($raw_rates)->Day->Rate as $rate)
+        {
+            $rates->add(['value' => floatval($rate), 'currency' => Str::of($rate->attributes()['curr'])->toString()]);
+        }
+        CurrencyRate::insert(
+            $rates->whereIn('currency',$codes->keys())
+            ->map(fn($item) => [
+                'id' => Str::uuid(),
+                'currency_id' => $codes[$item['currency']],
+                'rate_to_huf' => $item['value']
+            ])
+            ->toArray()
+        );
     }
 }
