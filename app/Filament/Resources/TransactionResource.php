@@ -4,15 +4,18 @@ namespace App\Filament\Resources;
 
 use App\Enums\Direction;
 use App\Filament\Resources\TransactionResource\Pages;
+use App\Models\Merchant;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class TransactionResource extends Resource
@@ -120,6 +123,16 @@ class TransactionResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('recreate_merchants')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $collection) {
+                            foreach($collection as $record) {
+                                if (!is_null($record->open_banking_transaction))
+                                {
+                                    $record->merchant_id = Merchant::getMerchant($record->open_banking_transaction, $record->user_id);
+                                }
+                            }
+                        }),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])

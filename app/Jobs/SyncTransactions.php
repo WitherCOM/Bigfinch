@@ -48,27 +48,24 @@ class SyncTransactions implements ShouldQueue
                         'description' => $this->getDescription($transaction),
                         'value' => abs(floatval($transaction['transactionAmount']['amount'])),
                         'direction' => floatval($transaction['transactionAmount']['amount']) > 0 ? Direction::INCOME->value : Direction::EXPENSE->value,
-                        'date' => Carbon::parse($transaction['bookingDateTime']),
+                        'date' => Carbon::parse($transaction['bookingDateTime'] ?? $transaction['bookingDate']),
                         'currency_id' => $currencies[$transaction['transactionAmount']['currency']],
                         'integration_id' => $this->integration->id,
                         'open_banking_transaction' => json_encode($transaction),
                         'user_id' => $this->integration->user_id,
                         'common_id' => $transaction['transactionId'],
-                        'merchant_id' => $this->getMerchant($transaction)
+                        'merchant_id' => Merchant::getMerchant($transaction, $this->integration->user_id)
                     ];
                     $data['category_id'] = $rules->filter(fn($rule) => $rule->checkRuleIsAppliedToData($data))->sortByDesc('priority')->first()?->target_id;
                     return $data;
                 });
-        } catch (GocardlessException)
+        } catch (GocardlessException $e)
         {
             Notification::make()
                 ->title('Gocardless error')
+                ->body($e->getMessage())
                 ->color('danger')
                 ->sendToDatabase($this->integration->user);
-        }
-        foreach(Rule::exclude()->get() as $rule)
-        {
-            $toCreate = $rule->excludeCollectionFilter($toCreate);
         }
         Transaction::insert($toCreate->toArray());
     }
@@ -89,37 +86,5 @@ class SyncTransactions implements ShouldQueue
             $name .= " " . $data['remittanceInformationUnstructured'];
         }
         return $name;
-    }
-
-    public function getMerchant(array $data)
-    {
-        $value = floatval($data['transactionAmount']['amount']);
-        if (($value > 0) && array_key_exists('debtorName',$data) && !array_key_exists('creditorName',$data))
-        {
-            $name = $data['debtorName'];
-        }
-        else if (($value < 0) && array_key_exists('creditorName',$data) && !array_key_exists('debtorName',$data))
-        {
-            $name = $data['creditorName'];
-        }
-        else
-        {
-            $name = null;
-        }
-        if (!is_null($name))
-        {
-            $merchant = Merchant::where('user_id', $this->integration->user_id)->whereJsonContains('search_keys', $name)->first();
-            if (is_null($merchant)) {
-                $merchant = new Merchant;
-                $merchant->name = $name;
-                $merchant->search_keys = [$name];
-                $merchant->user_id = $this->integration->user_id;
-                $merchant->save();
-                $merchant->refresh();
-            }
-            return $merchant->id;
-        }
-
-        return null;
     }
 }
