@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -80,6 +81,27 @@ class Rule extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function category_lookup(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id_lookup');
+    }
+
+    public function currency_lookup(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'currency_id_lookup');
+    }
+
+    public function merchant_lookup(): BelongsTo
+    {
+        return $this->belongsTo(Merchant::class, 'merchant_id_lookup');
+    }
+
+    public function target(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'target_id');
+    }
+
 
     public function scopeCategory(Builder $query)
     {

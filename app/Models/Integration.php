@@ -56,6 +56,16 @@ class Integration extends Model
         });
     }
 
+    public function canAccept(): Attribute
+    {
+        return Attribute::get(fn () => is_null($this->expires_at) || Carbon::now()->gt($this->expires_at));
+    }
+
+    public function expired(): Attribute
+    {
+        return Attribute::get(fn () => !is_null($this->expires_at) && Carbon::now()->gt($this->expires_at));
+    }
+
     /**
      * @throws ConnectionException
      */

@@ -3,12 +3,14 @@
 namespace App\Jobs;
 
 use App\Enums\Direction;
+use App\Exceptions\GocardlessException;
 use App\Models\Category;
 use App\Models\Currency;
 use App\Models\Integration;
 use App\Models\Merchant;
 use App\Models\Rule;
 use App\Models\Transaction;
+use Filament\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Carbon;
@@ -38,24 +40,32 @@ class SyncTransactions implements ShouldQueue
         $currencies = Currency::all(['iso_code', 'id'])->pluck('id', 'iso_code');
         $rules = Rule::category()->get();
         $transactionIds = $this->integration->all_transactions->pluck('id');
-        $toCreate = $this->integration->getTransactions()->whereNotIn('common_id', $transactionIds)
-            ->map(function ($transaction) use ($currencies, $rules) {
-                $data = [
-                    'id' => Str::uuid(),
-                    'description' => $this->getDescription($transaction),
-                    'value' => abs(floatval($transaction['transactionAmount']['amount'])),
-                    'direction' => floatval($transaction['transactionAmount']['amount']) > 0 ? Direction::INCOME->value : Direction::EXPENSE->value,
-                    'date' => Carbon::parse($transaction['bookingDateTime']),
-                    'currency_id' => $currencies[$transaction['transactionAmount']['currency']],
-                    'integration_id' => $this->integration->id,
-                    'open_banking_transaction' => json_encode($transaction, JSON_UNESCAPED_UNICODE),
-                    'user_id' => $this->integration->user_id,
-                    'common_id' => $transaction['transactionId'],
-                    'merchant_id' => $this->getMerchant($transaction)
-                ];
-                $data['category_id'] = $rules->filter(fn($rule) => $rule->checkRuleIsAppliedToData($data))->sortByDesc('priority')->first()?->target_id;
-                return $data;
-            });
+        try {
+            $toCreate = $this->integration->getTransactions()->whereNotIn('common_id', $transactionIds)
+                ->map(function ($transaction) use ($currencies, $rules) {
+                    $data = [
+                        'id' => Str::uuid(),
+                        'description' => $this->getDescription($transaction),
+                        'value' => abs(floatval($transaction['transactionAmount']['amount'])),
+                        'direction' => floatval($transaction['transactionAmount']['amount']) > 0 ? Direction::INCOME->value : Direction::EXPENSE->value,
+                        'date' => Carbon::parse($transaction['bookingDateTime']),
+                        'currency_id' => $currencies[$transaction['transactionAmount']['currency']],
+                        'integration_id' => $this->integration->id,
+                        'open_banking_transaction' => json_encode($transaction),
+                        'user_id' => $this->integration->user_id,
+                        'common_id' => $transaction['transactionId'],
+                        'merchant_id' => $this->getMerchant($transaction)
+                    ];
+                    $data['category_id'] = $rules->filter(fn($rule) => $rule->checkRuleIsAppliedToData($data))->sortByDesc('priority')->first()?->target_id;
+                    return $data;
+                });
+        } catch (GocardlessException)
+        {
+            Notification::make()
+                ->title('Gocardless error')
+                ->color('danger')
+                ->sendToDatabase($this->integration->user);
+        }
         foreach(Rule::exclude()->get() as $rule)
         {
             $toCreate = $rule->excludeCollectionFilter($toCreate);

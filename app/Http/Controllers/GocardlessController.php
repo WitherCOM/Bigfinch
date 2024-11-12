@@ -12,12 +12,11 @@ class GocardlessController extends Controller
         $ref = $request->query('ref');
         $integration = Integration::where('requisition_id', $ref)->first();
         abort_if(is_null($integration),404);
-        if (!is_null($integration->link))
+        if ($integration->can_accept)
         {
-            $integration->link = null;
             $integration->fillExtra();
             $integration->save();
         }
-        return response()->redirectTo('/');
+        return response()->redirectTo(route('filament.admin.resources.transactions.index'));
     }
 }

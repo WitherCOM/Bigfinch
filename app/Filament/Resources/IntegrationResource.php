@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\IntegrationResource\Pages;
 use App\Filament\Resources\IntegrationResource\RelationManagers;
 use App\Models\Integration;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -52,9 +53,10 @@ class IntegrationResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('institution_logo')->label(''),
                 Tables\Columns\TextColumn::make('name')
-                    ->url(fn (Integration $record) => $record->link),
+                    ->url(fn (Integration $record) => $record->can_accept ? $record->link : null),
                 Tables\Columns\TextColumn::make('institution_name'),
                 Tables\Columns\TextColumn::make('expires_at')
+                    ->color(fn (Integration $record) => $record->expired ? 'danger' : 'success')
             ])
             ->filters([
                 //

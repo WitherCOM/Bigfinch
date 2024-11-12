@@ -7,6 +7,7 @@ use App\Filament\Resources\TransactionResource\Pages;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -33,6 +34,7 @@ class TransactionResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('value')
                     ->required()
+                    ->minValue(0)
                     ->numeric(),
                 Forms\Components\Select::make('currency_id')
                     ->relationship('currency','iso_code')
@@ -53,6 +55,7 @@ class TransactionResource extends Resource
                     })
                     ->searchable(),
                 Forms\Components\Select::make('category_id')
+                    ->preload()
                     ->relationship('category','name', function (Builder $query, Forms\Get $get) {
                         $query->where(function (Builder $query) {
                             $query->where('user_id', Auth::id())->orWhereNull('user_id');
@@ -67,19 +70,51 @@ class TransactionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('date'),
-                Tables\Columns\TextColumn::make('formatted_value'),
+                Tables\Columns\TextColumn::make('formatted_value')
+                    ->color(fn (Transaction $record) => $record->direction === Direction::EXPENSE ? 'danger' : 'success'),
                 Tables\Columns\TextColumn::make('description'),
                 Tables\Columns\TextColumn::make('category.name'),
             ])
-            ->recordClasses(fn (Transaction $record) => match ($record->direction) {
-                Direction::INCOME => 'bg-green-600',
-                Direction::EXPENSE => 'bg-red-600',
-                default => null,
-            })
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('direction')
+                    ->options(Direction::class)
+                    ->default(Direction::EXPENSE->value)
             ])
             ->actions([
+                Tables\Actions\Action::make('split')
+                    ->form([
+                        Forms\Components\TextInput::make('value')
+                            ->required()
+                            ->minValue(0)
+                            ->maxValue(fn (Transaction $record) => $record->value)
+                            ->numeric(),
+                        Forms\Components\TextInput::make('description')
+                            ->afterStateHydrated(function (TextInput $component, Transaction $transaction) {
+                                $component->state($transaction->description);
+                            })
+                            ->required(),
+                        Forms\Components\Select::make('category_id')
+                            ->afterStateHydrated(function (Forms\Components\Select $component, Transaction $transaction) {
+                                $component->state($transaction->category_id);
+                            })
+                            ->preload()
+                            ->relationship('category','name', function (Builder $query, Transaction $record) {
+                                $query->where(function (Builder $query) {
+                                    $query->where('user_id', Auth::id())->orWhereNull('user_id');
+                                })->where('direction',$record->direction);
+                            })
+                            ->searchable()
+                    ])
+                    ->visible(fn (Transaction $record) => $record->direction === Direction::EXPENSE)
+                    ->action(function (Transaction $record, array $data) {
+                        $record->value -= $data['value'];
+                        $record->save();
+                        $transcation = $record->replicate();
+                        $transcation->value = $data['value'];
+                        $transcation->category_id = $data['category_id'];
+                        $transcation->description = $data['description'];
+                        $transcation->save();
+                    }),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
             ])

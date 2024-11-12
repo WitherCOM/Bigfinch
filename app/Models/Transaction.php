@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CurrencyPosition;
 use App\Enums\Direction;
+use App\Enums\RuleType;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -69,11 +70,25 @@ class Transaction extends Model
             $value = $this->value;
             if ($currency->position === CurrencyPosition::PREFIX)
             {
-                return "$currency->symbol $value";
+                if ($this->direction === Direction::EXPENSE)
+                {
+                    return "- $currency->symbol $value";
+                }
+                else
+                {
+                    return "$currency->symbol $value";
+                }
             }
             else
             {
-                return "$value $currency->symbol";
+                if ($this->direction === Direction::EXPENSE)
+                {
+                    return "- $value $currency->symbol";
+                }
+                else
+                {
+                    return "$value $currency->symbol";
+                }
             }
         });
     }

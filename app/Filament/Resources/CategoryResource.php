@@ -36,6 +36,7 @@ class CategoryResource extends Resource
                     ->required(),
                 Forms\Components\Select::make('direction')
                     ->required()
+                    ->options(Direction::class)
                     ->enum(Direction::class),
 
             ]);
@@ -45,10 +46,12 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('name'),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('direction')
+                    ->options(Direction::class)
+                    ->default(Direction::EXPENSE->value)
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
