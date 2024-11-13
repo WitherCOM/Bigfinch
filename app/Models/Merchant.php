@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Merchant extends Model
 {
@@ -45,7 +46,7 @@ class Merchant extends Model
         }
         if (!is_null($name))
         {
-            $merchant = Merchant::where('user_id', $user_id)->whereJsonContains('search_keys', $name)->first();
+            $merchant = DB::table('merchants')->where('user_id', $user_id)->whereJsonContains('search_keys', $name)->first();
             if (is_null($merchant)) {
                 $merchant = new Merchant;
                 $merchant->name = $name;

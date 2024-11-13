@@ -39,9 +39,9 @@ class SyncTransactions implements ShouldQueue
     {
         $currencies = Currency::all(['iso_code', 'id'])->pluck('id', 'iso_code');
         $rules = Rule::category()->get();
-        $transactionIds = $this->integration->all_transactions->pluck('id');
+        $transactionCommonIds = $this->integration->all_transactions->pluck('common_id');
         try {
-            $toCreate = $this->integration->getTransactions()->whereNotIn('common_id', $transactionIds)
+            $toCreate = $this->integration->getTransactions()->whereNotIn('transactionId', $transactionCommonIds)
                 ->map(function ($transaction) use ($currencies, $rules) {
                     $data = [
                         'id' => Str::uuid(),
