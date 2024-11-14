@@ -17,7 +17,8 @@ class Merchant extends Model
 
     protected $fillable = [
         'name',
-        'search_keys'
+        'search_keys',
+        'user_id'
     ];
 
     protected $casts = [
