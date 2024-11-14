@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class Merchant extends Model
@@ -23,6 +25,30 @@ class Merchant extends Model
     ];
 
     public $timestamps = false;
+
+    protected static function booting()
+    {
+        parent::booting();
+
+        parent::creating(function (Merchant $merchant) {
+            if (empty($merchant->search_keys))
+            {
+                $merchant->search_keys = [json_encode($merchant->name)];
+            }
+        });
+
+        parent::updating(function (Merchant $merchant) {
+            if (count($merchant->search_keys) <= 1)
+            {
+                $merchant->search_keys = [json_encode($merchant->name)];
+            }
+        });
+    }
+
+    public function keyFactors(): Attribute
+    {
+        return Attribute::get(fn () => count($this->search_keys));
+    }
 
     public function transactions()
     {
@@ -48,14 +74,12 @@ class Merchant extends Model
         if (!is_null($name))
         {
             $merchant = Merchant::query()
-                ->where('user_id', $user_id)->whereJsonContains('search_keys', $name)->first();
+                ->where('user_id', $user_id)->whereJsonContains('search_keys', json_encode($name))->first();
             if (is_null($merchant)) {
-                $merchant = new Merchant;
-                $merchant->name = $name;
-                $merchant->search_keys = [$name];
-                $merchant->user_id = $user_id;
-                $merchant->save();
-                $merchant->refresh();
+                $merchant = Merchant::create([
+                   'name' => $name,
+                   'user_id' => $user_id
+                ]);
             }
             return $merchant->id;
         }

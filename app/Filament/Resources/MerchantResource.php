@@ -31,8 +31,6 @@ class MerchantResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->required(),
-                Forms\Components\TagsInput::make('search_keys')
                     ->required()
             ]);
     }
@@ -41,7 +39,8 @@ class MerchantResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('key_factors')
             ])
             ->filters([
                 //
