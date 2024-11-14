@@ -186,4 +186,9 @@ class Integration extends Model
         return $transactions;
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
 }
