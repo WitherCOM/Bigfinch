@@ -51,7 +51,7 @@ class MerchantResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\Action::make('merge')
+                    Tables\Actions\BulkAction::make('merge')
                         ->form([
                             Forms\Components\TextInput::make('name')
                                 ->required()
