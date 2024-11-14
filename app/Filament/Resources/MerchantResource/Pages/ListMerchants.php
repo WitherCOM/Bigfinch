@@ -15,10 +15,7 @@ class ListMerchants extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
-            Actions\Action::make('clear')
-                ->requiresConfirmation()
-                ->action(fn () => DB::table('merchants')->truncate())
+            Actions\CreateAction::make()
         ];
     }
 }

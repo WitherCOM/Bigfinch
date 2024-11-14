@@ -32,6 +32,7 @@ class Merchant extends Model
     public static function getMerchant(array $data, $user_id)
     {
         $value = floatval($data['transactionAmount']['amount']);
+        $name = "";
         if (($value > 0) && array_key_exists('debtorName',$data) && !array_key_exists('creditorName',$data))
         {
             $name = $data['debtorName'];
@@ -46,7 +47,8 @@ class Merchant extends Model
         }
         if (!is_null($name))
         {
-            $merchant = DB::table('merchants')->where('user_id', $user_id)->whereJsonContains('search_keys', $name)->first();
+            $merchant = Merchant::query()
+                ->where('user_id', $user_id)->whereJsonContains('search_keys', $name)->first();
             if (is_null($merchant)) {
                 $merchant = new Merchant;
                 $merchant->name = $name;

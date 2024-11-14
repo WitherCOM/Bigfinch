@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\IntegrationResource\Pages;
 use App\Filament\Resources\IntegrationResource\RelationManagers;
+use App\Jobs\SyncTransactions;
 use App\Models\Integration;
 use Carbon\Carbon;
 use Filament\Forms;
@@ -62,6 +63,8 @@ class IntegrationResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\Action::make('sync')
+                    ->action(fn (Integration $record) => SyncTransactions::dispatch($record)),
                 Tables\Actions\EditAction::make()
                     ->form([
                         Forms\Components\TextInput::make('name')

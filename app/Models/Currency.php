@@ -78,25 +78,4 @@ class Currency extends Model
     {
         return $this->hasMany(CurrencyRate::class);
     }
-
-    public static function syncCurrencies()
-    {
-        $codes = Currency::all()->pluck('id','iso_code');
-        $soap_client = new \SoapClient("http://www.mnb.hu/arfolyamok.asmx?wsdl");
-        $raw_rates = $soap_client->GetCurrentExchangeRates()->GetCurrentExchangeRatesResult;
-        $rates = collect([]);
-        foreach(simplexml_load_string($raw_rates)->Day->Rate as $rate)
-        {
-            $rates->add(['value' => floatval($rate), 'currency' => Str::of($rate->attributes()['curr'])->toString()]);
-        }
-        CurrencyRate::insert(
-            $rates->whereIn('currency',$codes->keys())
-            ->map(fn($item) => [
-                'id' => Str::uuid(),
-                'currency_id' => $codes[$item['currency']],
-                'rate_to_huf' => $item['value']
-            ])
-            ->toArray()
-        );
-    }
 }

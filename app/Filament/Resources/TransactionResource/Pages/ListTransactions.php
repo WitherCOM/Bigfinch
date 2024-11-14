@@ -15,11 +15,7 @@ class ListTransactions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
-            Actions\Action::make('sync')
-                ->action(fn () => Auth::user()->integrations->each(
-                    fn ($integration) => SyncTransactions::dispatch($integration)
-                ))
+            Actions\CreateAction::make()
         ];
     }
 }

@@ -59,15 +59,19 @@ class SyncTransactions implements ShouldQueue
                     $data['category_id'] = $rules->filter(fn($rule) => $rule->checkRuleIsAppliedToData($data))->sortByDesc('priority')->first()?->target_id;
                     return $data;
                 });
+            Transaction::insert($toCreate->toArray());
+            Notification::make()
+                ->title('Synced '.$this->integration->name)
+                ->success()
+                ->sendToDatabase($this->integration->user);
         } catch (GocardlessException $e)
         {
             Notification::make()
                 ->title('Gocardless error')
                 ->body($e->getMessage())
-                ->color('danger')
+                ->danger()
                 ->sendToDatabase($this->integration->user);
         }
-        Transaction::insert($toCreate->toArray());
     }
 
     public function getDescription(array $data)
