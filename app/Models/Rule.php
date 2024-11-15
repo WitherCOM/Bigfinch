@@ -46,7 +46,7 @@ class Rule extends Model
 
     public function excludeQueryFilter(Builder $query): Builder
     {
-        return $query->whereNot(function (Builder $query) {
+        return $query->orWhere(function (Builder $query) {
             return $query
                 ->when(!is_null($this->description_lookup), function (Builder $query) {
                     $query->whereLike('description', "%$this->description_lookup%");

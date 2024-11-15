@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Enums\Direction;
 use App\Filament\Resources\ExcludeRuleResource\Pages;
-use App\Filament\Resources\ExcludeRuleResource\RelationManagers;
 use App\Models\Currency;
 use App\Models\Rule;
 use Filament\Forms;
@@ -17,6 +16,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ExcludeRuleResource extends Resource
 {
+    protected static ?string $navigationGroup = 'Rules';
+
+    protected static ?string $navigationLabel = 'Exclude Rules';
+
     protected static ?string $model = Rule::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

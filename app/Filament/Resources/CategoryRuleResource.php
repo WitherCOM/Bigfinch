@@ -12,10 +12,13 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CategoryRuleResource extends Resource
 {
+    protected static ?string $navigationGroup = 'Rules';
+
+    protected static ?string $navigationLabel = 'Category Rules';
+
     protected static ?string $model = Rule::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

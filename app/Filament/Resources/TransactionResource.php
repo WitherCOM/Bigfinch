@@ -75,10 +75,18 @@ class TransactionResource extends Resource
                 Tables\Columns\TextColumn::make('date'),
                 Tables\Columns\TextColumn::make('formatted_value')
                     ->color(fn (Transaction $record) => $record->direction === Direction::EXPENSE ? 'danger' : 'success'),
-                Tables\Columns\TextColumn::make('description'),
+                Tables\Columns\TextColumn::make('description')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('category.name'),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('category_id')
+                    ->preload()
+                    ->relationship('category','name', function (Builder $query) {
+                        $query->where(function (Builder $query) {
+                            $query->where('user_id', Auth::id())->orWhereNull('user_id');
+                        })->where('direction');
+                    }),
                 Tables\Filters\SelectFilter::make('direction')
                     ->options(Direction::class)
                     ->default(Direction::EXPENSE->value)

@@ -60,6 +60,20 @@ class SyncTransactions implements ShouldQueue
                     return $data;
                 });
             Transaction::insert($toCreate->toArray());
+
+            //Filter
+            $excludeRules = Rule::exclude()->get();
+            if ($excludeRules->count() > 0)
+            {
+                $softDeleteQuery = $this->integration->user->transactions()->query();
+                foreach($excludeRules as $rule)
+                {
+                    $softDeleteQuery = $rule->excludeQueryFilter($softDeleteQuery);
+                }
+                $softDeleteQuery->delete();
+            }
+
+
             Notification::make()
                 ->title('Synced '.$this->integration->name)
                 ->success()
