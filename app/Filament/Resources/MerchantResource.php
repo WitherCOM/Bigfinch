@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\MerchantResource\Pages;
-use App\Filament\Resources\MerchantResource\RelationManagers;
 use App\Models\Merchant;
 use App\Models\Transaction;
 use Filament\Forms;
@@ -12,10 +11,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class MerchantResource extends Resource
 {
@@ -45,8 +42,6 @@ class MerchantResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('formatted_expense_values')
-                    ->badge(),
                 Tables\Columns\TextColumn::make('key_factors')
             ])
             ->filters([

@@ -138,6 +138,7 @@ class TransactionResource extends Resource
                                 if (!is_null($record->open_banking_transaction))
                                 {
                                     $record->merchant_id = Merchant::getMerchant($record->open_banking_transaction, $record->user_id);
+                                    $record->save();
                                 }
                             }
                         }),

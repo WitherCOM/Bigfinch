@@ -81,10 +81,4 @@ class Merchant extends Model
 
         return null;
     }
-
-    public function formattedExpenseValues(): Attribute
-    {
-        return Attribute::get(fn() => $this->transactions()->where('direction',Direction::EXPENSE->value)->get()
-            ->groupBy('currency_id')->map(fn ($transactions) => $transactions[0]->currency->format($transactions->sum('value'))));
-    }
 }

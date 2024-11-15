@@ -46,9 +46,7 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('formatted_values')
-                    ->badge(),
+                Tables\Columns\TextColumn::make('name')
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('direction')
