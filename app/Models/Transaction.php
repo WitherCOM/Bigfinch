@@ -66,29 +66,14 @@ class Transaction extends Model
     public function formattedValue(): Attribute
     {
         return Attribute::get(function () {
-            $currency = $this->currency;
-            $value = $this->value;
-            if ($currency->position === CurrencyPosition::PREFIX)
+            $value = $this->currency->format($this->value);
+            if ($this->direction === Direction::EXPENSE)
             {
-                if ($this->direction === Direction::EXPENSE)
-                {
-                    return "- $currency->symbol $value";
-                }
-                else
-                {
-                    return "$currency->symbol $value";
-                }
+                return "- $value";
             }
             else
             {
-                if ($this->direction === Direction::EXPENSE)
-                {
-                    return "- $value $currency->symbol";
-                }
-                else
-                {
-                    return "$value $currency->symbol";
-                }
+                return $value;
             }
         });
     }

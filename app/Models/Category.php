@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Direction;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -44,5 +45,11 @@ class Category extends Model
     public function scopeExpense(Builder $query)
     {
         return $query->where('direction', Direction::EXPENSE);
+    }
+
+    public function formattedValues(): Attribute
+    {
+        return Attribute::get(fn() => $this->transactions()->get()
+            ->groupBy('currency_id')->map(fn ($transactions) => $transactions[0]->currency->format($transactions->sum('value'))));
     }
 }

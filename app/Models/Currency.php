@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CurrencyPosition;
+use App\Enums\Direction;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -77,5 +78,17 @@ class Currency extends Model
     public function rates(): HasMany
     {
         return $this->hasMany(CurrencyRate::class);
+    }
+
+    public function format($value)
+    {
+        if ($this->position === CurrencyPosition::PREFIX)
+        {
+            return "$this->symbol $value";
+        }
+        else
+        {
+            return "$value $this->symbol";
+        }
     }
 }

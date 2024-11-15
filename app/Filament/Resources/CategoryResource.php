@@ -47,11 +47,13 @@ class CategoryResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('formatted_values')
+                    ->badge(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('direction')
                     ->options(Direction::class)
-                    ->default(Direction::EXPENSE->value)
+                    ->default(Direction::EXPENSE->value),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

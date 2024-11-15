@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\MerchantResource\Pages;
 use App\Filament\Resources\MerchantResource\RelationManagers;
 use App\Models\Merchant;
+use App\Models\Transaction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MerchantResource extends Resource
 {
@@ -23,7 +25,8 @@ class MerchantResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('user_id', Auth::id());
+        return Merchant::query()
+            ->where('user_id',Auth::id());
     }
 
     public static function form(Form $form): Form
@@ -40,7 +43,10 @@ class MerchantResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('formatted_expense_values')
+                    ->badge(),
                 Tables\Columns\TextColumn::make('key_factors')
             ])
             ->filters([
@@ -55,6 +61,7 @@ class MerchantResource extends Resource
                     Tables\Actions\BulkAction::make('merge')
                         ->form([
                             Forms\Components\TextInput::make('name')
+                                ->datalist(fn(Collection $records) => $records->pluck('name'))
                                 ->required()
                         ])
                         ->action(function(Collection $records, array $data) {

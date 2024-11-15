@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Direction;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -33,13 +34,6 @@ class Merchant extends Model
 
         parent::creating(function (Merchant $merchant) {
             if (empty($merchant->search_keys))
-            {
-                $merchant->search_keys = [json_encode($merchant->name)];
-            }
-        });
-
-        parent::updating(function (Merchant $merchant) {
-            if (count($merchant->search_keys) <= 1)
             {
                 $merchant->search_keys = [json_encode($merchant->name)];
             }
@@ -86,5 +80,11 @@ class Merchant extends Model
         }
 
         return null;
+    }
+
+    public function formattedExpenseValues(): Attribute
+    {
+        return Attribute::get(fn() => $this->transactions()->where('direction',Direction::EXPENSE->value)->get()
+            ->groupBy('currency_id')->map(fn ($transactions) => $transactions[0]->currency->format($transactions->sum('value'))));
     }
 }
