@@ -2,10 +2,12 @@
 
 namespace App\Jobs;
 
+use App\Enums\ActionType;
 use App\Enums\Direction;
 use App\Exceptions\GocardlessException;
 use App\Models\Category;
 use App\Models\Currency;
+use App\Models\Filter;
 use App\Models\Integration;
 use App\Models\Merchant;
 use App\Models\Rule;
@@ -38,11 +40,11 @@ class SyncTransactions implements ShouldQueue
     public function handle(): void
     {
         $currencies = Currency::all(['iso_code', 'id'])->pluck('id', 'iso_code');
-        $rules = Rule::category()->get();
         $transactionCommonIds = $this->integration->all_transactions->pluck('common_id');
+        $filters = Filter::all();
         try {
             $toCreate = $this->integration->getTransactions()->whereNotIn('transactionId', $transactionCommonIds)
-                ->map(function ($transaction) use ($currencies, $rules) {
+                ->map(function ($transaction) use ($currencies, $filters) {
                     $data = [
                         'id' => Str::uuid(),
                         'description' => $this->getDescription($transaction),
@@ -56,23 +58,21 @@ class SyncTransactions implements ShouldQueue
                         'common_id' => $transaction['transactionId'],
                         'merchant_id' => Merchant::getMerchant($transaction, $this->integration->user_id)
                     ];
-                    $data['category_id'] = $rules->filter(fn($rule) => $rule->checkRuleIsAppliedToData($data))->sortByDesc('priority')->first()?->target_id;
+                    $data['category_id'] = $filters->where('action',ActionType::CREATE_CATEGORY)->filter(fn($filter) => $filter->check($data))->sortByDesc('priority')->first()?->action_parameter;
                     return $data;
                 });
             Transaction::insert($toCreate->toArray());
 
-            //Filter
-            $excludeRules = Rule::exclude()->get();
-            if ($excludeRules->count() > 0)
+            // Filter
+            if ($filters->where('action',ActionType::EXCLUDE_TRANSACTION)->count() > 0)
             {
                 $softDeleteQuery = $this->integration->user->transactions()->query();
-                foreach($excludeRules as $rule)
+                foreach($filters->where('action',ActionType::EXCLUDE_TRANSACTION) as $filter)
                 {
-                    $softDeleteQuery = $rule->excludeQueryFilter($softDeleteQuery);
+                    $softDeleteQuery = $filter->queryFilter($softDeleteQuery);
                 }
                 $softDeleteQuery->delete();
             }
-
 
             Notification::make()
                 ->title('Synced '.$this->integration->name)

@@ -4,10 +4,10 @@ namespace App\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
-enum RuleType: string implements HasLabel
+enum ActionType: string implements HasLabel
 {
-    case CATEGORY = 'category';
-    case EXCLUDE = 'exclude';
+    case CREATE_CATEGORY = 'create-category';
+    case EXCLUDE_TRANSACTION = 'exclude-transaction';
 
     public function getLabel(): ?string
     {
