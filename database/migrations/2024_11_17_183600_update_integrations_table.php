@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('integrations',function (Blueprint $table) {
-            $table->timestamp('last_synced_at');
+            $table->timestamp('last_synced_at')->nullable();
         });
     }
 
