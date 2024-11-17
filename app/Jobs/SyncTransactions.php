@@ -58,11 +58,12 @@ class SyncTransactions implements ShouldQueue
                         'user_id' => $this->integration->user_id,
                         'common_id' => $transaction['transactionId'],
                         'merchant_id' => $merchant?->id,
-                        'merchant' => [
-                            'name' => $merchant?->name
-                        ]
+                    ];
+                    $data['merchant'] = [
+                        'name' => $merchant?->name
                     ];
                     $data['category_id'] = $filters->where('action',ActionType::CREATE_CATEGORY)->filter(fn($filter) => $filter->check($data))->sortByDesc('priority')->first()?->action_parameter;
+                    unset($data['merchant']);
                     return $data;
                 });
             Transaction::insert($toCreate->toArray());
