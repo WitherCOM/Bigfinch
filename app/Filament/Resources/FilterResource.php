@@ -2,17 +2,22 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\ActionType;
 use App\Enums\Direction;
 use App\Filament\Resources\FilterResource\Pages;
 use App\Filament\Resources\FilterResource\RelationManagers;
+use App\Models\Category;
 use App\Models\Filter;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class FilterResource extends Resource
 {
@@ -24,15 +29,27 @@ class FilterResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('description'),
-                Forms\Components\TextInput::make('merchant'),
-                Forms\Components\TextInput::make('min_value')
-                    ->numeric(),
-                Forms\Components\TextInput::make('max_value')
-                    ->numeric(),
-                Forms\Components\Select::make('direction')
-                    ->options(Direction::class)
-                    ->enum(Direction::class)
+                Forms\Components\Section::make()->schema([
+                    Forms\Components\TextInput::make('description'),
+                    Forms\Components\TextInput::make('merchant'),
+                    Forms\Components\TextInput::make('min_value')
+                        ->numeric(),
+                    Forms\Components\TextInput::make('max_value')
+                        ->numeric(),
+                    Forms\Components\Select::make('direction')
+                        ->options(Direction::class)
+                        ->enum(Direction::class)
+                ]),
+                Forms\Components\Section::make()->schema([
+                    Forms\Components\Select::make('action')
+                        ->options(ActionType::class)
+                        ->live()
+                        ->enum(ActionType::class),
+                    Forms\Components\Select::make('action_parameter')
+                        ->requiredIf('action',ActionType::CREATE_CATEGORY->value)
+                        ->visible(fn (Get $get) => $get('action') === ActionType::CREATE_CATEGORY->value)
+                        ->options(Category::where('user_id',Auth::id())->get()->mapWithKeys(fn (Category $category, $key) => [$key => $category->name]))
+                ])
             ]);
     }
 

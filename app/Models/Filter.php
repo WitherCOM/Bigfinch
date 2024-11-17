@@ -14,6 +14,8 @@ class Filter extends Model
 {
     use HasUuids;
 
+    public $timestamps = false;
+
     protected $fillable = [
         'min_value',
         'max_value',
