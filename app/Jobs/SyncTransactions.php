@@ -45,6 +45,7 @@ class SyncTransactions implements ShouldQueue
         try {
             $toCreate = $this->integration->getTransactions()->whereNotIn('transactionId', $transactionCommonIds)
                 ->map(function ($transaction) use ($currencies, $filters) {
+                    $merchant = Merchant::getMerchant($transaction, $this->integration->user_id);
                     $data = [
                         'id' => Str::uuid(),
                         'description' => $this->getDescription($transaction),
@@ -56,7 +57,10 @@ class SyncTransactions implements ShouldQueue
                         'open_banking_transaction' => json_encode($transaction),
                         'user_id' => $this->integration->user_id,
                         'common_id' => $transaction['transactionId'],
-                        'merchant_id' => Merchant::getMerchant($transaction, $this->integration->user_id)
+                        'merchant_id' => $merchant->id,
+                        'merchant' => [
+                            'name' => $merchant->name
+                        ]
                     ];
                     $data['category_id'] = $filters->where('action',ActionType::CREATE_CATEGORY)->filter(fn($filter) => $filter->check($data))->sortByDesc('priority')->first()?->action_parameter;
                     return $data;

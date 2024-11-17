@@ -50,7 +50,7 @@ class Merchant extends Model
         return $this->hasMany(Transaction::class);
     }
 
-    public static function getMerchant(array $data, $user_id)
+    public static function getMerchant(array $data, $user_id): Merchant|null
     {
         $value = floatval($data['transactionAmount']['amount']);
         $name = "";
@@ -76,7 +76,7 @@ class Merchant extends Model
                    'user_id' => $user_id
                 ]);
             }
-            return $merchant->id;
+            return $merchant;
         }
 
         return null;
