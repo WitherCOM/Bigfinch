@@ -48,7 +48,7 @@ class FilterResource extends Resource
                     Forms\Components\Select::make('action_parameter')
                         ->requiredIf('action',ActionType::CREATE_CATEGORY->value)
                         ->visible(fn (Get $get) => $get('action') === ActionType::CREATE_CATEGORY->value)
-                        ->options(Category::where('user_id',Auth::id())->get()->mapWithKeys(fn (Category $category, $key) => [$key => $category->name]))
+                        ->options(Category::where('user_id',Auth::id())->get()->mapWithKeys(fn (Category $category, $key) => [$category->id => $category->name]))
                 ])
             ]);
     }
@@ -64,6 +64,18 @@ class FilterResource extends Resource
                 Tables\Columns\TextColumn::make('max_value'),
                 Tables\Columns\TextColumn::make('direction')
                     ->badge(),
+                Tables\Columns\TextColumn::make('action'),
+                Tables\Columns\TextColumn::make('action_parameter')
+                    ->formatStateUsing(function (Filter $record, string $state) {
+                        if ($record->action === ActionType::CREATE_CATEGORY)
+                        {
+                            return Category::find($state)->name;
+                        }
+                        else
+                        {
+                            return $state;
+                        }
+                    })
             ])
             ->filters([
                 //

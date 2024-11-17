@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ActionType;
 use App\Enums\Direction;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -31,7 +32,8 @@ class Filter extends Model
     ];
 
     protected $casts = [
-        'direction' => Direction::class
+        'direction' => Direction::class,
+        'action' => ActionType::class
     ];
 
     public function check(Transaction $transaction): bool
@@ -65,7 +67,7 @@ class Filter extends Model
         });
     }
 
-    public function priority()
+    public function priority(): Attribute
     {
         return Attribute::get(fn() => collect($this->attributesToArray())->filter(fn($value) => !is_null($value))->count());
     }
