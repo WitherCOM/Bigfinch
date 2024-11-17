@@ -147,7 +147,7 @@ class TransactionResource extends Resource
                                 }
                             }
                         }),
-                    Tables\Actions\BulkAction::make('assign_category')
+                    Tables\Actions\BulkAction::make('auto_assign_category')
                         ->requiresConfirmation()
                         ->action(function (Collection $collection) {
                             $filters = Filter::all()->where('action',ActionType::CREATE_CATEGORY);
