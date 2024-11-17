@@ -26,7 +26,8 @@ class Integration extends Model
 
     protected $casts = [
         'accounts' => 'collection',
-        'expires_at' => 'datetime'
+        'expires_at' => 'datetime',
+        'last_synced_at' => 'datetime'
     ];
 
     public function all_transactions()

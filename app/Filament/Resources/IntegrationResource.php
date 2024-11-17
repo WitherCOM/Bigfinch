@@ -54,17 +54,19 @@ class IntegrationResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('institution_logo')->label(''),
                 Tables\Columns\TextColumn::make('name')
-                    ->url(fn (Integration $record) => $record->can_accept ? $record->link : null),
+                    ->url(fn(Integration $record) => $record->can_accept ? $record->link : null),
                 Tables\Columns\TextColumn::make('institution_name'),
                 Tables\Columns\TextColumn::make('expires_at')
-                    ->color(fn (Integration $record) => $record->expired ? 'danger' : 'success')
+                    ->color(fn(Integration $record) => $record->expired ? 'danger' : 'success'),
+                Tables\Columns\TextColumn::make('last_synced_at')
+                    ->color(fn(Integration $record) => $record->last_synced_at->lt(Carbon::today()) ? 'danger' : 'success')
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\Action::make('sync')
-                    ->action(fn (Integration $record) => SyncTransactions::dispatch($record)),
+                    ->action(fn(Integration $record) => SyncTransactions::dispatch($record)),
                 Tables\Actions\EditAction::make()
                     ->form([
                         Forms\Components\TextInput::make('name')

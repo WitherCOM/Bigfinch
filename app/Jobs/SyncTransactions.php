@@ -78,6 +78,9 @@ class SyncTransactions implements ShouldQueue
                 ->title('Synced '.$this->integration->name)
                 ->success()
                 ->sendToDatabase($this->integration->user);
+
+            $this->integration->last_synced_at = Carbon::now();
+            $this->integration->save();
         } catch (GocardlessException $e)
         {
             Notification::make()
