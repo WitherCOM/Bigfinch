@@ -48,4 +48,12 @@ class TransactionPolicy
         return $transaction->user_id === $user->id;
     }
 
+
+    /**
+     * Determine whether the user can force delete the model.
+     */
+    public function forceDelete(User $user, Transaction $transaction): bool
+    {
+        return ($transaction->user_id === $user->id) && !is_null($transaction->integration_id);
+    }
 }

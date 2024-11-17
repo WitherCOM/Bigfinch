@@ -7,6 +7,8 @@ use App\Models\Merchant;
 use App\Models\Transaction;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -23,7 +25,7 @@ class MerchantResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return Merchant::query()
-            ->where('user_id',Auth::id());
+            ->where('user_id', Auth::id());
     }
 
     public static function form(Form $form): Form
@@ -33,6 +35,15 @@ class MerchantResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
             ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+            TextEntry::make('name'),
+            TextEntry::make('search_keys')
+                ->badge()
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -59,11 +70,11 @@ class MerchantResource extends Resource
                                 ->datalist(fn(Collection $records) => $records->pluck('name'))
                                 ->required()
                         ])
-                        ->action(function(Collection $records, array $data) {
+                        ->action(function (Collection $records, array $data) {
                             $merchant = Merchant::create([
                                 'user_id' => Auth::id(),
                                 'name' => $data['name'],
-                                'search_keys' => $records->flatMap(fn ($record) => $record->search_keys)
+                                'search_keys' => $records->flatMap(fn($record) => $record->search_keys)
                             ]);
                             $records->each(function ($record) use ($merchant) {
                                 $record->transactions()->update([
@@ -88,6 +99,7 @@ class MerchantResource extends Resource
         return [
             'index' => Pages\ListMerchants::route('/'),
             'create' => Pages\CreateMerchant::route('/create'),
+            'view' => Pages\ViewMerchant::route('/{record}'),
             'edit' => Pages\EditMerchant::route('/{record}/edit'),
         ];
     }

@@ -2,11 +2,15 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\ActionType;
 use App\Enums\Direction;
 use App\Filament\Resources\TransactionResource\Pages;
+use App\Models\Category;
+use App\Models\Filter;
 use App\Models\Merchant;
 use App\Models\Transaction;
 use Carbon\Carbon;
+use Filament\Actions\ForceDeleteAction;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -127,7 +131,8 @@ class TransactionResource extends Resource
                         $transcation->save();
                     }),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                Tables\Actions\DeleteAction::make(),
+                ForceDeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -138,6 +143,18 @@ class TransactionResource extends Resource
                                 if (!is_null($record->open_banking_transaction))
                                 {
                                     $record->merchant_id = Merchant::getMerchant($record->open_banking_transaction, $record->user_id);
+                                    $record->save();
+                                }
+                            }
+                        }),
+                    Tables\Actions\BulkAction::make('assign_category')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $collection) {
+                            $filters = Filter::all()->where('action',ActionType::CREATE_CATEGORY);
+                            foreach($collection as $record) {
+                                if (is_null($record->category_id))
+                                {
+                                    $record->category_id = $filters->filter(fn($filter) => $filter->check($record->toArray()))->sortByDesc('priority')->first()?->action_parameter;
                                     $record->save();
                                 }
                             }
