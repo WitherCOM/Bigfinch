@@ -57,9 +57,9 @@ class SyncTransactions implements ShouldQueue
                         'open_banking_transaction' => json_encode($transaction),
                         'user_id' => $this->integration->user_id,
                         'common_id' => $transaction['transactionId'],
-                        'merchant_id' => $merchant->id,
+                        'merchant_id' => $merchant?->id,
                         'merchant' => [
-                            'name' => $merchant->name
+                            'name' => $merchant?->name
                         ]
                     ];
                     $data['category_id'] = $filters->where('action',ActionType::CREATE_CATEGORY)->filter(fn($filter) => $filter->check($data))->sortByDesc('priority')->first()?->action_parameter;
