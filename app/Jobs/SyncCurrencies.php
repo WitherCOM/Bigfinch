@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Currency;
 use App\Models\CurrencyRate;
+use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Str;
@@ -38,7 +39,9 @@ class SyncCurrencies implements ShouldQueue
                 ->map(fn($item) => [
                     'id' => Str::uuid(),
                     'currency_id' => $codes[$item['currency']],
-                    'rate_to_huf' => $item['value']
+                    'rate_to_huf' => $item['value'],
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
                 ])
                 ->toArray()
         );

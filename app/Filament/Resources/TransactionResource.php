@@ -82,6 +82,8 @@ class TransactionResource extends Resource
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('category.name'),
+                Tables\Columns\TextColumn::make('merchant.name')
+                    ->searchable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category_id')
