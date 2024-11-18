@@ -38,8 +38,8 @@ class Filter extends Model
 
     public function check(array $transaction): bool
     {
-        $isDescription = is_null($this->description) || Str::of($transaction['description'])->contains($this->description);
-        $isMerchant = is_null($this->merchant) || Str::of($transaction['merchant']['name'])->contains($this->merchant);
+        $isDescription = is_null($this->description) || Str::of($transaction['description'])->contains($this->description, true);
+        $isMerchant = is_null($this->merchant) || Str::of($transaction['merchant']['name'])->contains($this->merchant, true);
         $isDirection = is_null($this->direction) || $transaction['direction'] == $this->direction->value;
         $isMinValue = is_null($this->min_value) || $transaction['value'] >= $this->min_value;
         $isMaxValue = is_null($this->max_value) || $transaction['value'] <= $this->max_value;
