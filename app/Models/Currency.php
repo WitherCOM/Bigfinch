@@ -47,8 +47,8 @@ class Currency extends Model
 
     public function nearestRate(Carbon $day)
     {
-        $lower = $this->rates()->whereDay('created_at','<=', $day)->latest()->first();
-        $upper = $this->rates()->whereDay('created_at','>=', $day)->orderBy('created_at')->first();
+        $lower = $this->rates->filter(fn(CurrencyRate $rate) => $rate->created_at->lte($day))->sortByDesc('created_at')->first();
+        $upper = $this->rates->filter(fn(CurrencyRate $rate) => $rate->created_at->gte($day))->sortBy('created_at')->first();
         if (is_null($lower) && is_null($upper))
         {
             return 1;

@@ -13,7 +13,7 @@ class CurrencyPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can_manage_settings;
+        return true;
     }
 
     /**

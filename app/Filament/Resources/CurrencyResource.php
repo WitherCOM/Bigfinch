@@ -9,6 +9,8 @@ use App\Models\Currency;
 use App\Rules\CurrencyCodeRule;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -35,6 +37,14 @@ class CurrencyResource extends Resource
                     ->rule(new CurrencyCodeRule())
                     ->required()
             ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+            TextEntry::make('name'),
+            TextEntry::make('iso_code')
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -70,6 +80,7 @@ class CurrencyResource extends Resource
         return [
             'index' => Pages\ListCurrencies::route('/'),
             'create' => Pages\CreateCurrency::route('/create'),
+            'view' => Pages\ViewCurrency::route('/{record}'),
             'edit' => Pages\EditCurrency::route('/{record}/edit'),
         ];
     }
