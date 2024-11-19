@@ -16,4 +16,12 @@ class EditTransaction extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+          TransactionResource\Widgets\TransactionInfo::class
+        ];
+    }
+
 }

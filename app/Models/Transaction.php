@@ -37,17 +37,6 @@ class Transaction extends Model
         'direction' => Direction::class
     ];
 
-    protected static function booted()
-    {
-        parent::booted();
-        parent::deleting(function (Transaction $transaction) {
-            if (is_null($transaction->integration_id))
-            {
-                $transaction->forceDeleting = true;
-            }
-        });
-    }
-
     public function merchant(): BelongsTo
     {
         return $this->belongsTo(Merchant::class);

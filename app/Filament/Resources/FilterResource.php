@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Enums\ActionType;
 use App\Enums\Direction;
 use App\Filament\Resources\FilterResource\Pages;
-use App\Filament\Resources\FilterResource\RelationManagers;
 use App\Models\Category;
 use App\Models\Filter;
 use Filament\Forms;
@@ -24,6 +23,12 @@ class FilterResource extends Resource
     protected static ?string $model = Filter::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('user_id', Auth::id());
+    }
 
     public static function form(Form $form): Form
     {

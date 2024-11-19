@@ -37,7 +37,7 @@ class TransactionPolicy
      */
     public function update(User $user, Transaction $transaction): bool
     {
-        return $transaction->user_id === $user->id;
+        return ($transaction->user_id === $user->id) && !$transaction->trashed();
     }
 
     /**
@@ -54,6 +54,6 @@ class TransactionPolicy
      */
     public function forceDelete(User $user, Transaction $transaction): bool
     {
-        return ($transaction->user_id === $user->id) && !is_null($transaction->integration_id);
+        return $transaction->user_id === $user->id;
     }
 }

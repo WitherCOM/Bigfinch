@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->viteTheme('resources/css/app.css')
             ->databaseNotifications()
             ->databaseNotificationsPolling(10)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')

@@ -11,6 +11,7 @@ use App\Models\Merchant;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -30,7 +31,9 @@ class TransactionResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['merchant','category'])->where('user_id', Auth::id());
+        return parent::getEloquentQuery()
+            ->with(['merchant', 'category'])
+            ->where('user_id', Auth::id());
     }
 
     public static function form(Form $form): Form
@@ -44,7 +47,7 @@ class TransactionResource extends Resource
                     ->minValue(0)
                     ->numeric(),
                 Forms\Components\Select::make('currency_id')
-                    ->relationship('currency','iso_code')
+                    ->relationship('currency', 'iso_code')
                     ->preload()
                     ->required()
                     ->searchable(),
@@ -57,16 +60,16 @@ class TransactionResource extends Resource
                     ->required()
                     ->default(Carbon::now()),
                 Forms\Components\Select::make('merchant_id')
-                    ->relationship('merchant','name', function (Builder $query) {
+                    ->relationship('merchant', 'name', function (Builder $query) {
                         $query->where('user_id', Auth::id());
                     })
                     ->searchable(),
                 Forms\Components\Select::make('category_id')
                     ->preload()
-                    ->relationship('category','name', function (Builder $query, Forms\Get $get) {
+                    ->relationship('category', 'name', function (Builder $query, Forms\Get $get) {
                         $query->where(function (Builder $query) {
                             $query->where('user_id', Auth::id())->orWhereNull('user_id');
-                        })->where('direction',$get('direction'));
+                        })->where('direction', $get('direction'));
                     })
                     ->searchable()
             ]);
@@ -78,7 +81,7 @@ class TransactionResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('date'),
                 Tables\Columns\TextColumn::make('formatted_value')
-                    ->color(fn (Transaction $record) => $record->direction === Direction::EXPENSE ? 'danger' : 'success'),
+                    ->color(fn(Transaction $record) => $record->direction === Direction::EXPENSE ? 'danger' : 'success'),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('category.name'),
@@ -86,9 +89,10 @@ class TransactionResource extends Resource
                     ->searchable(),
             ])
             ->filters([
+                Tables\Filters\TrashedFilter::make(),
                 Tables\Filters\SelectFilter::make('category_id')
                     ->preload()
-                    ->relationship('category','name', function (Builder $query) {
+                    ->relationship('category', 'name', function (Builder $query) {
                         $query->where(function (Builder $query) {
                             $query->where('user_id', Auth::id())->orWhereNull('user_id');
                         })->where('direction');
@@ -97,13 +101,14 @@ class TransactionResource extends Resource
                     ->options(Direction::class)
                     ->default(Direction::EXPENSE->value)
             ])
+            ->recordClasses(fn(Transaction $transaction) => $transaction->trashed() ? 'opacity-50' : null)
             ->actions([
                 Tables\Actions\Action::make('split')
                     ->form([
                         Forms\Components\TextInput::make('value')
                             ->required()
                             ->minValue(0)
-                            ->maxValue(fn (Transaction $record) => $record->value)
+                            ->maxValue(fn(Transaction $record) => $record->value)
                             ->numeric(),
                         Forms\Components\TextInput::make('description')
                             ->afterStateHydrated(function (TextInput $component, Transaction $transaction) {
@@ -115,35 +120,47 @@ class TransactionResource extends Resource
                                 $component->state($transaction->category_id);
                             })
                             ->preload()
-                            ->relationship('category','name', function (Builder $query, Transaction $record) {
+                            ->relationship('category', 'name', function (Builder $query, Transaction $record) {
                                 $query->where(function (Builder $query) {
                                     $query->where('user_id', Auth::id())->orWhereNull('user_id');
-                                })->where('direction',$record->direction);
+                                })->where('direction', $record->direction);
                             })
                             ->searchable()
                     ])
-                    ->visible(fn (Transaction $record) => $record->direction === Direction::EXPENSE)
+                    ->authorize('update')
+                    ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE)
                     ->action(function (Transaction $record, array $data) {
-                        $record->value -= $data['value'];
-                        $record->save();
-                        $transcation = $record->replicate();
+                        $transcation = $record->replicate(['id']);
                         $transcation->value = $data['value'];
                         $transcation->category_id = $data['category_id'];
                         $transcation->description = $data['description'];
                         $transcation->save();
+                        $record->refresh();
+                        $record->update([
+                            'value' => $record->value - $data['value']
+                        ]);
                     }),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\RestoreAction::make()
+                    ->modal(false)
+                    ->requiresConfirmation(false)
+                    ->label('Include'),
+                Tables\Actions\DeleteAction::make()
+                    ->icon('')
+                    ->modal(false)
+                    ->requiresConfirmation(false)
+                    ->label('Exclude'),
                 Tables\Actions\ForceDeleteAction::make()
+                    ->label('')
+                    ->visible()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\BulkAction::make('recreate_merchants')
                         ->requiresConfirmation()
                         ->action(function (Collection $collection) {
-                            foreach($collection as $record) {
-                                if (!is_null($record->open_banking_transaction))
-                                {
+                            foreach ($collection as $record) {
+                                if (!is_null($record->open_banking_transaction)) {
                                     $record->merchant_id = Merchant::getMerchant($record->open_banking_transaction, $record->user_id);
                                     $record->save();
                                 }
@@ -152,10 +169,9 @@ class TransactionResource extends Resource
                     Tables\Actions\BulkAction::make('auto_assign_category')
                         ->requiresConfirmation()
                         ->action(function (Collection $collection) {
-                            $filters = Filter::all()->where('action',ActionType::CREATE_CATEGORY);
-                            foreach($collection as $record) {
-                                if (is_null($record->category_id))
-                                {
+                            $filters = Filter::all()->where('action', ActionType::CREATE_CATEGORY);
+                            foreach ($collection as $record) {
+                                if (is_null($record->category_id)) {
                                     $record->category_id = $filters->filter(fn($filter) => $filter->check($record->toArray()))->sortByDesc('priority')->first()?->action_parameter;
                                     $record->save();
                                 }
@@ -164,7 +180,7 @@ class TransactionResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('date','desc');
+            ->defaultSort('date', 'desc');
     }
 
     public static function getRelations(): array
