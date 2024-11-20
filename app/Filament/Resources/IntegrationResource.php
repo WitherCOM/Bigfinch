@@ -22,11 +22,6 @@ class IntegrationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
 
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()->where('user_id', Auth::id());
-    }
-
     public static function form(Form $form): Form
     {
         return $form

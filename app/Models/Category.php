@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use App\Enums\Direction;
+use App\Models\Scopes\OwnerScope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[ScopedBy([OwnerScope::class])]
 class Category extends Model
 {
     /** @use HasFactory<\Database\Factories\CategoryFactory> */

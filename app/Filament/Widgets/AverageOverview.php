@@ -17,14 +17,14 @@ class AverageOverview extends BaseWidget
         $transactionExpend = Transaction::with(['currency','currency.rates'])->where('user_id',Auth::id())
             ->where('direction',Direction::EXPENSE->value)
             ->get();
-        $dailyAverage = $transactionExpend
+        $dailyAverage = round($transactionExpend
             ->groupBy(fn (Transaction $transaction) => $transaction->date->toDateString())
             ->map(fn ($groups) => $groups->map(fn(Transaction $transaction) => $transaction->currency->nearestRate($transaction->date) * $transaction->value)->sum())
-            ->avg();
-        $monthAverage = $transactionExpend
+            ->avg());
+        $monthAverage = round($transactionExpend
             ->groupBy(fn (Transaction $transaction) => $transaction->date->format('Y-m'))
             ->map(fn ($groups) => $groups->map(fn(Transaction $transaction) => $transaction->currency->nearestRate($transaction->date) * $transaction->value)->sum())
-            ->avg();
+            ->avg());
 
         return [
             Stat::make('Daily Avg', Currency::where('iso_code', 'HUF')->first()->format($dailyAverage)),
