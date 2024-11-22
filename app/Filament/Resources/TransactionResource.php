@@ -5,22 +5,19 @@ namespace App\Filament\Resources;
 use App\Enums\ActionType;
 use App\Enums\Direction;
 use App\Filament\Resources\TransactionResource\Pages;
-use App\Models\Category;
 use App\Models\Filter;
 use App\Models\Merchant;
 use App\Models\Transaction;
 use Carbon\Carbon;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreAction;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 
 class TransactionResource extends Resource
@@ -28,13 +25,6 @@ class TransactionResource extends Resource
     protected static ?string $model = Transaction::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->with(['merchant', 'category'])
-            ->where('user_id', Auth::id());
-    }
 
     public static function form(Form $form): Form
     {
@@ -89,7 +79,11 @@ class TransactionResource extends Resource
                     ->searchable(),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TrashedFilter::make()
+                    ->label('Visibility')
+                    ->trueLabel('With excluded')
+                    ->falseLabel('Only excluded')
+                    ->placeholder('Without excluded'),
                 Tables\Filters\SelectFilter::make('category_id')
                     ->preload()
                     ->relationship('category', 'name', function (Builder $query) {

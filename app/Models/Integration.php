@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Exceptions\GocardlessException;
+use App\Models\Scopes\OwnerScope;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +16,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
+#[ScopedBy([OwnerScope::class])]
 class Integration extends Model
 {
     /** @use HasFactory<\Database\Factories\IntegrationFactory> */

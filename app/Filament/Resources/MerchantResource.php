@@ -22,12 +22,6 @@ class MerchantResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
 
-    public static function getEloquentQuery(): Builder
-    {
-        return Merchant::query()
-            ->where('user_id', Auth::id());
-    }
-
     public static function form(Form $form): Form
     {
         return $form

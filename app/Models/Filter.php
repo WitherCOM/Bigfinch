@@ -4,13 +4,16 @@ namespace App\Models;
 
 use App\Enums\ActionType;
 use App\Enums\Direction;
+use App\Models\Scopes\OwnerScope;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+#[ScopedBy([OwnerScope::class])]
 class Filter extends Model
 {
     use HasUuids;

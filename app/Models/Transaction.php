@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\CurrencyPosition;
 use App\Enums\Direction;
 use App\Enums\RuleType;
+use App\Models\Scopes\OwnerScope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[ScopedBy([OwnerScope::class])]
 class Transaction extends Model
 {
     /** @use HasFactory<\Database\Factories\TransactionFactory> */
@@ -36,6 +39,8 @@ class Transaction extends Model
         'open_banking_transaction' => 'array',
         'direction' => Direction::class
     ];
+
+    protected $with = ['category', 'merchant'];
 
     public function merchant(): BelongsTo
     {
