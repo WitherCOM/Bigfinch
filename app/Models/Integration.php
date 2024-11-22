@@ -27,8 +27,9 @@ class Integration extends Model
     protected $casts = [
         'accounts' => 'collection',
         'expires_at' => 'datetime',
-        'last_synced_at' => 'datetime'
-    ];
+        'last_synced_at' => 'datetime',
+        'can_auto_sync' => 'boolean'
+     ];
 
     public function all_transactions()
     {
@@ -82,13 +83,13 @@ class Integration extends Model
                     'secret_key' => config('gocardless.secret_key')
                 ]);
                 if ($response->successful()) {
-                    Cache::set('gocardless_access_token', $response->json('access'), $response->json('access_expires'));
-                    Cache::set('gocardless_refresh_token', $response->json('refresh'), $response->json('refresh_expires'));
+                    Cache::set('gocardless_access_token', $response->json('access'), $response->json('access_expires') - 10);
+                    Cache::set('gocardless_refresh_token', $response->json('refresh'), $response->json('refresh_expires') - 10);
                     return $response->json('access');
                 } else {
                     Cache::forget('gocardless_access_token');
                     Cache::forget('gocardless_refresh_token');
-                    return null;
+                    throw new GocardlessException($response);
                 }
             } else {
                 // Refresh token
@@ -97,12 +98,12 @@ class Integration extends Model
                     'secret_key' => config('gocardless.secret_key')
                 ]);
                 if ($response->successful()) {
-                    Cache::set('gocardless_access_token', $response->json('access'), $response->json('access_expires'));
+                    Cache::set('gocardless_access_token', $response->json('access'), $response->json('access_expires') - 10);
                     return $response->json('access');
                 } else {
                     Cache::forget('gocardless_access_token');
                     Cache::forget('gocardless_refresh_token');
-                    return null;
+                    throw new GocardlessException($response);
                 }
             }
         } else {

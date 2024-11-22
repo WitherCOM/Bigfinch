@@ -58,6 +58,7 @@ class IntegrationResource extends Resource
                 Tables\Columns\TextColumn::make('institution_name'),
                 Tables\Columns\TextColumn::make('expires_at')
                     ->color(fn(Integration $record) => $record->expired ? 'danger' : 'success'),
+                Tables\Columns\CheckboxColumn::make('can_auto_sync'),
                 Tables\Columns\TextColumn::make('last_synced_at')
                     ->color(fn(Integration $record) => $record->last_synced_at->lt(Carbon::today()) ? 'danger' : 'success')
             ])

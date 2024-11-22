@@ -15,6 +15,7 @@ class AverageOverview extends BaseWidget
     protected function getStats(): array
     {
         $transactionExpend = Transaction::with(['currency','currency.rates'])->where('user_id',Auth::id())
+            ->where('date','>=',Carbon::now()->subMonths(3)->startOfMonth())
             ->where('direction',Direction::EXPENSE->value)
             ->get();
         $dailyAverage = $transactionExpend

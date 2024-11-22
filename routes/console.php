@@ -11,7 +11,7 @@ Artisan::command('inspire', function () {
 Schedule::job(new \App\Jobs\SyncCurrencies)->dailyAt('6:00');
 
 Schedule::call(function () {
-    foreach(\App\Models\Integration::all() as $integration)
+    foreach(\App\Models\Integration::where('can_auto_sync',true)->get() as $integration)
     {
         \App\Jobs\SyncTransactions::dispatch($integration);
     }
