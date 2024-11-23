@@ -172,6 +172,7 @@ class TransactionResource extends Resource
                             }
                         }),
                     Tables\Actions\DeleteBulkAction::make()
+                        ->icon('')
                         ->label('Exclude'),
                     Tables\Actions\ForceDeleteBulkAction::make()
                         ->visible()

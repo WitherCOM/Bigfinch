@@ -76,6 +76,11 @@ class FilterResource extends Resource
                         }
                     })
             ])
+            ->recordClasses(fn (Filter $record) => match($record->action) {
+                ActionType::CREATE_CATEGORY => 'success',
+                ActionType::EXCLUDE_TRANSACTION => 'warning',
+                'default' => ''
+            })
             ->filters([
                 //
             ])
