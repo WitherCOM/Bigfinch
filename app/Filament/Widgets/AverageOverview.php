@@ -15,10 +15,11 @@ class AverageOverview extends BaseWidget
     protected function getStats(): array
     {
         $transactionExpend = Transaction::with(['currency','currency.rates'])->where('user_id',Auth::id())
-            ->where('date','>=',Carbon::now()->subMonths(3)->startOfMonth())
+            ->where('date','>=',Carbon::now()->startOfYear())
             ->where('direction',Direction::EXPENSE->value)
             ->get();
         $dailyAverage = round($transactionExpend
+            ->where('date','>=', Carbon::now()->subMonth()->startOfMonth())
             ->groupBy(fn (Transaction $transaction) => $transaction->date->toDateString())
             ->map(fn ($groups) => $groups->map(fn(Transaction $transaction) => $transaction->currency->nearestRate($transaction->date) * $transaction->value)->sum())
             ->avg());
