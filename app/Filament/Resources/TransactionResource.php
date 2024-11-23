@@ -171,7 +171,10 @@ class TransactionResource extends Resource
                                 }
                             }
                         }),
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->label('Exclude'),
+                    Tables\Actions\ForceDeleteBulkAction::make()
+                        ->visible()
                 ]),
             ])
             ->defaultSort('date', 'desc');

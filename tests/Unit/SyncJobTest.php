@@ -132,4 +132,23 @@ class SyncJobTest extends TestCase
         $this->assertDatabaseCount(Transaction::class,5);
         $this->assertDatabaseCount(Merchant::class,3);
     }
+
+    public function test_sync_job_duplications(): void
+    {
+        $user = User::factory()->create();
+        $integration = Integration::insert([
+            'id' => Str::uuid(),
+            'name' => 'asd',
+            'user_id' => $user->id,
+            'accounts' => json_encode([Str::uuid()]),
+            'institution_name' => 'name',
+            'institution_logo' => 'logo',
+            'requisition_id' => Str::uuid()
+        ]);
+        $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
+        $job->handle();
+        $job->handle();
+        $this->assertDatabaseCount(Transaction::class,5);
+
+    }
 }

@@ -11,6 +11,7 @@ use App\Models\Filter;
 use App\Models\Integration;
 use App\Models\Merchant;
 use App\Models\Rule;
+use App\Models\Scopes\OwnerScope;
 use App\Models\Transaction;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -40,8 +41,8 @@ class SyncTransactions implements ShouldQueue
     public function handle(): void
     {
         $currencies = Currency::all(['iso_code', 'id'])->pluck('id', 'iso_code');
-        $transactionCommonIds = $this->integration->all_transactions->pluck('common_id');
-        $filters = Filter::all();
+        $transactionCommonIds = $this->integration->all_transactions()->withoutGlobalScopes()->pluck('common_id');
+        $filters = Filter::query()->withoutGlobalScope(OwnerScope::class)->get();
         try {
             $toCreate = $this->integration->getTransactions()->whereNotIn('transactionId', $transactionCommonIds)
                 ->map(function ($transaction) use ($currencies, $filters) {
