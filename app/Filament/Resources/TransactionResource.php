@@ -115,9 +115,7 @@ class TransactionResource extends Resource
                             })
                             ->preload()
                             ->relationship('category', 'name', function (Builder $query, Transaction $record) {
-                                $query->where(function (Builder $query) {
-                                    $query->where('user_id', Auth::id())->orWhereNull('user_id');
-                                })->where('direction', $record->direction);
+                                $query->where('direction', $record->direction);
                             })
                             ->searchable()
                     ])

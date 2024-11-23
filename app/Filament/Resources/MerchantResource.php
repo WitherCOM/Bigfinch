@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Direction;
 use App\Filament\Resources\MerchantResource\Pages;
 use App\Models\Merchant;
 use App\Models\Transaction;
@@ -27,7 +28,19 @@ class MerchantResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->required()
+                    ->required(),
+                Forms\Components\Select::make('expense_category_id')
+                    ->preload()
+                    ->relationship('category', 'name', function (Builder $query) {
+                        $query->where('direction', Direction::EXPENSE);
+                    })
+                    ->searchable(),
+                Forms\Components\Select::make('income_category_id')
+                    ->preload()
+                    ->relationship('category', 'name', function (Builder $query) {
+                        $query->where('direction', Direction::INCOME);
+                    })
+                    ->searchable(),
             ]);
     }
 
