@@ -64,6 +64,18 @@ class SyncTransactions implements ShouldQueue
                         'name' => $merchant?->name
                     ];
                     $data['category_id'] = $filters->where('action',ActionType::CREATE_CATEGORY)->filter(fn($filter) => $filter->check($data))->sortByDesc('priority')->first()?->action_parameter;
+                    // use merchant category if no filter
+                    if (is_null($data['category_id']))
+                    {
+                        if ($data['direction'] === Direction::INCOME->value)
+                        {
+                            $data['category_id'] = $merchant->income_category_id;
+                        }
+                        else if ($data['direction'] === Direction::EXPENSE->value)
+                        {
+                            $data['category_id'] = $merchant->expense_category_id;
+                        }
+                    }
                     unset($data['merchant']);
                     return $data;
                 });

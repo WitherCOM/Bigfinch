@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -22,7 +23,9 @@ class Merchant extends Model
     protected $fillable = [
         'name',
         'search_keys',
-        'user_id'
+        'user_id',
+        'expense_category_id',
+        'income_category_id'
     ];
 
     protected $casts = [
@@ -51,6 +54,16 @@ class Merchant extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function income_category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class,'income_category_id');
+    }
+
+    public function expense_category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class,'expense_category_id');
     }
 
     public static function getMerchant(array $data, $user_id): Merchant|null

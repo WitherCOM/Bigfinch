@@ -2,13 +2,17 @@
 
 namespace Tests\Unit;
 
+use App\Enums\ActionType;
 use App\Jobs\SyncTransactions;
+use App\Models\Category;
+use App\Models\Filter;
 use App\Models\Integration;
 use App\Models\Merchant;
 use App\Models\Scopes\OwnerScope;
 use App\Models\Transaction;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
+use Filament\Pages\Dashboard\Actions\FilterAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Support\Facades\Cache;
@@ -40,7 +44,7 @@ class SyncJobTest extends TestCase
                                 "amount" => "90000.00",
                                 "currency" => "HUF"
                             ],
-                            "debtorName" => "John Doe",
+                            "debtorName" => "Bolt",
                             "debtorAccount" => [],
                             "remittanceInformationUnstructured" => "John Doe",
                             "proprietaryBankTransactionCode" => "TRANSFER",
@@ -129,8 +133,8 @@ class SyncJobTest extends TestCase
         ]);
         $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
         $job->handle();
-        $this->assertDatabaseCount(Transaction::class,5);
-        $this->assertDatabaseCount(Merchant::class,3);
+        $this->assertDatabaseCount(Transaction::class, 5);
+        $this->assertDatabaseCount(Merchant::class, 4);
     }
 
     public function test_sync_job_duplications(): void
@@ -148,7 +152,68 @@ class SyncJobTest extends TestCase
         $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
         $job->handle();
         $job->handle();
-        $this->assertDatabaseCount(Transaction::class,5);
+        $this->assertDatabaseCount(Transaction::class, 5);
 
+    }
+
+    public function test_sync_job_filter_category_assign(): void
+    {
+        $user = User::factory()->create();
+        $integration = Integration::insert([
+            'id' => Str::uuid(),
+            'name' => 'asd',
+            'user_id' => $user->id,
+            'accounts' => json_encode([Str::uuid()]),
+            'institution_name' => 'name',
+            'institution_logo' => 'logo',
+            'requisition_id' => Str::uuid()
+        ]);
+        $category1 = Category::factory()->create();
+        $category2 = Category::factory()->create();
+        $filter = Filter::create([
+            'merchant' => 'Bolt',
+            'action' => ActionType::CREATE_CATEGORY,
+            'action_parameter' => $category1->id,
+            'user_id' => $user->id
+        ]);
+        $merchant = Merchant::create([
+            'name' => 'Bolt',
+            'user_id' => $user->id,
+            'income_category_id' => $category2->id
+        ]);
+        $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
+        $job->handle();
+
+        $transaction = Transaction::query()->withoutGlobalScopes()->where('common_id', 'id1')->first();
+        $this->assertNotNull($transaction);
+        $this->assertNotNull($transaction->category_id);
+        $this->assertEquals($category1->id, $transaction->category_id);
+    }
+
+    public function test_sync_job_merchant_category_assign(): void
+    {
+        $user = User::factory()->create();
+        $integration = Integration::insert([
+            'id' => Str::uuid(),
+            'name' => 'asd',
+            'user_id' => $user->id,
+            'accounts' => json_encode([Str::uuid()]),
+            'institution_name' => 'name',
+            'institution_logo' => 'logo',
+            'requisition_id' => Str::uuid()
+        ]);
+        $category = Category::factory()->create();
+        $merchant = Merchant::create([
+            'name' => 'Bolt',
+            'user_id' => $user->id,
+            'income_category_id' => $category->id
+        ]);
+        $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
+        $job->handle();
+
+        $transaction = Transaction::query()->withoutGlobalScopes()->where('common_id', 'id1')->first();
+        $this->assertNotNull($transaction);
+        $this->assertNotNull($transaction->category_id);
+        $this->assertEquals($category->id, $transaction->category_id);
     }
 }

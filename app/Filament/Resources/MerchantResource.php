@@ -47,6 +47,8 @@ class MerchantResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('income_category.name'),
+                Tables\Columns\TextColumn::make('expense_category.name'),
                 Tables\Columns\TextColumn::make('key_factors')
             ])
             ->filters([

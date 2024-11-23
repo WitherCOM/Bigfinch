@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\Direction;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,7 +20,8 @@ class CategoryFactory extends Factory
     {
         return [
             'name' => $this->faker->name,
-            'direction' => collect(Direction::cases())->random()
+            'direction' => collect(Direction::cases())->random(),
+            'user_id' => User::all()->pluck('id')->random()
         ];
     }
 }
