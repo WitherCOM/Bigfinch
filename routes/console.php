@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Scopes\OwnerScope;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -11,7 +12,7 @@ Artisan::command('inspire', function () {
 Schedule::job(new \App\Jobs\SyncCurrencies)->dailyAt('6:00');
 
 Schedule::call(function () {
-    foreach(\App\Models\Integration::where('can_auto_sync',true)->get() as $integration)
+    foreach(\App\Models\Integration::query()->withoutGlobalScope(OwnerScope::class)->where('can_auto_sync',true)->get() as $integration)
     {
         \App\Jobs\SyncTransactions::dispatch($integration);
     }

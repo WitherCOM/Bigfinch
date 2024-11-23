@@ -72,6 +72,7 @@ class Merchant extends Model
         if (!is_null($name))
         {
             $merchant = Merchant::query()
+                ->withoutGlobalScope(OwnerScope::class)
                 ->where('user_id', $user_id)->whereJsonContains('search_keys', json_encode($name))->first();
             if (is_null($merchant)) {
                 $merchant = Merchant::create([

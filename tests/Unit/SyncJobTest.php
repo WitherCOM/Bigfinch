@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Jobs\SyncTransactions;
 use App\Models\Integration;
 use App\Models\Merchant;
+use App\Models\Scopes\OwnerScope;
 use App\Models\Transaction;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
@@ -126,7 +127,7 @@ class SyncJobTest extends TestCase
             'institution_logo' => 'logo',
             'requisition_id' => Str::uuid()
         ]);
-        $job = new SyncTransactions(Integration::first());
+        $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
         $job->handle();
         $this->assertDatabaseCount(Transaction::class,5);
         $this->assertDatabaseCount(Merchant::class,3);
