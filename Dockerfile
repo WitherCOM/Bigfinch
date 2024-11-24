@@ -7,5 +7,4 @@ RUN composer install --no-ansi --no-dev --no-interaction --no-plugins --no-progr
 RUN npm install --no-package-lock && npm run build
 
 FROM ghcr.io/withercom/docker-laravel:php8.2
-COPY --chown=www-data:www-data --from=builder /usr/src/app/public /app/public
-COPY --chown=www-data:www-data --from=builder /usr/src/app/vendor /app/vendor
+COPY --chown=www-data:www-data --from=builder /usr/src/app /app
