@@ -60,8 +60,8 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Integration::class);
     }
 
-    public function rules(): HasMany
+    public function transactions(): HasMany
     {
-        return $this->hasMany(Rule::class);
+        return $this->hasMany(Transaction::class);
     }
 }
