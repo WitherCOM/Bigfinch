@@ -31,14 +31,14 @@ class MerchantResource extends Resource
                     ->required(),
                 Forms\Components\Select::make('expense_category_id')
                     ->preload()
-                    ->relationship('category', 'name', function (Builder $query) {
-                        $query->where('direction', Direction::EXPENSE);
+                    ->relationship('expense_category', 'name', function (Builder $query) {
+                        $query->where('direction', Direction::EXPENSE->value);
                     })
                     ->searchable(),
                 Forms\Components\Select::make('income_category_id')
                     ->preload()
-                    ->relationship('category', 'name', function (Builder $query) {
-                        $query->where('direction', Direction::INCOME);
+                    ->relationship('income_category', 'name', function (Builder $query) {
+                        $query->where('direction', Direction::INCOME->value);
                     })
                     ->searchable(),
             ]);
