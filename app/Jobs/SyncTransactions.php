@@ -85,7 +85,7 @@ class SyncTransactions implements ShouldQueue
             if ($filters->where('action',ActionType::EXCLUDE_TRANSACTION)->count() > 0)
             {
                 $softDeleteQuery = $this->integration->user->transactions()->query();
-                foreach($filters->where('action',ActionType::EXCLUDE_TRANSACTION) as $filter)
+                foreach($filters->where('action',ActionType::EXCLUDE_TRANSACTION)->get() as $filter)
                 {
                     $softDeleteQuery = $filter->queryFilter($softDeleteQuery);
                 }
