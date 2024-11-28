@@ -49,28 +49,6 @@ class Filter extends Model
         return $isDescription && $isDirection && $isMerchant && $isMinValue && $isMaxValue;
     }
 
-    public function filterQuery(Builder $query): Builder
-    {
-        return $query->orWhere(function (Builder $query) {
-            return $query
-                ->when(!is_null($this->description), function (Builder $query) {
-                    $query->whereLike('description', "%$this->description%");
-                })
-                ->when(!is_null($this->merchant), function (Builder $query) {
-                    $query->whereLike('merchant.name',"%$this->merchant%");
-                })
-                ->when(!is_null($this->direction), function (Builder $query) {
-                    $query->where('direction', $this->direction->value);
-                })
-                ->when(!is_null($this->min_value), function (Builder $query) {
-                    $query->where('value', '>=', $this->min_value);
-                })
-                ->when(!is_null($this->max_value), function (Builder $query) {
-                    $query->where('value', '<=', $this->max_value);
-                });
-        });
-    }
-
     public function priority(): Attribute
     {
         return Attribute::get(fn() => collect($this->attributesToArray())->filter(fn($value) => !is_null($value))->count());

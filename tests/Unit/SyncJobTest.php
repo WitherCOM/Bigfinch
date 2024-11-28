@@ -208,6 +208,8 @@ class SyncJobTest extends TestCase
             'user_id' => $user->id,
             'income_category_id' => $category->id
         ]);
+
+
         $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
         $job->handle();
 
@@ -215,5 +217,32 @@ class SyncJobTest extends TestCase
         $this->assertNotNull($transaction);
         $this->assertNotNull($transaction->category_id);
         $this->assertEquals($category->id, $transaction->category_id);
+    }
+
+    public function test_sync_job_exclude(): void
+    {
+        $user = User::factory()->create();
+        $integration = Integration::insert([
+            'id' => Str::uuid(),
+            'name' => 'asd',
+            'user_id' => $user->id,
+            'accounts' => json_encode([Str::uuid()]),
+            'institution_name' => 'name',
+            'institution_logo' => 'logo',
+            'requisition_id' => Str::uuid()
+        ]);
+
+        Filter::create([
+            'merchant' => 'Bolt',
+            'action' => ActionType::EXCLUDE_TRANSACTION,
+            'user_id' => $user->id
+        ]);
+
+        $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
+        $job->handle();
+
+        $this->assertDatabaseCount('transactions',5);
+        $this->assertCount(4, Transaction::query()->withoutGlobalScope(OwnerScope::class)->get());
+
     }
 }

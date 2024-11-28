@@ -63,6 +63,11 @@ class SyncTransactions implements ShouldQueue
                     $data['merchant'] = [
                         'name' => $merchant?->name
                     ];
+
+                    // EXCLUDE FILTER APPLICATION
+                    $data['deleted_at'] = $filters->where('action',ActionType::EXCLUDE_TRANSACTION)->filter(fn($filter) => $filter->check($data))->count() > 0 ? Carbon::now() : null;
+
+                    // CATEGORY FILTER APPLICATION
                     $data['category_id'] = $filters->where('action',ActionType::CREATE_CATEGORY)->filter(fn($filter) => $filter->check($data))->sortByDesc('priority')->first()?->action_parameter;
                     // use merchant category if no filter
                     if (is_null($data['category_id']))
@@ -79,18 +84,8 @@ class SyncTransactions implements ShouldQueue
                     unset($data['merchant']);
                     return $data;
                 });
-            Transaction::insert($toCreate->toArray());
 
-            // Filter
-            if ($filters->where('action',ActionType::EXCLUDE_TRANSACTION)->count() > 0)
-            {
-                $softDeleteQuery = $this->integration->user->transactions()->query();
-                foreach($filters->where('action','=',ActionType::EXCLUDE_TRANSACTION)->collect() as $filter)
-                {
-                    $softDeleteQuery = $filter->queryFilter($softDeleteQuery);
-                }
-                $softDeleteQuery->delete();
-            }
+            Transaction::insert($toCreate->toArray());
 
             Notification::make()
                 ->title('Synced '.$this->integration->name)

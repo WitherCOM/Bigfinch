@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\ActionType;
 use App\Enums\CurrencyPosition;
 use App\Enums\Direction;
-use App\Enums\RuleType;
 use App\Models\Scopes\OwnerScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,7 +30,8 @@ class Transaction extends Model
         'date',
         'merchant_id',
         'currency_id',
-        'category_id'
+        'category_id',
+        'deleted_at'
     ];
 
     public $timestamps = false;
@@ -70,5 +72,21 @@ class Transaction extends Model
                 return $value;
             }
         });
+    }
+
+    public static function excludeFilter(): void
+    {
+        $query = Transaction::query();
+        foreach(Filter::where('type', ActionType::EXCLUDE_TRANSACTION)->get() as $filter)
+        {
+            $query = $query->orWhere(fn (Builder $query) =>
+                $query->when(!is_null($filter->description), fn ($query) => $query->whereLike('description', "%$filter->description%"))
+                    ->when(!is_null($filter->merchant), fn ($query) => $query->whereRelation('merchant', fn ($query) => $query->whereLike('name',"%$filter->merchant%")))
+                    ->when(!is_null($this->direction), fn ($query) => $query->where('direction', $filter->direction->value))
+                    ->when(!is_null($this->min_value), fn ($query) => $query->where('value', '>=', $this->min_value))
+                    ->when(!is_null($this->max_value), fn ($query) => $query->where('value', '<=', $this->max_value))
+            );
+        }
+        $query->delete();
     }
 }
