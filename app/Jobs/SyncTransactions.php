@@ -10,7 +10,6 @@ use App\Models\Currency;
 use App\Models\Filter;
 use App\Models\Integration;
 use App\Models\Merchant;
-use App\Models\Rule;
 use App\Models\Scopes\OwnerScope;
 use App\Models\Transaction;
 use Filament\Notifications\Notification;
@@ -40,13 +39,13 @@ class SyncTransactions implements ShouldQueue
      */
     public function handle(): void
     {
+        Auth::login($this->integration->user);
         $currencies = Currency::all(['iso_code', 'id'])->pluck('id', 'iso_code');
-        $transactionCommonIds = $this->integration->all_transactions()->withoutGlobalScopes()->pluck('common_id');
-        $filters = Filter::query()->withoutGlobalScope(OwnerScope::class)->get();
+        $transactionCommonIds = $this->integration->all_transactions()->pluck('common_id');
+        $filters = Filter::query()->get();
         try {
             $toCreate = $this->integration->getTransactions()->whereNotIn('transactionId', $transactionCommonIds)
                 ->map(function ($transaction) use ($currencies, $filters) {
-                    $merchant = Merchant::getMerchant($transaction, $this->integration->user_id);
                     $data = [
                         'id' => Str::uuid(),
                         'description' => $this->getDescription($transaction),
@@ -58,34 +57,19 @@ class SyncTransactions implements ShouldQueue
                         'open_banking_transaction' => json_encode($transaction),
                         'user_id' => $this->integration->user_id,
                         'common_id' => $transaction['transactionId'],
-                        'merchant_id' => $merchant?->id,
-                    ];
-                    $data['merchant'] = [
-                        'name' => $merchant?->name
+                        'merchant_id' => Merchant::getMerchant($transaction)?->id,
                     ];
 
-                    // EXCLUDE FILTER APPLICATION
-                    $data['deleted_at'] = $filters->where('action',ActionType::EXCLUDE_TRANSACTION)->filter(fn($filter) => $filter->check($data))->count() > 0 ? Carbon::now() : null;
-
-                    // CATEGORY FILTER APPLICATION
-                    $data['category_id'] = $filters->where('action',ActionType::CREATE_CATEGORY)->filter(fn($filter) => $filter->check($data))->sortByDesc('priority')->first()?->action_parameter;
-                    // use merchant category if no filter
-                    if (is_null($data['category_id']))
-                    {
-                        if ($data['direction'] === Direction::INCOME->value)
-                        {
-                            $data['category_id'] = $merchant->income_category_id;
-                        }
-                        else if ($data['direction'] === Direction::EXPENSE->value)
-                        {
-                            $data['category_id'] = $merchant->expense_category_id;
-                        }
-                    }
-                    unset($data['merchant']);
                     return $data;
                 });
 
             Transaction::insert($toCreate->toArray());
+
+            // EXLUDE FILTER APPLICATION
+            Filter::exclude();
+            // CATEGORY FILTER APPLICATION
+            Filter::category();
+
 
             Notification::make()
                 ->title('Synced '.$this->integration->name)

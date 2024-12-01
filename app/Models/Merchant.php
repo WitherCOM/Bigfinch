@@ -66,7 +66,7 @@ class Merchant extends Model
         return $this->belongsTo(Category::class,'expense_category_id');
     }
 
-    public static function getMerchant(array $data, $user_id): Merchant|null
+    public static function getMerchant(array $data): Merchant|null
     {
         $value = floatval($data['transactionAmount']['amount']);
         $name = "";
@@ -85,12 +85,11 @@ class Merchant extends Model
         if (!is_null($name))
         {
             $merchant = Merchant::query()
-                ->withoutGlobalScope(OwnerScope::class)
-                ->where('user_id', $user_id)->whereJsonContains('search_keys', json_encode($name))->first();
+                ->whereJsonContains('search_keys', json_encode($name))->first();
             if (is_null($merchant)) {
                 $merchant = Merchant::create([
                    'name' => $name,
-                   'user_id' => $user_id
+                   'user_id' => Auth::id()
                 ]);
             }
             return $merchant;

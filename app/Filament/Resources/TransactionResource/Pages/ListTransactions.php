@@ -32,28 +32,7 @@ class ListTransactions extends ListRecords
                 }),
             Actions\Action::make('manual_category_assign')
                 ->action(function() {
-                    $filters = Filter::where('type', ActionType::CREATE_CATEGORY->value)->get();
-                    foreach (Transaction::whereNull('category_id') as $record) {
-                        $category_id = $filters->where('action',ActionType::CREATE_CATEGORY)->filter(fn($filter) => $filter->check($record->toArray()))->sortByDesc('priority')->first()?->action_parameter;
-                        // use merchant category if no filter
-                        if (is_null($category_id))
-                        {
-                            if ($record->direction === Direction::INCOME)
-                            {
-                                $category_id = $record->merchant->income_category_id;
-                            }
-                            else if ($record->direction === Direction::EXPENSE)
-                            {
-                                $category_id = $record->merchant->expense_category_id;
-                            }
-                        }
-                        if (!is_null($category_id))
-                        {
-                            $record->update([
-                                'category_id' => $category_id
-                            ]);
-                        }
-                    }
+                    Filter::category();
                 })
         ];
     }
