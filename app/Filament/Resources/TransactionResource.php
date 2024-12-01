@@ -148,16 +148,6 @@ class TransactionResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('recreate_merchants')
-                        ->requiresConfirmation()
-                        ->action(function (Collection $collection) {
-                            foreach ($collection as $record) {
-                                if (!is_null($record->open_banking_transaction)) {
-                                    $record->merchant_id = Merchant::getMerchant($record->open_banking_transaction, $record->user_id);
-                                    $record->save();
-                                }
-                            }
-                        }),
                     Tables\Actions\BulkAction::make('auto_assign_category')
                         ->requiresConfirmation()
                         ->action(function (Collection $collection) {

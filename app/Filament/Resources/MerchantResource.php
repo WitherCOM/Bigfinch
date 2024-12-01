@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\Direction;
 use App\Filament\Resources\MerchantResource\Pages;
+use App\Models\Category;
 use App\Models\Merchant;
 use App\Models\Transaction;
 use Filament\Forms;
@@ -41,16 +42,9 @@ class MerchantResource extends Resource
                         $query->where('direction', Direction::INCOME->value);
                     })
                     ->searchable(),
+                Forms\Components\TagsInput::make('search_keys')
+                    ->disabled()
             ]);
-    }
-
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist->schema([
-            TextEntry::make('name'),
-            TextEntry::make('search_keys')
-                ->badge()
-        ]);
     }
 
     public static function table(Table $table): Table
@@ -60,8 +54,10 @@ class MerchantResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('income_category.name'),
-                Tables\Columns\TextColumn::make('expense_category.name'),
+                Tables\Columns\SelectColumn::make('income_category_id')
+                    ->options(Category::where('direction', Direction::INCOME->value)->get()->pluck('name','id')),
+                Tables\Columns\SelectColumn::make('expense_category_id')
+                    ->options(Category::where('direction', Direction::EXPENSE->value)->get()->pluck('name','id')),
                 Tables\Columns\TextColumn::make('key_factors')
             ])
             ->filters([
@@ -108,7 +104,6 @@ class MerchantResource extends Resource
         return [
             'index' => Pages\ListMerchants::route('/'),
             'create' => Pages\CreateMerchant::route('/create'),
-            'view' => Pages\ViewMerchant::route('/{record}'),
             'edit' => Pages\EditMerchant::route('/{record}/edit'),
         ];
     }
