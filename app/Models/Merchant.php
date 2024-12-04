@@ -70,11 +70,11 @@ class Merchant extends Model
     {
         $value = floatval($data['transactionAmount']['amount']);
         $name = "";
-        if ($value > 0)
+        if ($value > 0 && array_key_exists('debtorName',$data))
         {
             $name = $data['debtorName'];
         }
-        else if ($value < 0)
+        else if ($value < 0 && array_key_exists('creditorName',$data))
         {
             $name = $data['creditorName'];
         }
