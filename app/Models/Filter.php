@@ -96,11 +96,11 @@ class Filter extends Model
             {
                 if ($transaction->direction === Direction::INCOME)
                 {
-                    $category_id = $transaction->merchant->income_category_id;
+                    $category_id = $transaction->merchant?->income_category_id;
                 }
                 else if ($transaction->direction === Direction::EXPENSE)
                 {
-                    $category_id = $transaction->merchant->expense_category_id;
+                    $category_id = $transaction->merchant?->expense_category_id;
                 }
             }
             if (!is_null($category_id))
