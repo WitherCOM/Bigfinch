@@ -18,4 +18,12 @@ Schedule::call(function () {
     }
 })->dailyAt('7:00');
 
+Schedule::call(function () {
+    foreach(\App\Models\Integration::query()->withoutGlobalScope(OwnerScope::class)->where('can_auto_sync',true)->get() as $integration)
+    {
+        \App\Jobs\SyncTransactions::dispatch($integration);
+    }
+})->dailyAt('22:00');
+
+
 

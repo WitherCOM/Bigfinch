@@ -19,7 +19,7 @@ class AverageOverview extends BaseWidget
             ->where('direction',Direction::EXPENSE->value)
             ->get();
         $dailyAverage = round($transactionExpend
-            ->where('date','>=', Carbon::now()->subMonth()->startOfMonth())
+            ->where('date','>=', Carbon::now()->subDays(3))
             ->groupBy(fn (Transaction $transaction) => $transaction->date->toDateString())
             ->map(fn ($groups) => $groups->map(fn(Transaction $transaction) => $transaction->currency->nearestRate($transaction->date) * $transaction->value)->sum())
             ->avg());
