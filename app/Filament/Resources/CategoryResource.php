@@ -24,7 +24,6 @@ class CategoryResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->rule(new NotDefaultCategoryName())
                     ->required(),
                 Forms\Components\Select::make('direction')
                     ->required()

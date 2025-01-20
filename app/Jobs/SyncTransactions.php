@@ -10,6 +10,7 @@ use App\Models\Currency;
 use App\Models\Filter;
 use App\Models\Integration;
 use App\Models\Merchant;
+use App\Models\OpenBankingDataParser;
 use App\Models\Scopes\OwnerScope;
 use App\Models\Transaction;
 use Filament\Notifications\Notification;
@@ -40,37 +41,23 @@ class SyncTransactions implements ShouldQueue
     public function handle(): void
     {
         Auth::login($this->integration->user);
-        $currencies = Currency::all(['iso_code', 'id'])->pluck('id', 'iso_code');
         $transactionCommonIds = $this->integration->all_transactions()->pluck('common_id');
-        $filters = Filter::query()->get();
         try {
             $toCreate = $this->integration->getTransactions()->whereNotIn('transactionId', $transactionCommonIds)
-                ->map(function ($transaction) use ($currencies, $filters) {
-                    $data = [
-                        'id' => Str::uuid(),
-                        'description' => $this->getDescription($transaction),
-                        'value' => abs(floatval($transaction['transactionAmount']['amount'])),
-                        'direction' => floatval($transaction['transactionAmount']['amount']) > 0 ? Direction::INCOME->value : Direction::EXPENSE->value,
-                        'date' => Carbon::parse($transaction['bookingDateTime'] ?? $transaction['bookingDate']),
-                        'currency_id' => $currencies[$transaction['transactionAmount']['currency']],
-                        'integration_id' => $this->integration->id,
-                        'open_banking_transaction' => json_encode($transaction),
-                        'user_id' => $this->integration->user_id,
-                        'common_id' => $transaction['transactionId'],
-                        'merchant_id' => Merchant::getMerchant($transaction)?->id,
-                    ];
-
-                    return $data;
+                ->map(function ($transaction) {
+                    return OpenBankingDataParser::parse($this->integration, $transaction);
                 });
 
+            // Run pre modules here
+            foreach ($this->integration->user->modules as $module) {
+                $toCreate = $module->before($toCreate, $this->integration->user);
+            }
             Transaction::insert($toCreate->toArray());
-
-            // EXLUDE FILTER APPLICATION
-            Filter::exclude();
-            // CATEGORY FILTER APPLICATION
-            Filter::category();
-
-
+            // Run after modules here
+            foreach ($this->integration->user->modules as $module) {
+                $module->after($this->integration->user);
+            }
+            // Apply filters here
             Notification::make()
                 ->title('Synced '.$this->integration->name)
                 ->success()
@@ -86,23 +73,5 @@ class SyncTransactions implements ShouldQueue
                 ->danger()
                 ->sendToDatabase($this->integration->user);
         }
-    }
-
-    public function getDescription(array $data)
-    {
-        $name = Str::of($data['proprietaryBankTransactionCode'])->lower()->camel()->title()->toString();
-        if (array_key_exists('additionalInformation',$data))
-        {
-            $name .= " " . $data['additionalInformation'];
-        }
-        if (array_key_exists('remittanceInformationUnstructuredArray',$data))
-        {
-            $name .= " " . implode(" ", $data['remittanceInformationUnstructuredArray']);
-        }
-        if (array_key_exists('remittanceInformationUnstructured',$data))
-        {
-            $name .= " " . $data['remittanceInformationUnstructured'];
-        }
-        return $name;
     }
 }
