@@ -31,6 +31,7 @@ class Transaction extends Model
         'merchant_id',
         'currency_id',
         'category_id',
+        'tags',
         'deleted_at'
     ];
 
@@ -39,6 +40,7 @@ class Transaction extends Model
     protected $casts = [
         'date' => 'datetime',
         'open_banking_transaction' => 'array',
+        'tags' => 'array',
         'direction' => Direction::class
     ];
 
@@ -72,21 +74,5 @@ class Transaction extends Model
                 return $value;
             }
         });
-    }
-
-    public static function excludeFilter(): void
-    {
-        $query = Transaction::query();
-        foreach(Filter::where('type', ActionType::EXCLUDE_TRANSACTION)->get() as $filter)
-        {
-            $query = $query->orWhere(fn (Builder $query) =>
-                $query->when(!is_null($filter->description), fn ($query) => $query->whereLike('description', "%$filter->description%"))
-                    ->when(!is_null($filter->merchant), fn ($query) => $query->whereRelation('merchant', fn ($query) => $query->whereLike('name',"%$filter->merchant%")))
-                    ->when(!is_null($this->direction), fn ($query) => $query->where('direction', $filter->direction->value))
-                    ->when(!is_null($this->min_value), fn ($query) => $query->where('value', '>=', $this->min_value))
-                    ->when(!is_null($this->max_value), fn ($query) => $query->where('value', '<=', $this->max_value))
-            );
-        }
-        $query->delete();
     }
 }

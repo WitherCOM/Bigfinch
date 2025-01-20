@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Novadaemon\FilamentPrettyJson\PrettyJson;
 
 class TransactionResource extends Resource
 {
@@ -61,7 +62,9 @@ class TransactionResource extends Resource
                             $query->where('user_id', Auth::id())->orWhereNull('user_id');
                         })->where('direction', $get('direction'));
                     })
-                    ->searchable()
+                    ->searchable(),
+                Forms\Components\TagsInput::make('tags'),
+                PrettyJson::make('open_banking_transaction')
             ]);
     }
 
