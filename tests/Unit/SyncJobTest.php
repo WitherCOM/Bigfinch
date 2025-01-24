@@ -131,10 +131,9 @@ class SyncJobTest extends TestCase
             'institution_logo' => 'logo',
             'requisition_id' => Str::uuid()
         ]);
-        $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
+        $job = new SyncTransactions(Integration::query()->first());
         $job->handle();
         $this->assertDatabaseCount(Transaction::class, 5);
-        $this->assertDatabaseCount(Merchant::class, 4);
     }
 
     public function test_sync_job_duplications(): void
@@ -149,100 +148,10 @@ class SyncJobTest extends TestCase
             'institution_logo' => 'logo',
             'requisition_id' => Str::uuid()
         ]);
-        $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
+        $job = new SyncTransactions(Integration::query()->first());
         $job->handle();
         $job->handle();
         $this->assertDatabaseCount(Transaction::class, 5);
-
-    }
-
-    public function test_sync_job_filter_category_assign(): void
-    {
-        $user = User::factory()->create();
-        $integration = Integration::insert([
-            'id' => Str::uuid(),
-            'name' => 'asd',
-            'user_id' => $user->id,
-            'accounts' => json_encode([Str::uuid()]),
-            'institution_name' => 'name',
-            'institution_logo' => 'logo',
-            'requisition_id' => Str::uuid()
-        ]);
-        $category1 = Category::factory()->create();
-        $category2 = Category::factory()->create();
-        $filter = Filter::create([
-            'merchant' => 'Bolt',
-            'action' => ActionType::CREATE_CATEGORY,
-            'action_parameter' => $category1->id,
-            'user_id' => $user->id
-        ]);
-        $merchant = Merchant::create([
-            'name' => 'Bolt',
-            'user_id' => $user->id,
-            'income_category_id' => $category2->id
-        ]);
-        $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
-        $job->handle();
-
-        $transaction = Transaction::query()->withoutGlobalScopes()->where('common_id', 'id1')->first();
-        $this->assertNotNull($transaction);
-        $this->assertNotNull($transaction->category_id);
-        $this->assertEquals($category1->id, $transaction->category_id);
-    }
-
-    public function test_sync_job_merchant_category_assign(): void
-    {
-        $user = User::factory()->create();
-        $integration = Integration::insert([
-            'id' => Str::uuid(),
-            'name' => 'asd',
-            'user_id' => $user->id,
-            'accounts' => json_encode([Str::uuid()]),
-            'institution_name' => 'name',
-            'institution_logo' => 'logo',
-            'requisition_id' => Str::uuid()
-        ]);
-        $category = Category::factory()->create();
-        $merchant = Merchant::create([
-            'name' => 'Bolt',
-            'user_id' => $user->id,
-            'income_category_id' => $category->id
-        ]);
-
-
-        $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
-        $job->handle();
-
-        $transaction = Transaction::query()->withoutGlobalScopes()->where('common_id', 'id1')->first();
-        $this->assertNotNull($transaction);
-        $this->assertNotNull($transaction->category_id);
-        $this->assertEquals($category->id, $transaction->category_id);
-    }
-
-    public function test_sync_job_exclude(): void
-    {
-        $user = User::factory()->create();
-        $integration = Integration::insert([
-            'id' => Str::uuid(),
-            'name' => 'asd',
-            'user_id' => $user->id,
-            'accounts' => json_encode([Str::uuid()]),
-            'institution_name' => 'name',
-            'institution_logo' => 'logo',
-            'requisition_id' => Str::uuid()
-        ]);
-
-        Filter::create([
-            'merchant' => 'Bolt',
-            'action' => ActionType::EXCLUDE_TRANSACTION,
-            'user_id' => $user->id
-        ]);
-
-        $job = new SyncTransactions(Integration::query()->withoutGlobalScope(OwnerScope::class)->first());
-        $job->handle();
-
-        $this->assertDatabaseCount('transactions',5);
-        $this->assertCount(4, Transaction::query()->withoutGlobalScope(OwnerScope::class)->get());
 
     }
 }

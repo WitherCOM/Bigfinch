@@ -47,10 +47,13 @@ class SyncTransactions implements ShouldQueue
         try {
             $toCreate = $this->integration->getTransactions()->whereNotIn('transactionId', $transactionCommonIds)
                 ->map(function ($transaction) {
-                    return OpenBankingDataParser::parse($this->integration, $transaction);
+                    $data = OpenBankingDataParser::parse($transaction);
+                    $data['id'] = Str::uuid()->toString();
+                    $data['integration_id'] = $this->integration->id;
+                    $data['user_id'] = $this->integration->user_id;
+                    return $data;
                 });
-
-            Transaction::create($toCreate->toArray());
+            Transaction::insert($toCreate->toArray());
 
             // Apply filters here
             Notification::make()

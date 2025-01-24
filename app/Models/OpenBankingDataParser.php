@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 class OpenBankingDataParser
 {
 
-    private static function getDescription(array $data)
+    private static function getDescription(array $data): string
     {
         $name = Str::of($data['proprietaryBankTransactionCode'])->lower()->camel()->title()->toString();
         if (array_key_exists('additionalInformation',$data))
@@ -54,18 +54,16 @@ class OpenBankingDataParser
         return $name;
     }
 
-    public static function parse(Integration $integration, array $openBankingData): array {
+
+    public static function parse(array $openBankingData): array {
         $currencies = Currency::all(['iso_code', 'id'])->pluck('id', 'iso_code');
         return [
-            'id' => Str::uuid(),
             'description' => self::getDescription($openBankingData),
             'value' => abs(floatval($openBankingData['transactionAmount']['amount'])),
             'direction' => floatval($openBankingData['transactionAmount']['amount']) > 0 ? Direction::INCOME->value : Direction::EXPENSE->value,
             'date' => Carbon::parse($openBankingData['bookingDateTime'] ?? $openBankingData['bookingDate']),
             'currency_id' => $currencies[$openBankingData['transactionAmount']['currency']],
-            'integration_id' => $integration->id,
             'open_banking_transaction' => json_encode($openBankingData),
-            'user_id' => $integration->user_id,
             'common_id' => $openBankingData['transactionId'],
             'merchant' => self::getMerchantName($openBankingData),
         ];
