@@ -11,6 +11,7 @@ use App\Models\Filter;
 use App\Models\Integration;
 use App\Models\Merchant;
 use App\Models\OpenBankingDataParser;
+use App\Models\RawMerchant;
 use App\Models\Scopes\OwnerScope;
 use App\Models\Transaction;
 use Filament\Notifications\Notification;
@@ -19,6 +20,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class SyncTransactions implements ShouldQueue
@@ -48,15 +50,8 @@ class SyncTransactions implements ShouldQueue
                     return OpenBankingDataParser::parse($this->integration, $transaction);
                 });
 
-            // Run pre modules here
-            foreach ($this->integration->user->modules as $module) {
-                $toCreate = $module->before($toCreate, $this->integration->user);
-            }
-            Transaction::insert($toCreate->toArray());
-            // Run after modules here
-            foreach ($this->integration->user->modules as $module) {
-                $module->after($this->integration->user);
-            }
+            Transaction::create($toCreate->toArray());
+
             // Apply filters here
             Notification::make()
                 ->title('Synced '.$this->integration->name)

@@ -26,6 +26,34 @@ class OpenBankingDataParser
         }
         return $name;
     }
+
+    public static function getMerchantName(array $data) : string | null
+    {
+        $value = floatval($data['transactionAmount']['amount']);
+        if ($value > 0 && array_key_exists('debtorName',$data))
+        {
+            $name = $data['debtorName'];
+        }
+        else if ($value < 0 && array_key_exists('creditorName',$data))
+        {
+            $name = $data['creditorName'];
+        }
+        else
+        {
+            $name = null;
+        }
+        if (!is_null($name))
+        {
+            $newWords = [];
+            foreach (explode(' ', $name) as $word) {
+                $newWords[] = Str::of($word)->lower()->ucfirst()->toString();
+            }
+            $name = implode(' ', $newWords);
+            return $name;
+        }
+        return $name;
+    }
+
     public static function parse(Integration $integration, array $openBankingData): array {
         $currencies = Currency::all(['iso_code', 'id'])->pluck('id', 'iso_code');
         return [
@@ -39,7 +67,7 @@ class OpenBankingDataParser
             'open_banking_transaction' => json_encode($openBankingData),
             'user_id' => $integration->user_id,
             'common_id' => $openBankingData['transactionId'],
-            'merchant_id' => Merchant::getMerchant($openBankingData)?->id,
+            'merchant' => self::getMerchantName($openBankingData),
         ];
     }
 }
