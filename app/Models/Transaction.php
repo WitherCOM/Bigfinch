@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[ScopedBy([OwnerScope::class])]
 class Transaction extends Model
 {
     /** @use HasFactory<\Database\Factories\TransactionFactory> */
@@ -28,7 +27,7 @@ class Transaction extends Model
         'direction',
         'value',
         'date',
-        'merchant_id',
+        'merchant',
         'currency_id',
         'category_id',
         'tags',
@@ -44,12 +43,7 @@ class Transaction extends Model
         'direction' => Direction::class
     ];
 
-    protected $with = ['category', 'merchant'];
-
-    public function merchant(): BelongsTo
-    {
-        return $this->belongsTo(Merchant::class);
-    }
+    protected $with = ['category'];
 
     public function currency(): BelongsTo
     {

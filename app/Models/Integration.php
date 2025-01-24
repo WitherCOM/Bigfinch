@@ -16,7 +16,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
-#[ScopedBy([OwnerScope::class])]
 class Integration extends Model
 {
     /** @use HasFactory<\Database\Factories\IntegrationFactory> */

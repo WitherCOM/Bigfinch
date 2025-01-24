@@ -78,7 +78,7 @@ class TransactionResource extends Resource
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('category.name'),
-                Tables\Columns\TextColumn::make('merchant.name')
+                Tables\Columns\TextColumn::make('merchant')
                     ->searchable(),
             ])
             ->filters([
@@ -151,17 +151,6 @@ class TransactionResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('auto_assign_category')
-                        ->requiresConfirmation()
-                        ->action(function (Collection $collection) {
-                            $filters = Filter::all()->where('action', ActionType::CREATE_CATEGORY);
-                            foreach ($collection as $record) {
-                                if (is_null($record->category_id)) {
-                                    $record->category_id = $filters->filter(fn($filter) => $filter->check($record->toArray()))->sortByDesc('priority')->first()?->action_parameter;
-                                    $record->save();
-                                }
-                            }
-                        }),
                     Tables\Actions\DeleteBulkAction::make()
                         ->icon('')
                         ->label('Exclude'),

@@ -123,8 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'modules' => [
-        \App\Models\Modules\CategorizeByMerchant::class,
-    ]
+    'modules' => []
 
 ];
