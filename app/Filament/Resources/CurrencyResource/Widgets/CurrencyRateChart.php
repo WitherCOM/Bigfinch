@@ -25,14 +25,15 @@ class CurrencyRateChart extends ChartWidget
 
     protected function getData(): array
     {
+        $rates = $this->record->rates->sortBy('created_at');
         return [
             'datasets' => [
                 [
                     'label' => $this->record->name,
-                    'data' => $this->record->rates->pluck('rate_to_huf')
+                    'data' => $rates->pluck('rate_to_huf')
                 ]
             ],
-            'labels' => $this->record->rates->pluck('created_at')->map(fn($date) => $date->format('Y-m-d'))
+            'labels' => $rates->pluck('created_at')->map(fn($date) => $date->format('Y-m-d'))
         ];
     }
 
