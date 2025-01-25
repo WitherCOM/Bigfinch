@@ -2,7 +2,7 @@
 
 namespace App\Filament\Actions;
 
-use App\Engine\OpenBankingDataParser;
+use App\Engine\OpenBankingEngine;
 use Filament\Forms\Components\Toggle;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,7 +23,7 @@ class RunEngineBulkAction extends BulkAction
                 foreach ($records as $record) {
                     if (!is_null($record->open_banking_transaction))
                     {
-                        $data = OpenBankingDataParser::parse($record->open_banking_transaction);
+                        $data = OpenBankingEngine::parse($record->open_banking_transaction);
                         $record->merchant = $data['merchant'];
                     }
                 }

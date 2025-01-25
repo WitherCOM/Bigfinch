@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Engine\OpenBankingDataParser;
+use App\Engine\OpenBankingEngine;
 use App\Enums\ActionType;
 use App\Enums\CurrencyPosition;
 use App\Enums\Direction;
@@ -62,7 +62,7 @@ class Transaction extends Model
     {
         if (!is_null($this->open_banking_transaction))
         {
-            $data = OpenBankingDataParser::parse($this->open_banking_transaction);
+            $data = OpenBankingEngine::parse($this->open_banking_transaction);
             $this->merchant = $data['merchant'];
         }
     }

@@ -7,7 +7,7 @@ use App\Models\Currency;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
-class OpenBankingDataParser
+class OpenBankingEngine
 {
 
     private static function getDescription(array $data): string
@@ -47,34 +47,13 @@ class OpenBankingDataParser
         {
             $newWords = [];
             foreach (explode(' ', $name) as $word) {
-                if (self::calculateShannonEntropy($name) < 3) {
-                    $newWords[] = Str::of($word)->lower()->ucfirst()->toString();
-                }
+                $newWords[] = Str::of($word)->lower()->ucfirst()->toString();
             }
             $name = implode(' ', $newWords);
             return $name;
         }
         return $name;
     }
-
-    private static function calculateShannonEntropy($word) {
-        $length = strlen($word);
-        if ($length === 0) {
-            return 0; // Avoid division by zero
-        }
-
-        $frequencies = count_chars($word, 1); // Get frequency of each character
-        $entropy = 0.0;
-
-        foreach ($frequencies as $char => $count) {
-            $probability = $count / $length; // Probability of each character
-            $entropy -= $probability * log($probability, 2); // Shannon entropy formula
-        }
-
-        return $entropy * 100;
-    }
-
-
 
     public static function parse(array $openBankingData): array {
         $currencies = Currency::all(['iso_code', 'id'])->pluck('id', 'iso_code');

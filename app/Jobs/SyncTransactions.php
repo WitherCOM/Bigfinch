@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Engine\StaticEngine;
-use App\Engine\OpenBankingDataParser;
+use App\Engine\OpenBankingEngine;
 use App\Enums\ActionType;
 use App\Exceptions\GocardlessException;
 use App\Models\Integration;
@@ -41,7 +41,7 @@ class SyncTransactions implements ShouldQueue
         try {
             $toCreate = $this->integration->getTransactions()->whereNotIn('transactionId', $transactionCommonIds)
                 ->map(function ($transaction) {
-                    $data = OpenBankingDataParser::parse($transaction);
+                    $data = OpenBankingEngine::parse($transaction);
                     $data['id'] = Str::uuid()->toString();
                     $data['integration_id'] = $this->integration->id;
                     $data['user_id'] = $this->integration->user_id;

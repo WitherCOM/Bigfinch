@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             $table->json('tags')->default('[]');
-            $table->json('flags');
+            $table->json('flags')->default('[]');
             $table->dropConstrainedForeignId('merchant_id');
             $table->string('merchant')->nullable();
         });
