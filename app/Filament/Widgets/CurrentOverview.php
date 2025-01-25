@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Filament\Widgets;
+
+use App\Enums\Direction;
+use App\Models\Currency;
+use App\Models\Transaction;
+use Carbon\Carbon;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Auth;
+
+class CurrentOverview extends BaseWidget
+{
+    protected function getStats(): array
+    {
+        $thisMonth = Transaction::with(['currency','currency.rates'])->where('user_id',Auth::id())
+            ->where('date','>=',Carbon::now()->startOfMonth())
+            ->where('direction',Direction::EXPENSE->value)
+            ->get()
+            ->map(fn (Transaction $transaction) => $transaction->currency->nearestRate($transaction->date) * $transaction->value)
+            ->sum();
+
+        return [
+            Stat::make('This month', Currency::where('iso_code', 'HUF')->first()->format($thisMonth)),
+        ];
+    }
+}
