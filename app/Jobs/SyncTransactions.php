@@ -49,7 +49,10 @@ class SyncTransactions implements ShouldQueue
                     return $data;
                 });
             $toCreate = FlagEngine::internalTransaction($toCreate);
-            $toCreate['flags'] = json_encode($toCreate['flags']);
+            $toCreate = $toCreate->map(function ($data) {
+                $data['flags'] = json_encode($data['flags']);
+                return $data;
+            });
 
             Transaction::insert($toCreate->toArray());
 

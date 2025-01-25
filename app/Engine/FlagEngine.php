@@ -16,8 +16,14 @@ class FlagEngine
         for ($i = 0; $i < count($dateSorted) - 1; $i++) {
             if ($dateSorted[$i]['date']->diff($dateSorted[$i+1]['date'])->seconds < 5 * 60 &&
                 abs($dateSorted[$i]['value'] - $dateSorted[$i+1]['value']) < 5) {
-                $dateSorted[$i]['direction'] = Direction::INTERNAL->value;
-                $dateSorted[$i+1]['direction'] = Direction::INTERNAL->value;
+                $transactionA = $dateSorted[$i];
+                $transactionA ['direction'] = Direction::INTERNAL->value; // TEMP
+                $transactionB['flags'][] = Flag::INTERNAL_TRANSACTION->value;
+                $transactionB = $dateSorted[$i+1];
+                $transactionB['direction'] = Direction::INTERNAL->value; // TEMP
+                $transactionB['flags'][] = Flag::INTERNAL_TRANSACTION->value;
+                $dateSorted[$i] = $transactionA;
+                $dateSorted[$i+1] = $transactionB;
             }
         }
         return $dateSorted;

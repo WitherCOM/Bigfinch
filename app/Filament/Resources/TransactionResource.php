@@ -96,7 +96,6 @@ class TransactionResource extends Resource
                     }),
                 Tables\Filters\SelectFilter::make('direction')
                     ->options(Direction::class)
-                    ->default(Direction::EXPENSE->value)
             ])
             ->recordClasses(fn(Transaction $transaction) => $transaction->trashed() ? 'opacity-50' : null)
             ->actions([
