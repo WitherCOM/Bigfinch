@@ -8,6 +8,8 @@ enum Direction: string implements HasLabel
 {
     case INCOME = 'income';
     case EXPENSE = 'expense';
+    case INTERNAL = 'internal';
+    case INVEST = 'invest';
 
     public function getLabel(): ?string
     {

@@ -12,7 +12,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use ReflectionClass;
-use App\Models\Modules\CategorizeByMerchant;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -27,7 +26,6 @@ class User extends Authenticatable implements FilamentUser
     protected $fillable = [
         'name',
         'email',
-        'modules',
         'password',
     ];
 

@@ -2,25 +2,19 @@
 
 namespace App\Jobs;
 
+use App\Engine\FlagEngine;
+use App\Engine\OpenBankingDataParser;
 use App\Enums\ActionType;
-use App\Enums\Direction;
 use App\Exceptions\GocardlessException;
-use App\Models\Category;
-use App\Models\Currency;
-use App\Models\Filter;
 use App\Models\Integration;
 use App\Models\Merchant;
-use App\Models\OpenBankingDataParser;
 use App\Models\RawMerchant;
-use App\Models\Scopes\OwnerScope;
 use App\Models\Transaction;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class SyncTransactions implements ShouldQueue
@@ -51,8 +45,12 @@ class SyncTransactions implements ShouldQueue
                     $data['id'] = Str::uuid()->toString();
                     $data['integration_id'] = $this->integration->id;
                     $data['user_id'] = $this->integration->user_id;
+                    $data['flags'] = [];
                     return $data;
                 });
+            $toCreate = FlagEngine::internalTransaction($toCreate);
+            $toCreate['flags'] = json_encode($toCreate['flags']);
+
             Transaction::insert($toCreate->toArray());
 
             // Apply filters here
