@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Engine\OpenBankingDataParser;
 use App\Enums\ActionType;
 use App\Enums\CurrencyPosition;
 use App\Enums\Direction;
@@ -25,6 +26,7 @@ class Transaction extends Model
     protected $fillable = [
         'description',
         'direction',
+        'flags',
         'value',
         'date',
         'merchant',
@@ -39,6 +41,7 @@ class Transaction extends Model
     protected $casts = [
         'date' => 'datetime',
         'open_banking_transaction' => 'array',
+        'flags' => 'array',
         'tags' => 'array',
         'direction' => Direction::class
     ];
@@ -53,6 +56,15 @@ class Transaction extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function updateData()
+    {
+        if (!is_null($this->open_banking_transaction))
+        {
+            $data = OpenBankingDataParser::parse($this->open_banking_transaction);
+            $this->merchant = $data['merchant'];
+        }
     }
 
     public function formattedValue(): Attribute
