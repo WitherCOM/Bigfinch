@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\ActionType;
 use App\Enums\Direction;
+use App\Filament\Actions\RunEngineBulkAction;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Models\Filter;
 use App\Models\Merchant;
@@ -50,11 +51,6 @@ class TransactionResource extends Resource
                 Forms\Components\DateTimePicker::make('date')
                     ->required()
                     ->default(Carbon::now()),
-                Forms\Components\Select::make('merchant_id')
-                    ->relationship('merchant', 'name', function (Builder $query) {
-                        $query->where('user_id', Auth::id());
-                    })
-                    ->searchable(),
                 Forms\Components\Select::make('category_id')
                     ->preload()
                     ->relationship('category', 'name', function (Builder $query, Forms\Get $get) {
@@ -74,7 +70,12 @@ class TransactionResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('date'),
                 Tables\Columns\TextColumn::make('formatted_value')
-                    ->color(fn(Transaction $record) => $record->direction === Direction::EXPENSE ? 'danger' : 'success'),
+                    ->color(fn(Transaction $record) => match($record->direction) {
+                        Direction::EXPENSE => 'danger',
+                        Direction::INCOME => 'success',
+                        Direction::INTERNAL => 'info',
+                        Direction::INVEST => 'warning'
+                    }),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('category.name'),
@@ -153,6 +154,7 @@ class TransactionResource extends Resource
                     Tables\Actions\DeleteBulkAction::make()
                         ->icon('')
                         ->label('Exclude'),
+                    RunEngineBulkAction::make('run_engine'),
                     Tables\Actions\ForceDeleteBulkAction::make()
                         ->visible()
                 ]),
