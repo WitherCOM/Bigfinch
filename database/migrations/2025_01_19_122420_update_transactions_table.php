@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             $table->json('tags')->default('[]');
+            $table->json('flags');
             $table->dropConstrainedForeignId('merchant_id');
             $table->string('merchant')->nullable();
         });
@@ -24,8 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->dropColumn('tags');
-            $table->dropColumn(['merchant']);
+            $table->dropColumn(['merchant','flags','tags']);
             $table->foreignUuid('merchant_id')->nullable()->constrained('merchants')->nullOnDelete();
         });
     }
