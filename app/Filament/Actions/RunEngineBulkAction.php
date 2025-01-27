@@ -3,6 +3,7 @@
 namespace App\Filament\Actions;
 
 use App\Engine\OpenBankingEngine;
+use App\Engine\StaticEngine;
 use Filament\Forms\Components\Toggle;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
@@ -16,6 +17,9 @@ class RunEngineBulkAction extends BulkAction
         $this->form([
             Toggle::make('update_merchant')
                 ->label('Update Merchant')
+                ->default(false),
+            Toggle::make('detect_internal_transaction')
+                ->label('Detect Internal Transaction')
                 ->default(false)
         ]);
         $this->action(function (Collection $records, array $data) {
@@ -26,6 +30,12 @@ class RunEngineBulkAction extends BulkAction
                         $data = OpenBankingEngine::parse($record->open_banking_transaction);
                         $record->merchant = $data['merchant'];
                     }
+                }
+            }
+            if ($data['detect_internal_transaction']) {
+                $data = StaticEngine::internalTransaction($records->map(fn ($record) => $record->toArray()));
+                foreach ($data as $i => $record) {
+                    $records[$i]->fill($record);
                 }
             }
             foreach ($records as $record) {
