@@ -33,8 +33,8 @@ class RunEngineBulkAction extends BulkAction
                 }
             }
             if ($data['detect_internal_transaction']) {
-                $data = StaticEngine::internalTransaction($records->map(fn ($record) => $record->toArray()));
-                foreach ($data as $i => $record) {
+                $modifiedRecords = StaticEngine::internalTransaction($records->map(fn ($record) => $record->toArray()));
+                foreach ($modifiedRecords as $i => $record) {
                     $records[$i]->fill($record);
                 }
             }
