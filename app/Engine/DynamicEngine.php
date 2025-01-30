@@ -22,7 +22,7 @@ class DynamicEngine
                 abs($dateSorted[$i]['value']*$currencies->find($dateSorted[$i]['currency_id'])->rate - $dateSorted[$i+1]['value']*$currencies->find($dateSorted[$i+1]['currency_id'])->rate) < self::VALUE_THRESHOLD &&
                 (($dateSorted[$i]['direction'] == Direction::EXPENSE->value && $dateSorted[$i+1]['direction'] == Direction::INCOME->value) || ($dateSorted[$i+1]['direction'] == Direction::EXPENSE->value && $dateSorted[$i]['direction'] == Direction::INCOME->value))) {
                 $transactionA = $dateSorted[$i];
-                $transactionB['flags'][] = Flag::INTERNAL_TRANSACTION->value;
+                $transactionA['flags'][] = Flag::INTERNAL_TRANSACTION->value;
                 $transactionB = $dateSorted[$i+1];
                 $transactionB['flags'][] = Flag::INTERNAL_TRANSACTION->value;
                 $dateSorted[$i] = $transactionA;
