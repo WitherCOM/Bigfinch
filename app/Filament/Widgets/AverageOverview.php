@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\Direction;
+use App\Enums\Flag;
 use App\Models\Currency;
 use App\Models\Transaction;
 use Carbon\Carbon;
@@ -16,6 +17,8 @@ class AverageOverview extends BaseWidget
     {
         $transactionExpend = Transaction::with(['currency','currency.rates'])->where('user_id',Auth::id())
             ->where('date','>=',Carbon::now()->subMonths(3))
+            ->whereJsonDoesntContain('flags', Flag::INTERNAL_TRANSACTION->value)
+            ->whereJsonDoesntContain('flags', Flag::INVESTMENT->value)
             ->where('direction',Direction::EXPENSE->value)
             ->get();
         $dailyAverage = round($transactionExpend

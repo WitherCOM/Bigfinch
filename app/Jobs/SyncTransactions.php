@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Engine\StaticEngine;
+use App\Engine\DynamicEngine;
 use App\Engine\OpenBankingEngine;
 use App\Enums\ActionType;
 use App\Exceptions\GocardlessException;
@@ -48,7 +48,7 @@ class SyncTransactions implements ShouldQueue
                     $data['flags'] = [];
                     return $data;
                 });
-            $toCreate = StaticEngine::internalTransaction($toCreate);
+            $toCreate = DynamicEngine::internalTransaction($toCreate);
             $toCreate = $toCreate->map(function ($data) {
                 $data['flags'] = json_encode($data['flags']);
                 return $data;

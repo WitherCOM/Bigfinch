@@ -2,12 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\ActionType;
 use App\Enums\Direction;
+use App\Enums\Flag;
 use App\Filament\Actions\RunEngineBulkAction;
 use App\Filament\Resources\TransactionResource\Pages;
-use App\Models\Filter;
-use App\Models\Merchant;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Filament\Forms;
@@ -17,8 +15,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Novadaemon\FilamentPrettyJson\PrettyJson;
 
@@ -70,11 +66,18 @@ class TransactionResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('date'),
                 Tables\Columns\TextColumn::make('formatted_value')
-                    ->color(fn(Transaction $record) => match($record->direction) {
-                        Direction::EXPENSE => 'danger',
-                        Direction::INCOME => 'success',
-                        Direction::INTERNAL => 'info',
-                        Direction::INVEST => 'warning'
+                    ->color(function (Transaction $transaction) {
+                        if ($transaction->flags->contains(Flag::INTERNAL_TRANSACTION)){
+                            return 'info';
+                        } else if ($transaction->flags->contains(Flag::INVESTMENT)) {
+                            return 'warning';
+                        } else if ($transaction->direction == Direction::EXPENSE) {
+                            return 'danger';
+                        } else if ($transaction->direction == Direction::INCOME) {
+                            return 'success';
+                        } else {
+                            return 'neutral';
+                        }
                     }),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),

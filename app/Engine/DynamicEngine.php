@@ -9,7 +9,7 @@ use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
-class StaticEngine
+class DynamicEngine
 {
     const DATE_THRESHOLD = 300;
     const VALUE_THRESHOLD = 5;
@@ -22,19 +22,9 @@ class StaticEngine
                 abs($dateSorted[$i]['value']*$currencies->find($dateSorted[$i]['currency_id'])->rate - $dateSorted[$i+1]['value']*$currencies->find($dateSorted[$i+1]['currency_id'])->rate) < self::VALUE_THRESHOLD &&
                 (($dateSorted[$i]['direction'] == Direction::EXPENSE->value && $dateSorted[$i+1]['direction'] == Direction::INCOME->value) || ($dateSorted[$i+1]['direction'] == Direction::EXPENSE->value && $dateSorted[$i]['direction'] == Direction::INCOME->value))) {
                 $transactionA = $dateSorted[$i];
-                $transactionA['direction'] = Direction::INTERNAL->value;
                 $transactionB['flags'][] = Flag::INTERNAL_TRANSACTION->value;
-                if ($transactionA['direction'] == Direction::EXPENSE->value)
-                {
-                    $transactionA['value'] = - abs($transactionA['value']);
-                }
                 $transactionB = $dateSorted[$i+1];
-                $transactionB['direction'] = Direction::INTERNAL->value;
                 $transactionB['flags'][] = Flag::INTERNAL_TRANSACTION->value;
-                if ($transactionB['direction'] == Direction::EXPENSE->value)
-                {
-                    $transactionB['value'] = - abs($transactionA['value']);
-                }
                 $dateSorted[$i] = $transactionA;
                 $dateSorted[$i+1] = $transactionB;
             }
