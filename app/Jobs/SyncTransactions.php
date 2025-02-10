@@ -39,20 +39,15 @@ class SyncTransactions implements ShouldQueue
         Auth::login($this->integration->user);
         $transactionCommonIds = $this->integration->all_transactions()->pluck('common_id');
         try {
-            $toCreate = $this->integration->getTransactions(Carbon::now()->subMonth()->toDateString())->whereNotIn('transactionId', $transactionCommonIds)
+            $toCreate = $this->integration->getTransactions()->whereNotIn('transactionId', $transactionCommonIds)
                 ->map(function ($transaction) {
                     $data = OpenBankingEngine::parse($transaction);
                     $data['id'] = Str::uuid()->toString();
                     $data['integration_id'] = $this->integration->id;
                     $data['user_id'] = $this->integration->user_id;
-                    $data['flags'] = [];
+                    $data['flags'] = json_encode([]);
                     return $data;
                 });
-            $toCreate = DynamicEngine::internalTransaction($toCreate);
-            $toCreate = $toCreate->map(function ($data) {
-                $data['flags'] = json_encode($data['flags']);
-                return $data;
-            });
 
             Transaction::insert($toCreate->toArray());
 
