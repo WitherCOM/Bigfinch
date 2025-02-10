@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\IntegrationResource\Pages;
-use App\Filament\Resources\IntegrationResource\RelationManagers;
 use App\Jobs\SyncTransactions;
 use App\Models\Integration;
 use Carbon\Carbon;
@@ -63,9 +62,10 @@ class IntegrationResource extends Resource
             ->actions([
                 Tables\Actions\Action::make('sync')
                     ->action(fn(Integration $record) => SyncTransactions::dispatch($record)),
-                Tables\Actions\Action::make('auth')
-                    ->requiresConfirmation(fn (Integration $record) => !$record->can_accept)
-                    ->url(fn(Integration $record) => $record->link),
+                Tables\Actions\Action::make('renew')
+                    ->action(function (Integration $record) {
+                        redirect($record->link);
+                    }),
                 Tables\Actions\EditAction::make()
                     ->form([
                         Forms\Components\TextInput::make('name')
