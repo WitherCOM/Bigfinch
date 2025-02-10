@@ -63,6 +63,9 @@ class IntegrationResource extends Resource
             ->actions([
                 Tables\Actions\Action::make('sync')
                     ->action(fn(Integration $record) => SyncTransactions::dispatch($record)),
+                Tables\Actions\Action::make('auth')
+                    ->requiresConfirmation(fn (Integration $record) => !$record->can_accept)
+                    ->url(fn(Integration $record) => $record->link),
                 Tables\Actions\EditAction::make()
                     ->form([
                         Forms\Components\TextInput::make('name')
