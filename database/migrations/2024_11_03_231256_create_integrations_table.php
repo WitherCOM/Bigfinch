@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('integrations', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
-            $table->uuid('institution_name');
+            $table->string('institution_name');
             $table->string('institution_logo');
             $table->uuid('requisition_id');
             $table->json('accounts')->nullable();
