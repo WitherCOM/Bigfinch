@@ -62,7 +62,7 @@ class Integration extends Model
 
     public function canAccept(): Attribute
     {
-        return Attribute::get(fn () => is_null($this->expires_at) || Carbon::now()->gt($this->expires_at));
+        return Attribute::get(fn () => is_null($this->expires_at));
     }
 
     public function expired(): Attribute
@@ -164,7 +164,7 @@ class Integration extends Model
     {
         $access_token = self::getAccessToken();
         $requisition_id = $this->requisition_id;
-        // Create requisition
+        // Get requisition
         $response = Http::withHeader('Authorization', "Bearer $access_token")
             ->get("https://bankaccountdata.gocardless.com/api/v2/requisitions/$requisition_id/");
         throw_if($response->failed(), new GocardlessException($response));
