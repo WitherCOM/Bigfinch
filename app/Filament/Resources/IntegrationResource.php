@@ -57,7 +57,8 @@ class IntegrationResource extends Resource
                         $record->deleteRequisition();
                         $record->createRequisition();
                         $record->save();
-                    }),
+                    })
+                    ->visible(fn(Integration $record): bool => $record->expired),
                 Tables\Actions\EditAction::make()
                     ->form([
                         Forms\Components\TextInput::make('name')
