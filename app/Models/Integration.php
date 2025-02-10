@@ -123,24 +123,34 @@ class Integration extends Model
         throw_if($response->failed(), new GocardlessException($response));
     }
 
-
-    public function fillBasics($institution_id, $max_historical_days, $access_valid_for_days)
+    public function fillBasics($institution_id)
     {
+        $access_token = self::getAccessToken();
+        $response = Http::withHeader('Authorization', "Bearer $access_token")
+            ->get("https://bankaccountdata.gocardless.com/api/v2/institutions/$institution_id");
+        throw_if($response->failed(), new GocardlessException($response));
+        $this->institution_id = $institution_id;
+        $this->institution_name = $response->json('name');
+        $this->institution_logo = $response->json('logo');
+    }
+
+    public function createRequisition()
+    {
+        $institution_id = $this->institution_id;
         $access_token = self::getAccessToken();
 
         // Get institution
         $response = Http::withHeader('Authorization', "Bearer $access_token")
             ->get("https://bankaccountdata.gocardless.com/api/v2/institutions/$institution_id");
         throw_if($response->failed(), new GocardlessException($response));
-        $this->institution_name = $response->json('name');
-        $this->institution_logo = $response->json('logo');
-
+        $max_access_valid_for_days = $response->json('max_access_valid_for_days');
+        $transaction_total_days = $response->json('transaction_total_days');
         // Create custom end user agreement
         $response = Http::withHeader('Authorization', "Bearer $access_token")
             ->post('https://bankaccountdata.gocardless.com/api/v2/agreements/enduser/', [
                 'institution_id' => $institution_id,
-                'max_historical_days' => $max_historical_days,
-                'access_valid_for_days' => $access_valid_for_days,
+                'max_historical_days' => $transaction_total_days,
+                'access_valid_for_days' => $max_access_valid_for_days,
                 'access_scope' => [
                     'transactions',
                     'details'
@@ -158,6 +168,7 @@ class Integration extends Model
         throw_if($response->failed(), new GocardlessException($response));
         $this->requisition_id = $response->json('id');
         $this->link = $response->json('link');
+        $this->expires_at = null;
     }
 
     public function fillExtra()

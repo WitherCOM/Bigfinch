@@ -17,7 +17,8 @@ class CreateIntegration extends CreateRecord
     {
         $integration = new Integration($data);
         $integration->user_id = Auth::id();
-        $integration->fillBasics($data['institution_id'], $data['max_historical_days'], $data['access_valid_for_days']);
+        $integration->fillBasics($data['institution_id']);
+        $integration->createRequisition();
         $integration->save();
         return $integration;
     }

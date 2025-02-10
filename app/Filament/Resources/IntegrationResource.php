@@ -29,16 +29,6 @@ class IntegrationResource extends Resource
                 Forms\Components\Select::make('institution_id')
                     ->options(Integration::listBanks())
                     ->searchable(),
-                Forms\Components\TextInput::make('max_historical_days')
-                    ->required()
-                    ->default(180)
-                    ->numeric(),
-                Forms\Components\TextInput::make('access_valid_for_days')
-                    ->required()
-                    ->minValue(1)
-                    ->maxValue(90)
-                    ->default(90)
-                    ->numeric()
             ]);
     }
 
@@ -64,7 +54,9 @@ class IntegrationResource extends Resource
                     ->action(fn(Integration $record) => SyncTransactions::dispatch($record)),
                 Tables\Actions\Action::make('renew')
                     ->action(function (Integration $record) {
-                        redirect($record->link);
+                        $record->deleteRequisition();
+                        $record->createRequisition();
+                        $record->save();
                     }),
                 Tables\Actions\EditAction::make()
                     ->form([
