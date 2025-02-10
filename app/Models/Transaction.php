@@ -59,15 +59,6 @@ class Transaction extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function updateData()
-    {
-        if (!is_null($this->open_banking_transaction))
-        {
-            $data = OpenBankingEngine::parse($this->open_banking_transaction);
-            $this->merchant = $data['merchant'];
-        }
-    }
-
     public function formattedValue(): Attribute
     {
         return Attribute::get(function () {

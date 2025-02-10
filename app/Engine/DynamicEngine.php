@@ -13,20 +13,20 @@ class DynamicEngine
 {
     const DATE_THRESHOLD = 300;
     const VALUE_THRESHOLD = 5;
+
+    public static function run(Collection $transactions): Collection {
+        $records = static::internalTransaction($transactions);
+        return $records;
+    }
     public static function internalTransaction(Collection $transactions): Collection
     {
-        $currencies = Currency::all();
         $dateSorted = $transactions->sortBy('date');
         for ($i = 0; $i < count($dateSorted) - 1; $i++) {
-            if (Carbon::parse($dateSorted[$i]['date'])->diff(Carbon::parse($dateSorted[$i+1]['date']))->seconds < self::DATE_THRESHOLD &&
-                abs($dateSorted[$i]['value']*$currencies->find($dateSorted[$i]['currency_id'])->rate - $dateSorted[$i+1]['value']*$currencies->find($dateSorted[$i+1]['currency_id'])->rate) < self::VALUE_THRESHOLD &&
-                (($dateSorted[$i]['direction'] == Direction::EXPENSE->value && $dateSorted[$i+1]['direction'] == Direction::INCOME->value) || ($dateSorted[$i+1]['direction'] == Direction::EXPENSE->value && $dateSorted[$i]['direction'] == Direction::INCOME->value))) {
-                $transactionA = $dateSorted[$i];
-                $transactionA['flags'][] = Flag::INTERNAL_TRANSACTION->value;
-                $transactionB = $dateSorted[$i+1];
-                $transactionB['flags'][] = Flag::INTERNAL_TRANSACTION->value;
-                $dateSorted[$i] = $transactionA;
-                $dateSorted[$i+1] = $transactionB;
+            if (Carbon::parse($dateSorted[$i]->date)->diff(Carbon::parse($dateSorted[$i+1]->date))->seconds < self::DATE_THRESHOLD &&
+                abs($dateSorted[$i]->value*$dateSorted[$i]->currency->rate - $dateSorted[$i+1]->value*$dateSorted[$i+1]->currency->rate) < self::VALUE_THRESHOLD &&
+                (($dateSorted[$i]->direction == Direction::EXPENSE->value && $dateSorted[$i+1]->direction == Direction::INCOME->value) || ($dateSorted[$i+1]->direction == Direction::EXPENSE->value && $dateSorted[$i]->direction == Direction::INCOME->value))) {
+                $dateSorted[$i]->flags[] = Flag::INTERNAL_TRANSACTION->value;
+                $dateSorted[$i+1]->flags[] = Flag::INTERNAL_TRANSACTION->value;
             }
         }
         return $dateSorted;

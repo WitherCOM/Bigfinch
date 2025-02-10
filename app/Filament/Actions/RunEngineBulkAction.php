@@ -33,10 +33,7 @@ class RunEngineBulkAction extends BulkAction
                 }
             }
             if ($data['detect_internal_transaction']) {
-                $modifiedRecords = DynamicEngine::internalTransaction($records->map(fn ($record) => $record->toArray()));
-                foreach ($modifiedRecords as $i => $record) {
-                    $records[$i]->fill($record);
-                }
+                $records = DynamicEngine::internalTransaction($records);
             }
             foreach ($records as $record) {
                 if ($record->isDirty())

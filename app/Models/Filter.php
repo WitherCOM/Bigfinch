@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-#[ScopedBy([OwnerScope::class])]
 class Filter extends Model
 {
     use HasUuids;
