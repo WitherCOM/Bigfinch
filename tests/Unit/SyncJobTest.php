@@ -127,6 +127,7 @@ class SyncJobTest extends TestCase
             'name' => 'asd',
             'user_id' => $user->id,
             'accounts' => json_encode([Str::uuid()]),
+            'institution_id' => 'id',
             'institution_name' => 'name',
             'institution_logo' => 'logo',
             'requisition_id' => Str::uuid()
@@ -144,6 +145,7 @@ class SyncJobTest extends TestCase
             'name' => 'asd',
             'user_id' => $user->id,
             'accounts' => json_encode([Str::uuid()]),
+            'institution_id' => 'id',
             'institution_name' => 'name',
             'institution_logo' => 'logo',
             'requisition_id' => Str::uuid()
