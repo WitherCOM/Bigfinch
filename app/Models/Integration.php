@@ -120,7 +120,7 @@ class Integration extends Model
         // Create requisition
         $response = Http::withHeader('Authorization', "Bearer $access_token")
             ->delete("https://bankaccountdata.gocardless.com/api/v2/requisitions/$requisition_id/");
-        throw_if($response->failed(), new GocardlessException($response));
+        throw_if(!$response->notFound() && $response->failed(), new GocardlessException($response));
     }
 
     public function fillBasics($institution_id)
