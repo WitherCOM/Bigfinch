@@ -191,11 +191,9 @@ class Integration extends Model
 
     public function getTransactions($start = null): Collection
     {
-        $params = [
-            'query' => []
-        ];
+        $query = [];
         if (!is_null($start)) {
-            $params['query']['date_from'] = $start;
+            $params['date_from'] = $start;
         }
         $access_token = self::getAccessToken();
         $transactions = collect($this->accounts)->flatMap(function ($account) use ($access_token, $params) {
