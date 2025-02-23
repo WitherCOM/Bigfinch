@@ -193,12 +193,12 @@ class Integration extends Model
     {
         $query = [];
         if (!is_null($start)) {
-            $params['date_from'] = $start;
+            $query['date_from'] = $start;
         }
         $access_token = self::getAccessToken();
-        $transactions = collect($this->accounts)->flatMap(function ($account) use ($access_token, $params) {
+        $transactions = collect($this->accounts)->flatMap(function ($account) use ($access_token, $query) {
             $response = Http::withHeader('Authorization', "Bearer $access_token")
-                ->get("https://bankaccountdata.gocardless.com/api/v2/accounts/$account/transactions",$params);
+                ->get("https://bankaccountdata.gocardless.com/api/v2/accounts/$account/transactions",$query);
             throw_if($response->failed(), new GocardlessException($response));
             return $response->json('transactions.booked');
         });

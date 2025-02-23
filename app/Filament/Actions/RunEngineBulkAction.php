@@ -2,8 +2,8 @@
 
 namespace App\Filament\Actions;
 
+use App\Engine\FlagEngine;
 use App\Engine\OpenBankingEngine;
-use App\Engine\DynamicEngine;
 use Filament\Forms\Components\Toggle;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
@@ -32,8 +32,8 @@ class RunEngineBulkAction extends BulkAction
                     }
                 }
             }
-            if ($data['detect_internal_transaction']) {
-                $records = DynamicEngine::internalTransaction($records);
+            if ($data['flag_engine']) {
+                $records = FlagEngine::run($records);
             }
             foreach ($records as $record) {
                 if ($record->isDirty())
