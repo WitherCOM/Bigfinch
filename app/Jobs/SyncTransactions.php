@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Engine\DynamicEngine;
+use App\Engine\FlagInternalTransactions;
 use App\Engine\OpenBankingEngine;
 use App\Enums\ActionType;
 use App\Exceptions\GocardlessException;

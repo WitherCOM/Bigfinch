@@ -17,7 +17,7 @@ Schedule::call(function () {
         foreach ($integrations as $integration) {
             \App\Jobs\SyncTransactions::dispatch($integration);
         }
-        \App\Jobs\RunDynamicEngine::dispatch(\App\Models\User::find($user_id)->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(90)));
+        \App\Jobs\RunFlagEngine::dispatch(\App\Models\User::find($user_id)->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(90)));
     }
 })->dailyAt('7:00');
 

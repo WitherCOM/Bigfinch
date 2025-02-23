@@ -9,6 +9,7 @@ use App\Filament\Resources\TransactionResource\Pages;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -56,6 +57,8 @@ class TransactionResource extends Resource
                     })
                     ->searchable(),
                 Forms\Components\TagsInput::make('tags'),
+                TagsInput::make('flags')
+                    ->disabled(),
                 PrettyJson::make('open_banking_transaction')
             ]);
     }
@@ -103,6 +106,36 @@ class TransactionResource extends Resource
             ])
             ->recordClasses(fn(Transaction $transaction) => $transaction->trashed() ? 'opacity-50' : null)
             ->actions([
+                Tables\Actions\Action::make('keep_only')
+                    ->authorize('update')
+                    ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE)
+                    ->form([
+                        Forms\Components\Tabs::make('Keep Only')
+                        ->tabs([
+                            Forms\Components\Tabs\Tab::make('Value')
+                                ->schema([
+                                    Forms\Components\TextInput::make('value')
+                                        ->requiredWithout('percentage')
+                                ]),
+                            Forms\Components\Tabs\Tab::make('Percentage')
+                                ->schema([
+                                    Forms\Components\TextInput::make('percentage')
+                                        ->required()
+                                        ->requiredWithout('value')
+                                        ->minValue(0)
+                                        ->maxValue(100)
+                                ])
+                        ])
+                    ])
+                    ->action(function (Transaction $record, array $data) {
+                        if (!is_null($data['value']))
+                        {
+                            $record->value = $data['value'];
+                        } else if (!is_null($data['percentage'])) {
+                            $record->value = $record->value * $data['percentage'] / 100;
+                        }
+                        $record->save();
+                    }),
                 Tables\Actions\Action::make('split')
                     ->form([
                         Forms\Components\TextInput::make('value')
