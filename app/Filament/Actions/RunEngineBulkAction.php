@@ -18,8 +18,8 @@ class RunEngineBulkAction extends BulkAction
             Toggle::make('update_merchant')
                 ->label('Update Merchant')
                 ->default(false),
-            Toggle::make('detect_internal_transaction')
-                ->label('Detect Internal Transaction')
+            Toggle::make('flag_engine')
+                ->label('Flag engine')
                 ->default(false)
         ]);
         $this->action(function (Collection $records, array $data) {
