@@ -46,7 +46,7 @@ class FlagEngine
     public static function detectInvestor(Transaction $transaction): Transaction
     {
         $regex = '/' . implode('|', self::MATCH_INVESTORS) . '/i';
-        if (preg_match($regex, $transaction->open_banking_transaction['creditorName']))
+        if (isset($transaction->open_banking_transaction['creditorName']) && preg_match($regex, $transaction->open_banking_transaction['creditorName']))
         {
             $transaction->flags[] = Flag::INVESTMENT;
         }
