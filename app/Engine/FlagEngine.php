@@ -7,6 +7,7 @@ use App\Enums\Flag;
 use App\Models\Transaction;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class FlagEngine
 {
@@ -30,6 +31,9 @@ class FlagEngine
     {
         $dateSorted = $transactions->sortBy('date');
         for ($index = 0; $index < count($dateSorted)-1; $index++) {
+            Log::write("error",Carbon::parse($dateSorted[$index]->date)->diff(Carbon::parse($dateSorted[$index+1]->date))->seconds);
+            Log::write("error",abs($dateSorted[$index]->value*$dateSorted[$index]->currency->rate - $dateSorted[$index+1]->value*$dateSorted[$index+1]->currency->rate));
+            Log::write("error",(($dateSorted[$index]->direction == Direction::EXPENSE->value && $dateSorted[$index+1]->direction == Direction::INCOME->value) || ($dateSorted[$index+1]->direction == Direction::EXPENSE->value && $dateSorted[$index]->direction == Direction::INCOME->value)));
             if (Carbon::parse($dateSorted[$index]->date)->diff(Carbon::parse($dateSorted[$index+1]->date))->seconds < self::DATE_THRESHOLD &&
                 abs($dateSorted[$index]->value*$dateSorted[$index]->currency->rate - $dateSorted[$index+1]->value*$dateSorted[$index+1]->currency->rate) < self::VALUE_THRESHOLD &&
                 (($dateSorted[$index]->direction == Direction::EXPENSE->value && $dateSorted[$index+1]->direction == Direction::INCOME->value) || ($dateSorted[$index+1]->direction == Direction::EXPENSE->value && $dateSorted[$index]->direction == Direction::INCOME->value))) {
