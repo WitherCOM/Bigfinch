@@ -29,7 +29,7 @@ class FlagEngine
     public static function detectInternalTransaction(Collection $transactions): Collection
     {
         $dateSorted = $transactions->sortBy('date');
-        for ($index = 0; $index < count($dateSorted); $index++) {
+        for ($index = 0; $index < count($dateSorted)-1; $index++) {
             if (Carbon::parse($dateSorted[$index]->date)->diff(Carbon::parse($dateSorted[$index+1]->date))->seconds < self::DATE_THRESHOLD &&
                 abs($dateSorted[$index]->value*$dateSorted[$index]->currency->rate - $dateSorted[$index+1]->value*$dateSorted[$index+1]->currency->rate) < self::VALUE_THRESHOLD &&
                 (($dateSorted[$index]->direction == Direction::EXPENSE->value && $dateSorted[$index+1]->direction == Direction::INCOME->value) || ($dateSorted[$index+1]->direction == Direction::EXPENSE->value && $dateSorted[$index]->direction == Direction::INCOME->value))) {
