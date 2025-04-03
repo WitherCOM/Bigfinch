@@ -193,7 +193,7 @@ class Integration extends Model
     {
         $query = [];
         if (!is_null($start)) {
-            $query['date_from'] = $start;
+            $query['date_from'] = $start->toDateString();
         }
         $access_token = self::getAccessToken();
         $transactions = collect($this->accounts)->flatMap(function ($account) use ($access_token, $query) {
