@@ -2,22 +2,16 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\ActionType;
-use App\Enums\Direction;
+use App\Enums\FilterAction;
 use App\Filament\Resources\FilterResource\Pages;
 use App\Models\Category;
+use App\Models\Currency;
 use App\Models\Filter;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Pages\Dashboard\Actions\FilterAction;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Auth;
-
 class FilterResource extends Resource
 {
     protected static ?string $model = Filter::class;
@@ -28,6 +22,40 @@ class FilterResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('name'),
+                Forms\Components\Section::make('date_range')
+                    ->schema([
+                        Forms\Components\DateTimePicker::make('from'),
+                        Forms\Components\DateTimePicker::make('to')
+                    ]),
+                Forms\Components\Section::make('value_range')
+                    ->schema([
+                        Forms\Components\TextInput::make('min_value')
+                            ->numeric(),
+                        Forms\Components\TextInput::make('max_value')
+                            ->numeric(),
+                        Forms\Components\Select::make('currency_id')
+                            ->options(Currency::all()->mapWithKeys(fn(Currency $currency) => [$currency->id => $currency->iso_code]))
+                            ->searchable(),
+                    ]),
+                Forms\Components\TextInput::make('description'),
+                Forms\Components\TextInput::make('tag'),
+                Forms\Components\Select::make('flag')
+                    ->options(\App\Enums\Flag::class)
+                    ->enum(\App\Enums\Flag::class),
+                Forms\Components\Section::make('filter_action')
+                    ->schema([
+                        Forms\Components\Select::make('action')
+                            ->required()
+                            ->live()
+                            ->options(\App\Enums\FilterAction::class)
+                            ->enum(\App\Enums\FilterAction::class),
+                        Forms\Components\Select::make('action_parameters.category_id')
+                            ->visible(fn(Forms\Get $get) => $get('action') === FilterAction::CATEGORIZE->value)
+                            ->required(fn(Forms\Get $get) => $get('action') === FilterAction::CATEGORIZE->value)
+                            ->options(Currency::all()->mapWithKeys(fn(Category $category) => [$category->id => $category->name]))
+                            ->searchable(),
+                    ])
             ]);
     }
 
@@ -35,6 +63,9 @@ class FilterResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('filter_highlight'),
+                Tables\Columns\TextColumn::make('action')
             ])
             ->filters([
                 //

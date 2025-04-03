@@ -59,7 +59,7 @@ class TransactionResource extends Resource
                 Forms\Components\TagsInput::make('tags'),
                 TagsInput::make('flags')
                     ->disabled(),
-                PrettyJson::make('open_banking_transaction')
+               // PrettyJson::make('open_banking_transaction')
             ]);
     }
 
