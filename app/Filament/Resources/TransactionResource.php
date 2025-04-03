@@ -17,7 +17,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Novadaemon\FilamentPrettyJson\PrettyJson;
+use Novadaemon\FilamentPrettyJson\Form\PrettyJsonField;
 
 class TransactionResource extends Resource
 {
@@ -59,7 +59,7 @@ class TransactionResource extends Resource
                 Forms\Components\TagsInput::make('tags'),
                 TagsInput::make('flags')
                     ->disabled(),
-                PrettyJson::make('open_banking_transaction')
+                PrettyJsonField::make('open_banking_transaction')
             ]);
     }
 
