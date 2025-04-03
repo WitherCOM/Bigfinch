@@ -23,7 +23,7 @@ class RunEngineBulkAction extends BulkAction
                 ->default(false)
         ]);
         $this->action(function (Collection $records, array $data) {
-            if ($data['update_merchant']) {
+            if (isset($data['update_merchant'])) {
                 foreach ($records as $record) {
                     if (!is_null($record->open_banking_transaction))
                     {
@@ -32,7 +32,7 @@ class RunEngineBulkAction extends BulkAction
                     }
                 }
             }
-            if ($data['flag_engine']) {
+            if (isset($data['flag_engine'])) {
                 $records = FlagEngine::run($records);
             }
             foreach ($records as $record) {
