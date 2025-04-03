@@ -37,8 +37,6 @@ class Transaction extends Model
         'deleted_at'
     ];
 
-    public $timestamps = false;
-
     protected $casts = [
         'date' => 'datetime',
         'open_banking_transaction' => 'array',
