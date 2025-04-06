@@ -51,6 +51,7 @@ class FlagEngine
         if (isset($transaction->open_banking_transaction['creditorName']) && preg_match($regex, $transaction->open_banking_transaction['creditorName']))
         {
             $transaction->flags[] = Flag::INVESTMENT;
+            $transaction->flags = array_unique($transaction->flags);
         }
         return $transaction;
     }
