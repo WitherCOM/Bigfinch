@@ -42,7 +42,8 @@ class FlagEngine
     }
 
     const MATCH_INVESTORS = [
-        'lightyear' // Lightyear Europe AS. Client Account.
+        'lightyear', // Lightyear Europe AS. Client Account.
+        'webkincstar' // Magyar államkincstar
     ];
     public static function detectInvestor(Transaction $transaction): Transaction
     {
