@@ -23,16 +23,16 @@ class RunEngineBulkAction extends BulkAction
                 ->default(false)
         ]);
         $this->action(function (Collection $records, array $data) {
-            if (isset($data['update_merchant'])) {
+            if ($data['update_merchant']) {
                 foreach ($records as $record) {
                     if (!is_null($record->open_banking_transaction))
                     {
-                        $data = OpenBankingEngine::parse($record->open_banking_transaction);
-                        $record->merchant = $data['merchant'];
+                        $bankingData = OpenBankingEngine::parse($record->open_banking_transaction);
+                        $record->merchant = $bankingData['merchant'];
                     }
                 }
             }
-            if (isset($data['flag_engine'])) {
+            if ($data['flag_engine']) {
                 $records = FlagEngine::run($records);
             }
             foreach ($records as $record) {
