@@ -42,7 +42,9 @@ class MonthlyDistribution extends ChartWidget
                 'date' => Carbon::today()->startOfMonth()->subMonths($i),
             ]);
         }
-        $normal = $normal->groupBy(function ($data) {
+        $normal = $normal
+        ->sortBy('date')
+        ->groupBy(function ($data) {
             return $data['date']->startOfMonth();
         })->map(fn ($group) => $group->sum('value'));
 
@@ -60,7 +62,9 @@ class MonthlyDistribution extends ChartWidget
                 'date' => Carbon::today()->startOfMonth()->subMonths($i),
             ]);
         }
-        $investment = $investment->groupBy(function ($data) {
+        $investment = $investment
+        ->sortBy('date')
+        ->groupBy(function ($data) {
             return $data['date']->startOfMonth();
         })->map(fn ($group) => $group->sum('value'));
 
