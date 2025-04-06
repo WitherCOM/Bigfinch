@@ -19,12 +19,14 @@ class MonthlyDistribution extends ChartWidget
         return __('Monthly Distribution');
     }
 
+    private const  DAY_HISTORY = 6;
+
     protected function getData(): array
     {
         $transactions = Transaction::with(['currency','currency.rates'])
             ->where('user_id',Auth::id())
             ->where('direction', Direction::EXPENSE->value)
-            ->where('date','>=',Carbon::today()->startOfMonth()->subMonths(6))
+            ->where('date','>=',Carbon::today()->startOfMonth()->subMonths(self::DAY_HISTORY))
             ->orderBy('date')
             ->get();
 
@@ -36,7 +38,7 @@ class MonthlyDistribution extends ChartWidget
             'date' => $transaction->date,
             'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value
         ]);
-        for($i = 0; $i < 6; $i++) {
+        for($i = 0; $i <= 6; $i++) {
             $normal->add([
                 'value' => 0,
                 'date' => Carbon::today()->startOfMonth()->subMonths($i),
@@ -56,7 +58,7 @@ class MonthlyDistribution extends ChartWidget
             'date' => $transaction->date,
             'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value
         ]);
-        for($i = 0; $i < 6; $i++) {
+        for($i = 0; $i <= 6; $i++) {
             $investment->add([
                 'value' => 0,
                 'date' => Carbon::today()->startOfMonth()->subMonths($i),
