@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Enums\Direction;
 use App\Enums\Flag;
+use App\Models\Currency;
 use App\Models\Transaction;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
@@ -30,16 +31,38 @@ class MonthlyDistribution extends ChartWidget
         $normal = $transactions->filter(function (Transaction $transaction) {
            return $transaction->flags->doesntContain(Flag::INTERNAL_TRANSACTION) &&
            $transaction->flags->doesntContain(Flag::INVESTMENT);
-        })->groupBy(function (Transaction $transaction) {
-            return $transaction->date->startOfMonth();
-        })->map(fn ($groups) => $groups->map(fn(Transaction $transaction) => $transaction->currency->nearestRate($transaction->date) * $transaction->value)->sum());
+        })
+        ->map(fn(Transaction $transaction) => [
+            'date' => $transaction->date,
+            'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value
+        ]);
+        for($i = 0; $i < 6; $i++) {
+            $normal->add([
+                'value' => 0,
+                'date' => Carbon::today()->startOfMonth()->subMonths($i),
+            ]);
+        }
+        $normal = $normal->groupBy(function ($data) {
+            return $data['date']->startOfMonth();
+        })->map(fn ($group) => $group->sum('value'));
 
         $investment = $transactions->filter(function (Transaction $transaction) {
             return $transaction->flags->doesntContain(Flag::INTERNAL_TRANSACTION) &&
             $transaction->flags->contains(Flag::INVESTMENT);
-        })->groupBy(function (Transaction $transaction) {
-            return $transaction->date->startOfMonth();
-        })->map(fn ($groups) => $groups->map(fn(Transaction $transaction) => $transaction->currency->nearestRate($transaction->date) * $transaction->value)->sum());
+        })
+        ->map(fn(Transaction $transaction) => [
+            'date' => $transaction->date,
+            'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value
+        ]);
+        for($i = 0; $i < 6; $i++) {
+            $investment->add([
+                'value' => 0,
+                'date' => Carbon::today()->startOfMonth()->subMonths($i),
+            ]);
+        }
+        $investment = $investment->groupBy(function ($data) {
+            return $data['date']->startOfMonth();
+        })->map(fn ($group) => $group->sum('value'));
 
         return [
             'datasets' => [
