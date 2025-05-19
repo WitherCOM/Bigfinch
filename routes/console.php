@@ -12,24 +12,17 @@ Artisan::command('inspire', function () {
 Schedule::job(new \App\Jobs\SyncCurrencies)->dailyAt('6:00');
 
 Schedule::call(function () {
-    foreach(\App\Models\Integration::query()->where('can_auto_sync',true)->get()->groupBy('user_id') as $user_id => $integrations)
+    foreach(\App\Models\Integration::query()->where('can_auto_sync',true)->get() as $integration)
     {
-        foreach ($integrations as $integration) {
-            \App\Jobs\SyncTransactions::dispatch($integration);
-        }
-        \App\Jobs\RunFlagEngine::dispatch(\App\Models\User::find($user_id)->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(90)));
+        \App\Jobs\SyncTransactions::dispatch($integration);
     }
 })->dailyAt('7:00');
 
 Schedule::call(function () {
-    foreach(\App\Models\Integration::query()->where('can_auto_sync',true)->get()->groupBy('user_id') as $user_id => $integrations)
+    foreach(\App\Models\User::all() as $user)
     {
-        foreach ($integrations as $integration) {
-            \App\Jobs\SyncTransactions::dispatch($integration);
-        }
-        \App\Jobs\RunFlagEngine::dispatch(\App\Models\User::find($user_id)->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(90)));
+        \App\Jobs\RunFlagEngine::dispatch($user->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(90)));
     }
-})->dailyAt('22:00');
-
+})->dailyAt('7:30');
 
 

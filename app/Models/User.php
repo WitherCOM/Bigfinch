@@ -6,6 +6,7 @@ use App\Casts\ModulesCast;
 use App\Models\Modules\ModuleInterface;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -66,5 +67,17 @@ class User extends Authenticatable implements FilamentUser
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function defaultCurrencyId(): Attribute {
+        return Attribute::get(function () {
+            if (!isset($this->settings['default_currency_id'])) {
+                $settings = $this->settings;
+                $settings['default_currency_id'] = Currency::first()->id;
+                $this->settings = $settings;
+                $this->save();
+            }
+            return $this->settings['default_currency_id'];
+        });
     }
 }
