@@ -6,6 +6,7 @@ use App\Enums\Direction;
 use App\Enums\Flag;
 use App\Filament\Actions\RunEngineBulkAction;
 use App\Filament\Resources\TransactionResource\Pages;
+use App\Models\Category;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Filament\Forms;
@@ -65,6 +66,12 @@ class TransactionResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $categories = Category::all();
+        $monthSelect = [];
+        for ($month = 1; $month <= Carbon::now()->month; $month++) {
+            $monthSelect[$month] = Carbon::create(month: $month)->format('M');
+        }
+
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('date'),
@@ -84,7 +91,8 @@ class TransactionResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('category.name'),
+                Tables\Columns\SelectColumn::make('category_id')
+                    ->options(fn (Transaction $record) => $categories->where('direction',$record->direction->value)->pluck('name', 'id')),
                 Tables\Columns\TextColumn::make('merchant')
                     ->searchable(),
             ])
@@ -101,6 +109,9 @@ class TransactionResource extends Resource
                             $query->where('user_id', Auth::id())->orWhereNull('user_id');
                         })->where('direction');
                     }),
+                Tables\Filters\SelectFilter::make('Month')
+                    ->query(fn (Builder $query, array $data) => $query->when($data['value'], fn (Builder $query, $month) => $query->whereMonth('date', $month)))
+                    ->options($monthSelect),
                 Tables\Filters\SelectFilter::make('direction')
                     ->options(Direction::class)
             ])

@@ -23,6 +23,8 @@ class MonthlyDistribution extends ChartWidget
 
     protected function getData(): array
     {
+
+        $displayCurrency = Currency::find(Auth::user()->default_currency_id);
         $transactions = Transaction::with(['currency','currency.rates'])
             ->where('user_id',Auth::id())
             ->where('direction', Direction::EXPENSE->value)
@@ -36,7 +38,7 @@ class MonthlyDistribution extends ChartWidget
         })
         ->map(fn(Transaction $transaction) => [
             'date' => $transaction->date,
-            'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value
+            'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value / $displayCurrency->nearestRate($transaction->date)
         ]);
         for($i = 0; $i <= 6; $i++) {
             $normal->add([
@@ -56,7 +58,7 @@ class MonthlyDistribution extends ChartWidget
         })
         ->map(fn(Transaction $transaction) => [
             'date' => $transaction->date,
-            'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value
+            'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value / $displayCurrency->nearestRate($transaction->date)
         ]);
         for($i = 0; $i <= 6; $i++) {
             $investment->add([
@@ -94,17 +96,19 @@ class MonthlyDistribution extends ChartWidget
 
     protected function getOptions(): RawJs
     {
-        return RawJs::make(<<<JS
+        $displayCurrency = Currency::find(Auth::user()->default_currency_id);
+        $placeholder = $displayCurrency->format("<replace>");
+        return RawJs::make("
         {
             scales: {
                 y: {
                     ticks: {
-                        callback: (value) => value + ' Ft',
+                        callback: (value) => '$placeholder'.replace('<replace>',value),
                     },
                 },
             },
         }
-    JS);
+    ");
     }
 
 }
