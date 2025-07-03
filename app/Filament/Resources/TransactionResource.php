@@ -172,11 +172,11 @@ class TransactionResource extends Resource
                     ->authorize('update')
                     ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE)
                     ->action(function (Transaction $record, array $data) {
-                        $transcation = $record->replicate(['id']);
-                        $transcation->value = $data['value'];
-                        $transcation->category_id = $data['category_id'];
-                        $transcation->description = $data['description'];
-                        $transcation->save();
+                        $transaction = $record->replicate(['id']);
+                        $transaction->value = $data['value'];
+                        $transaction->category_id = $data['category_id'];
+                        $transaction->description = $data['description'];
+                        $transaction->save();
                         $record->refresh();
                         $record->update([
                             'value' => $record->value - $data['value']
