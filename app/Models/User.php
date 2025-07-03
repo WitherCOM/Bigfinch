@@ -69,6 +69,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Transaction::class);
     }
 
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class);
+    }
+
     public function defaultCurrencyId(): Attribute {
         return Attribute::get(function () {
             if (!isset($this->settings['default_currency_id'])) {
