@@ -14,6 +14,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Bus;
 
 class IntegrationResource extends Resource
 {
@@ -51,7 +52,10 @@ class IntegrationResource extends Resource
             ])
             ->actions([
                 Tables\Actions\Action::make('sync')
-                    ->action(fn(Integration $record) => SyncTransactions::dispatch($record)),
+                    ->action(fn(Integration $record) => Bus::chain([
+                        new SyncTransactions($record),
+                        new \App\Jobs\RunFlagEngine(Auth::user()->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(90)))
+                    ])->dispatch()),
                 Tables\Actions\Action::make('renew')
                     ->action(function (Integration $record) {
                         $record->deleteRequisition();
