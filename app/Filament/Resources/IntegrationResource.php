@@ -54,7 +54,7 @@ class IntegrationResource extends Resource
                 Tables\Actions\Action::make('sync')
                     ->action(fn(Integration $record) => Bus::chain([
                         new SyncTransactions($record),
-                        new \App\Jobs\RunFlagEngine(Auth::user()->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(90)))
+                        new \App\Jobs\RunFlagEngine(Auth::user()->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(90))->get())
                     ])->dispatch()),
                 Tables\Actions\Action::make('renew')
                     ->action(function (Integration $record) {
