@@ -59,6 +59,7 @@ class TransactionResource extends Resource
                     ->searchable(),
                 Forms\Components\TagsInput::make('tags'),
                 Forms\Components\Select::make('flags')
+                    ->nullable()
                     ->enum(Flag::class)
                     ->options(Flag::class)
                     ->multiple(),
