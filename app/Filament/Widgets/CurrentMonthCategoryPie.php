@@ -33,8 +33,8 @@ class CurrentMonthCategoryPie extends ChartWidget
 
         $data = $transactions->filter(function (Transaction $transaction) {
             return $transaction->flags->doesntContain(Flag::INTERNAL_TRANSACTION) &&
-                $transaction->flags->doesntContain(Flag::INVESTMENT->value) &&
-                $transaction->flags->doesntContain(Flag::EXCHANGE->value);
+                $transaction->flags->doesntContain(Flag::INVESTMENT) &&
+                $transaction->flags->doesntContain(Flag::EXCHANGE);
         })
             ->map(fn(Transaction $transaction) => [
                 'category' => $transaction->category?->name ?? __('Other'),
