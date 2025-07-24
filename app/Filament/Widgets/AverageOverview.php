@@ -20,6 +20,7 @@ class AverageOverview extends BaseWidget
             ->where('date','>=',Carbon::now()->subMonths(3))
             ->whereJsonDoesntContain('flags', Flag::INTERNAL_TRANSACTION->value)
             ->whereJsonDoesntContain('flags', Flag::INVESTMENT->value)
+            ->whereJsonDoesntContain('flags', Flag::EXCHANGE->value)
             ->where('direction',Direction::EXPENSE->value)
             ->get();
         $dailyAverage = round($transactionExpend
