@@ -59,6 +59,7 @@ class TransactionResource extends Resource
                     ->searchable(),
                 Forms\Components\TagsInput::make('tags'),
                 Forms\Components\Select::make('flags')
+                    ->enum(Flag::class)
                     ->multiple(),
                 PrettyJsonField::make('open_banking_transaction')
             ]);
