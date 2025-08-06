@@ -20,7 +20,7 @@ Schedule::call(function () {
     }
     foreach(\App\Models\User::all() as $user)
     {
-        $jobs[] = new \App\Jobs\RunFlagEngine($user->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(90))->get());
+        $jobs[] = new \App\Jobs\RunFlagEngine($user->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(config('app.retro_days')))->get());
     }
     Bus::batch($jobs)->dispatch();
 })->dailyAt('7:00');

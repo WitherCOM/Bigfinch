@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Casts\ModulesCast;
+use App\Enums\Direction;
+use App\Enums\Flag;
 use App\Models\Modules\ModuleInterface;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -11,7 +13,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use PhpParser\Node\Scalar\MagicConst\Dir;
 use ReflectionClass;
 
 class User extends Authenticatable implements FilamentUser
@@ -84,5 +90,20 @@ class User extends Authenticatable implements FilamentUser
             }
             return $this->settings['default_currency_id'];
         });
+    }
+
+    public function getStatisticalTransactionData(Carbon $fromDate, Direction $direction, Currency $displayCurrency): Collection
+    {
+        $rawTransactions = $this->transactions()
+            ->with(['currency','currency.rates'])
+            ->where('direction', $direction->value)
+            ->where('date','>=', $fromDate)
+            ->orderBy('date')
+            ->get();
+        return $rawTransactions->map(fn(Transaction $transaction) => [
+            'date' => $transaction->date,
+            'category' => $transaction->category?->name ?? __('Other'),
+            'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value / $displayCurrency->nearestRate($transaction->date)
+        ]);
     }
 }

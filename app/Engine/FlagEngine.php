@@ -32,10 +32,14 @@ class FlagEngine
         $dateSorted = $transactions->sortBy('date');
         for ($index = 0; $index < count($dateSorted)-1; $index++) {
             if (Carbon::parse($dateSorted[$index]->date)->diff(Carbon::parse($dateSorted[$index+1]->date))->seconds < self::DATE_THRESHOLD &&
-                abs($dateSorted[$index]->value*$dateSorted[$index]->currency->rate - $dateSorted[$index+1]->value*$dateSorted[$index+1]->currency->rate) < self::VALUE_THRESHOLD &&
-                (($dateSorted[$index]->direction == Direction::EXPENSE && $dateSorted[$index+1]->direction == Direction::INCOME) || ($dateSorted[$index+1]->direction == Direction::EXPENSE && $dateSorted[$index]->direction == Direction::INCOME))) {
-                $dateSorted[$index]->flags[] = Flag::INTERNAL_TRANSACTION->value;
-                $dateSorted[$index+1]->flags[] = Flag::INTERNAL_TRANSACTION->value;
+                abs($dateSorted[$index]->value*$dateSorted[$index]->currency->rate - $dateSorted[$index+1]->value*$dateSorted[$index+1]->currency->rate) < self::VALUE_THRESHOLD) {
+                    if ($dateSorted[$index]->direction == Direction::EXPENSE && $dateSorted[$index+1]->direction == Direction::INCOME) {
+                        $dateSorted[$index]->direction = Direction::INTERNAL_FROM;
+                        $dateSorted[$index+1]->direction = Direction::INTERNAL_TO;
+                    } else if ($dateSorted[$index+1]->direction == Direction::EXPENSE && $dateSorted[$index]->direction == Direction::INCOME) {
+                        $dateSorted[$index]->direction = Direction::INTERNAL_TO;
+                        $dateSorted[$index+1]->direction = Direction::INTERNAL_FROM;
+                    }
             }
         }
         return $dateSorted;
@@ -50,8 +54,7 @@ class FlagEngine
         $regex = '/' . implode('|', self::MATCH_INVESTORS) . '/i';
         if (isset($transaction->open_banking_transaction['creditorName']) && preg_match($regex, $transaction->open_banking_transaction['creditorName']))
         {
-            $transaction->flags[] = Flag::INVESTMENT;
-            $transaction->flags = collect($transaction->flags->unique());
+            $transaction->direction = Direction::INVESTMENT;
         }
         return $transaction;
     }
