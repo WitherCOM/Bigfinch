@@ -16,14 +16,8 @@ class CurrentOverview extends BaseWidget
     protected function getStats(): array
     {
         $displayCurrency = Currency::find(Auth::user()->default_currency_id);
-        $thisMonth = Transaction::with(['currency','currency.rates'])->where('user_id',Auth::id())
-            ->where('date','>=',Carbon::now()->startOfMonth())
-            ->whereJsonDoesntContain('flags', Flag::INTERNAL_TRANSACTION->value)
-            ->whereJsonDoesntContain('flags', Flag::INVESTMENT->value)
-            ->where('direction',Direction::EXPENSE->value)
-            ->get()
-            ->map(fn (Transaction $transaction) => $transaction->currency->nearestRate($transaction->date) * $transaction->value / $displayCurrency->nearestRate($transaction->date))
-            ->sum();
+        $expenseTransactions = Auth::user()->getStatisticalTransactionData(\Illuminate\Support\Carbon::today()->startOfMonth(),Direction::EXPENSE,$displayCurrency);
+        $thisMonth = $expenseTransactions->sum('value');
 
         return [
             Stat::make('This month', $displayCurrency->format($thisMonth)),

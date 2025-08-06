@@ -19,55 +19,31 @@ class MonthlyDistribution extends ChartWidget
         return __('Monthly Distribution');
     }
 
-    private const  DAY_HISTORY = 6;
+    private const  MONTH_HISTORY = 6;
 
     protected function getData(): array
     {
-
         $displayCurrency = Currency::find(Auth::user()->default_currency_id);
-        $transactions = Transaction::with(['currency','currency.rates'])
-            ->where('user_id',Auth::id())
-            ->where('direction', Direction::EXPENSE->value)
-            ->where('date','>=',Carbon::today()->startOfMonth()->subMonths(self::DAY_HISTORY))
-            ->orderBy('date')
-            ->get();
-
-        $normal = $transactions->filter(function (Transaction $transaction) {
-           return $transaction->flags->doesntContain(Flag::INTERNAL_TRANSACTION) &&
-           $transaction->flags->doesntContain(Flag::INVESTMENT) &&
-               $transaction->flags->doesntContain(Flag::EXCHANGE);
-        })
-        ->map(fn(Transaction $transaction) => [
-            'date' => $transaction->date,
-            'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value / $displayCurrency->nearestRate($transaction->date)
-        ]);
-        for($i = 0; $i <= 6; $i++) {
-            $normal->add([
+        $expenseTransactions = Auth::user()->getStatisticalTransactionData(Carbon::today()->startOfMonth()->subMonths(self::MONTH_HISTORY),Direction::EXPENSE,$displayCurrency);
+        $investmentTransactions = Auth::user()->getStatisticalTransactionData(Carbon::today()->startOfMonth()->subMonths(self::MONTH_HISTORY),Direction::INVESTMENT,$displayCurrency);
+        // Fill empty months
+        for($i = 0; $i <= self::MONTH_HISTORY; $i++) {
+            $expenseTransactions->add([
+                'value' => 0,
+                'date' => Carbon::today()->startOfMonth()->subMonths($i),
+            ]);
+            $investmentTransactions->add([
                 'value' => 0,
                 'date' => Carbon::today()->startOfMonth()->subMonths($i),
             ]);
         }
-        $normal = $normal
+        $groupExpense = $expenseTransactions
         ->sortBy('date')
         ->groupBy(function ($data) {
             return $data['date']->startOfMonth();
         })->map(fn ($group) => $group->sum('value'));
 
-        $investment = $transactions->filter(function (Transaction $transaction) {
-            return $transaction->flags->doesntContain(Flag::INTERNAL_TRANSACTION) &&
-            $transaction->flags->contains(Flag::INVESTMENT);
-        })
-        ->map(fn(Transaction $transaction) => [
-            'date' => $transaction->date,
-            'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value / $displayCurrency->nearestRate($transaction->date)
-        ]);
-        for($i = 0; $i <= 6; $i++) {
-            $investment->add([
-                'value' => 0,
-                'date' => Carbon::today()->startOfMonth()->subMonths($i),
-            ]);
-        }
-        $investment = $investment
+        $groupInvest = $investmentTransactions
         ->sortBy('date')
         ->groupBy(function ($data) {
             return $data['date']->startOfMonth();
@@ -77,16 +53,16 @@ class MonthlyDistribution extends ChartWidget
             'datasets' => [
                 [
                     'label' => __('Normal'),
-                    'data' => $normal->values(),
+                    'data' => $groupExpense->values(),
                     'borderColor' => '#b31010',
                     'backgroundColor' => '#d11919'
                 ],
                 [
                     'label' => __('Investment'),
-                    'data' => $investment->values()
+                    'data' => $groupInvest->values()
                 ]
             ],
-            'labels' => $normal->keys()->map(fn ($date) => Carbon::parse($date)->monthName),
+            'labels' => $groupExpense->keys()->map(fn ($date) => Carbon::parse($date)->monthName),
         ];
     }
 

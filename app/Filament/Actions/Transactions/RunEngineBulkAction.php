@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Actions;
+namespace App\Filament\Actions\Transactions;
 
 use App\Engine\FlagEngine;
 use App\Engine\OpenBankingEngine;

@@ -61,7 +61,7 @@ class Transaction extends Model
     {
         return Attribute::get(function () {
             $value = $this->currency->format($this->value);
-            if ($this->direction === Direction::EXPENSE)
+            if ($this->direction === Direction::EXPENSE || $this->direction === Direction::INTERNAL_FROM)
             {
                 return "- $value";
             }
@@ -71,4 +71,5 @@ class Transaction extends Model
             }
         });
     }
+
 }

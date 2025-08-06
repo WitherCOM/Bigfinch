@@ -22,36 +22,19 @@ class CurrentMonthCategoryPie extends ChartWidget
 
     protected function getData(): array
     {
-
         $displayCurrency = Currency::find(Auth::user()->default_currency_id);
-        $transactions = Transaction::with(['currency', 'currency.rates'])
-            ->where('user_id', Auth::id())
-            ->where('direction', Direction::EXPENSE->value)
-            ->where('date', '>=', Carbon::today()->startOfMonth())
-            ->orderBy('date')
-            ->get();
-
-        $data = $transactions->filter(function (Transaction $transaction) {
-            return $transaction->flags->doesntContain(Flag::INTERNAL_TRANSACTION) &&
-                $transaction->flags->doesntContain(Flag::INVESTMENT) &&
-                $transaction->flags->doesntContain(Flag::EXCHANGE);
-        })
-            ->map(fn(Transaction $transaction) => [
-                'category' => $transaction->category?->name ?? __('Other'),
-                'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value / $displayCurrency->nearestRate($transaction->date)
-            ])
-            ->sortBy('date')
+        $transactions = Auth::user()->getStatisticalTransactionData(Carbon::today()->startOfMonth()->subMonths(2),Direction::EXPENSE,$displayCurrency)
             ->groupBy('category')
-            ->mapWithKeys(fn($group,$category_id) => [$category_id => $group->sum('value')]);
+            ->mapWithKeys(fn($group,$category) => [$category => $group->sum('value')]);
 
         return [
             'datasets' => [
                 [
                     'label' => __('Normal'),
-                    'data' => $data->values(),
+                    'data' => $transactions->values(),
                 ]
             ],
-            'labels' => $data->keys()
+            'labels' => $transactions->keys()
         ];
     }
 
