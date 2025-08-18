@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use ResourceBundle;
+use Database\Factories\CurrencyFactory;
 use App\Enums\CurrencyPosition;
 use App\Enums\Direction;
 use Carbon\Carbon;
@@ -17,7 +19,7 @@ use PHPUnit\Util\Xml;
 
 class Currency extends Model
 {
-    /** @use HasFactory<\Database\Factories\CurrencyFactory> */
+    /** @use HasFactory<CurrencyFactory> */
     use HasFactory;
     use HasUuids;
 
@@ -35,7 +37,7 @@ class Currency extends Model
     public function name(): Attribute
     {
         return Attribute::get(function() {
-            $bundle = \ResourceBundle::create(App::currentLocale(), 'ICUDATA-curr');
+            $bundle = ResourceBundle::create(App::currentLocale(), 'ICUDATA-curr');
             return $bundle->get('Currencies')->get($this->iso_code)->get(1);
         });
     }
@@ -70,7 +72,7 @@ class Currency extends Model
 
     public static function iso_codes(): Collection
     {
-        $bundle = \ResourceBundle::create('en', 'ICUDATA-curr');
+        $bundle = ResourceBundle::create('en', 'ICUDATA-curr');
         $currencies = collect($bundle->get('Currencies'));
         return $currencies->keys();
     }

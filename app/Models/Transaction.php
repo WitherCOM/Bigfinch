@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\TransactionFactory;
 use App\Casts\FlagArray;
 use App\Engine\OpenBankingEngine;
 use App\Enums\ActionType;
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Transaction extends Model
 {
-    /** @use HasFactory<\Database\Factories\TransactionFactory> */
+    /** @use HasFactory<TransactionFactory> */
     use HasFactory;
     use HasUuids;
     use SoftDeletes;
