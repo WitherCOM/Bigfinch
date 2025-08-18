@@ -6,6 +6,7 @@ use Antlr\Antlr4\Runtime\CommonTokenStream;
 use Antlr\Antlr4\Runtime\InputStream;
 use Antlr\Antlr4\Runtime\Tree\ParseTreeWalker;
 use App\Dsl\FilterLanguage\Collection;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use App\Enums\Direction;
 use App\Enums\FilterAction;
 use App\Enums\Flag;
@@ -14,7 +15,6 @@ use FilterLexer;
 use FilterParser;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class Filter extends Model
