@@ -38,9 +38,4 @@ class Tag extends Model
             return $tags;
         },[]);
     }
-
-    protected function sushiShouldCache(): true
-    {
-        return true;
-    }
 }
