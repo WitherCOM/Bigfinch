@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\CategoryFactory;
 use App\Enums\Direction;
 use App\Models\Scopes\OwnerScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    /** @use HasFactory<\Database\Factories\CategoryFactory> */
+    /** @use HasFactory<CategoryFactory> */
     use HasFactory;
     use HasUuids;
 

@@ -2,10 +2,10 @@
 
 namespace App\Filament\Actions\Transactions;
 
+use Filament\Actions\Action;
 use App\Models\Transaction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 
 class SplitAction extends Action

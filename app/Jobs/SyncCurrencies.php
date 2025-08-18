@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use SoapClient;
 use App\Models\Currency;
 use App\Models\CurrencyRate;
 use Carbon\Carbon;
@@ -27,7 +28,7 @@ class SyncCurrencies implements ShouldQueue
     public function handle(): void
     {
         $codes = Currency::all()->pluck('id','iso_code');
-        $soap_client = new \SoapClient("http://www.mnb.hu/arfolyamok.asmx?wsdl");
+        $soap_client = new SoapClient("http://www.mnb.hu/arfolyamok.asmx?wsdl");
         $raw_rates = $soap_client->GetCurrentExchangeRates()->GetCurrentExchangeRatesResult;
         $rates = collect([]);
         foreach(simplexml_load_string($raw_rates)->Day->Rate as $rate)

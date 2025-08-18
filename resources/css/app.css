@@ -1,1 +1,10 @@
-@import '/vendor/filament/filament/resources/css/theme.css';
+@import '../../vendor/filament/filament/resources/css/theme.css';
+@import './prettyjson.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views';
+@source '../../storage/framework/views';
+@source '../../app/Filament';
+@source './resources/views';
+@source './resources/js';
+
+

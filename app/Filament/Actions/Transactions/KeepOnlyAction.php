@@ -2,10 +2,11 @@
 
 namespace App\Filament\Actions\Transactions;
 
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use App\Models\Transaction;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Actions\Action;
 
 class KeepOnlyAction extends Action
 {
@@ -15,12 +16,12 @@ class KeepOnlyAction extends Action
         $this->form([
             Tabs::make('Keep Only')
                 ->tabs([
-                    Tabs\Tab::make('Value')
+                    Tab::make('Value')
                         ->schema([
                             TextInput::make('value')
                                 ->requiredWithout('percentage')
                         ]),
-                    Tabs\Tab::make('Percentage')
+                    Tab::make('Percentage')
                         ->schema([
                             TextInput::make('percentage')
                                 ->requiredWithout('value')

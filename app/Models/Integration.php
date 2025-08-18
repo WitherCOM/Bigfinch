@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\IntegrationFactory;
 use App\Exceptions\GocardlessException;
 use App\Models\Scopes\OwnerScope;
 use Carbon\Carbon;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Http;
 
 class Integration extends Model
 {
-    /** @use HasFactory<\Database\Factories\IntegrationFactory> */
+    /** @use HasFactory<IntegrationFactory> */
     use HasFactory;
     use HasUuids;
 
