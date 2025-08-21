@@ -53,9 +53,6 @@ class FilterResource extends Resource
                     ]),
                 TextInput::make('description'),
                 TextInput::make('tag'),
-                Select::make('flag')
-                    ->options(Flag::class)
-                    ->enum(Flag::class),
                 Section::make('filter_action')
                     ->schema([
                         Select::make('action')
