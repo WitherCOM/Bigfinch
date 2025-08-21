@@ -32,7 +32,6 @@ class Filter extends Model
         'max_value',
         'currency',
         'description',
-        'flag',
         'action',
         'action_parameters',
         'user_id'
@@ -42,7 +41,6 @@ class Filter extends Model
         'from' => 'datetime',
         'to' => 'datetime',
         'direction' => Direction::class,
-        'flag' => Flag::class,
         'action' => FilterAction::class,
         'action_parameters' => 'array'
     ];
@@ -52,7 +50,7 @@ class Filter extends Model
         return Attribute::get(function () {
             $highlight = "";
             foreach (['from', 'to', 'tag', 'merchant', 'direction',
-                         'min_value', 'max_value', 'currency', 'description', 'flag'] as $key) {
+                         'min_value', 'max_value', 'currency', 'description'] as $key) {
                 if ($this->{$key}) {
                     $highlight .= "$key=" . $this->{$key} . ",";
                 }

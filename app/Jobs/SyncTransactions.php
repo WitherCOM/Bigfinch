@@ -45,7 +45,6 @@ class SyncTransactions implements ShouldQueue
                     $data['id'] = Str::uuid()->toString();
                     $data['integration_id'] = $this->integration->id;
                     $data['user_id'] = $this->integration->user_id;
-                    $data['flags'] = json_encode([]);
                     return $data;
                 });
 

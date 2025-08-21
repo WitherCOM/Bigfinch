@@ -28,7 +28,6 @@ class Transaction extends Model
     protected $fillable = [
         'description',
         'direction',
-        'flags',
         'value',
         'date',
         'merchant',
@@ -41,7 +40,6 @@ class Transaction extends Model
     protected $casts = [
         'date' => 'datetime',
         'open_banking_transaction' => 'array',
-        'flags' => FlagArray::class,
         'tags' => 'array',
         'direction' => Direction::class
     ];
