@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AutoTags;
 
+use App\Enums\NavGroup;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class AutoTagResource extends Resource
 {
     protected static ?string $model = AutoTag::class;
+    protected static string|null|\UnitEnum $navigationGroup = NavGroup::TRANSACTIONS;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 

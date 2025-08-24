@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TagUseds;
 
+use App\Enums\NavGroup;
 use Filament\Schemas\Schema;
 use App\Filament\Resources\TagUseds\Pages\ListTagUsed;
 use App\Filament\Resources\TagUsedResource\Pages;
@@ -13,10 +14,12 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class TagUsedResource extends Resource
 {
     protected static ?string $model = Tag::class;
+    protected static string | UnitEnum | null $navigationGroup = NavGroup::STATISTICS;
 
     public static function getEloquentQuery(): Builder
     {

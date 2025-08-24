@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\NavGroup;
 use Filament\Schemas\Schema;
 use App\Models\Category;
 use App\Models\Currency;
@@ -11,6 +12,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
+use UnitEnum;
 
 class UserPreferences extends Page implements HasForms
 {
@@ -19,6 +21,7 @@ class UserPreferences extends Page implements HasForms
 
     public ?array $data = [];
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string | UnitEnum | null $navigationGroup = NavGroup::SETTINGS;
 
     protected string $view = 'filament.pages.user-preferences';
 

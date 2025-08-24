@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Integrations;
 
+use App\Enums\NavGroup;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -16,7 +17,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\Integrations\Pages\ListIntegrations;
 use App\Filament\Resources\Integrations\Pages\CreateIntegration;
-use App\Filament\Resources\IntegrationResource\Pages;
 use App\Jobs\SyncTransactions;
 use App\Models\Integration;
 use Carbon\Carbon;
@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\Bus;
 class IntegrationResource extends Resource
 {
     protected static ?string $model = Integration::class;
+    protected static string|null|\UnitEnum $navigationGroup = NavGroup::SETTINGS;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-globe-alt';
 
