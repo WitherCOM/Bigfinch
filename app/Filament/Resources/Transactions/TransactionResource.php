@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Transactions;
 
 use App\Enums\NavGroup;
+use App\Filament\Actions\Transactions\SetOriginalAction;
 use App\Filament\Forms\Components\PrettyJsonField;
 use Filament\Actions\ActionGroup;
 use Filament\Schemas\Schema;
@@ -160,6 +161,9 @@ class TransactionResource extends Resource
                     ->requiresConfirmation(false)
                     ->label(__('Exclude')),
                 ActionGroup::make([
+                    SetOriginalAction::make('set_original')
+                        ->visible(fn(Transaction $record) => !is_null($record->open_banking_transaction))
+                        ->authorize('update'),
                     KeepOnlyAction::make('keep_only')
                         ->authorize('update')
                         ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE),
