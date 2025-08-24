@@ -20,12 +20,7 @@ class Category extends Model
 
     protected $fillable = [
         'name',
-        'direction',
         'user_id'
-    ];
-
-    protected $casts = [
-        'direction' => Direction::class
     ];
 
     public $timestamps = false;
@@ -38,16 +33,6 @@ class Category extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
-    }
-
-    public function scopeIncome(Builder $query)
-    {
-        return $query->where('direction', Direction::INCOME);
-    }
-
-    public function scopeExpense(Builder $query)
-    {
-        return $query->where('direction', Direction::EXPENSE);
     }
 
     public function formattedValues(): Attribute

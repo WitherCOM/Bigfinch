@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Categories;
 
+use App\Enums\NavGroup;
+use Filament\Navigation\NavigationGroup;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -14,10 +16,7 @@ use App\Filament\Resources\Categories\Pages\ListCategories;
 use App\Filament\Resources\Categories\Pages\CreateCategory;
 use App\Filament\Resources\Categories\Pages\EditCategory;
 use App\Enums\Direction;
-use App\Filament\Resources\CategoryResource\Pages;
-use App\Filament\Resources\CategoryResource\RelationManagers;
 use App\Models\Category;
-use App\Rules\NotDefaultCategoryName;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -26,6 +25,7 @@ use Filament\Tables\Table;
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
+    protected static string|null|\UnitEnum $navigationGroup = NavGroup::TRANSACTIONS;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-newspaper';
 

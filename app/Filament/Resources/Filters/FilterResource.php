@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Filters;
 
+use App\Enums\NavGroup;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -25,9 +26,12 @@ use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use UnitEnum;
+
 class FilterResource extends Resource
 {
     protected static ?string $model = Filter::class;
+    protected static string | UnitEnum | null $navigationGroup = NavGroup::SETTINGS;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Currencies;
 
+use App\Enums\NavGroup;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -32,7 +33,7 @@ class CurrencyResource extends Resource
 {
     protected static ?string $model = Currency::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Management';
+    protected static string | \UnitEnum | null $navigationGroup = NavGroup::SETTINGS;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-currency-dollar';
 

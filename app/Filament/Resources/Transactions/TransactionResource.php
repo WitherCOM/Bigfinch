@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Transactions;
 
+use App\Enums\NavGroup;
 use App\Filament\Forms\Components\PrettyJsonField;
+use Filament\Actions\ActionGroup;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -31,18 +33,31 @@ use App\Filament\Actions\Transactions\SplitAction;
 use App\Models\Category;
 use App\Models\Transaction;
 use Carbon\Carbon;
-use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use UnitEnum;
 
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
+    protected static string | UnitEnum | null $navigationGroup = NavGroup::TRANSACTIONS;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-cart';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->select(['*',
+                DB::raw('
+                    CASE
+                        WHEN transactions.category_id IS NULL THEN 0
+                        ELSE 1
+                    END AS is_category_null')]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -91,6 +106,9 @@ class TransactionResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('date'),
+                SelectColumn::make('category_id')
+                    ->rules([Rule::in($categories->pluck('id'))])
+                    ->options(fn (Transaction $record) => $categories->pluck('name', 'id')),
                 TextColumn::make('formatted_value')
                     ->color(function (Transaction $transaction) {
                         if ($transaction->direction == Direction::INTERNAL_TO || $transaction->direction == Direction::INTERNAL_FROM){
@@ -107,8 +125,6 @@ class TransactionResource extends Resource
                     }),
                 TextColumn::make('description')
                     ->searchable(),
-                SelectColumn::make('category_id')
-                    ->options(fn (Transaction $record) => $categories->pluck('name', 'id')),
                 TextColumn::make('merchant')
                     ->searchable(),
             ])
@@ -123,7 +139,7 @@ class TransactionResource extends Resource
                     ->relationship('category', 'name', function (Builder $query) {
                         $query->where(function (Builder $query) {
                             $query->where('user_id', Auth::id())->orWhereNull('user_id');
-                        })->where('direction');
+                        });
                     }),
                 SelectFilter::make('Month')
                     ->query(fn (Builder $query, array $data) => $query->when($data['value'], fn (Builder $query, $month) => $query->whereMonth('date', $month)))
@@ -133,12 +149,6 @@ class TransactionResource extends Resource
             ])
             ->recordClasses(fn(Transaction $transaction) => $transaction->trashed() ? 'opacity-50' : null)
             ->recordActions([
-                KeepOnlyAction::make('keep_only')
-                    ->authorize('update')
-                    ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE),
-                SplitAction::make('split')
-                    ->authorize('update')
-                    ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE),
                 EditAction::make(),
                 RestoreAction::make()
                     ->modal(false)
@@ -148,10 +158,18 @@ class TransactionResource extends Resource
                     ->icon('')
                     ->modal(false)
                     ->requiresConfirmation(false)
-                    ->label('Exclude'),
-                ForceDeleteAction::make()
-                    ->label('')
-                    ->visible()
+                    ->label(__('Exclude')),
+                ActionGroup::make([
+                    KeepOnlyAction::make('keep_only')
+                        ->authorize('update')
+                        ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE),
+                    SplitAction::make('split')
+                        ->authorize('update')
+                        ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE),
+                    ForceDeleteAction::make()
+                        ->label(__('Permanently Delete'))
+                        ->visible(),
+                ])
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -164,6 +182,7 @@ class TransactionResource extends Resource
                         ->visible()
                 ]),
             ])
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->orderBy('is_category_null'))
             ->defaultSort('date', 'desc');
     }
 
