@@ -88,7 +88,7 @@ class TransactionResource extends Resource
                     ->relationship('category', 'name', function (Builder $query, Get $get) {
                         $query->where(function (Builder $query) {
                             $query->where('user_id', Auth::id())->orWhereNull('user_id');
-                        })->where('direction', $get('direction'));
+                        });
                     })
                     ->searchable(),
                 TagsInput::make('tags'),
