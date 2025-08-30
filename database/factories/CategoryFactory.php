@@ -20,7 +20,6 @@ class CategoryFactory extends Factory
     {
         return [
             'name' => $this->faker->name,
-            'direction' => collect(Direction::cases())->random(),
             'user_id' => User::all()->pluck('id')->random()
         ];
     }

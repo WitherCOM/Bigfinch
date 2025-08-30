@@ -22,9 +22,7 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
         $this->call(CurrencySeeder::class);
-        Category::factory()->count(10)->create([
-            'direction' => Direction::EXPENSE->value
-        ]);
+        Category::factory()->count(10)->create();
         Transaction::factory()->count(10000)->create();
 
 
