@@ -34,7 +34,6 @@ class PrettyJsonField extends Field
             if ($state === null || $state === '[]') {
                 $state = 'null';
             }
-
             $component->state($state);
         });
 

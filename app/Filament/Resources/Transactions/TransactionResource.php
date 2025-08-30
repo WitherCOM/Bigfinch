@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Transactions;
 use App\Enums\NavGroup;
 use App\Filament\Actions\Transactions\SetOriginalAction;
 use App\Filament\Forms\Components\PrettyJsonField;
+use App\Filament\Tables\Columns\WorkingSelectColumn;
 use Filament\Actions\ActionGroup;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
@@ -107,8 +108,7 @@ class TransactionResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('date'),
-                SelectColumn::make('category_id')
-                    ->rules([Rule::in($categories->pluck('id'))])
+                WorkingSelectColumn::make('category_id')
                     ->options(fn (Transaction $record) => $categories->pluck('name', 'id')),
                 TextColumn::make('formatted_value')
                     ->color(function (Transaction $transaction) {
