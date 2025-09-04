@@ -33,6 +33,10 @@ class CompleteTransactions extends TableWidget
 
         return $table
             ->query(fn (): Builder => Transaction::query()
+                ->whereIn('direction', [
+                    Direction::EXPENSE->value,
+                    Direction::INCOME->value
+                ])
                 ->whereNull('category_id')
             )
             ->defaultSort('date', 'desc')
