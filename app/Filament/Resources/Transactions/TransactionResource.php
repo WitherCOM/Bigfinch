@@ -52,13 +52,7 @@ class TransactionResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->select(['*',
-                DB::raw('
-                    CASE
-                        WHEN transactions.category_id IS NULL THEN 0
-                        ELSE 1
-                    END AS is_category_null')]);
+        return parent::getEloquentQuery();
     }
 
     public static function form(Schema $schema): Schema
