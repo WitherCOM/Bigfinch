@@ -13,14 +13,14 @@ Artisan::command('inspire', function () {
 Schedule::job(new \App\Jobs\SyncCurrencies)->dailyAt('6:00');
 
 Schedule::call(function () {
-    $jobs = [];
-    foreach(\App\Models\Integration::query()->where('can_auto_sync',true)->get() as $integration)
-    {
-        $jobs[] = new \App\Jobs\SyncTransactions($integration);
-    }
+    $batches = [];
     foreach(\App\Models\User::all() as $user)
     {
-        $jobs[] = new \App\Jobs\RunFlagEngine($user->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(config('app.retro_days')))->get());
+        $batches[] = Bus::batch($user->integrations()->where('can_auto_sync',true)->get()->map(function (\App\Models\Integration $integration) {
+            return new \App\Jobs\SyncTransactions($integration);
+        }));
+        $batches = new \App\Jobs\RunFlagEngine($user->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(config('app.retro_days')))->get());
     }
-    Bus::batch($jobs)->dispatch();
+
+    Bus::chain($batches)->dispatch();
 })->dailyAt('7:00');
