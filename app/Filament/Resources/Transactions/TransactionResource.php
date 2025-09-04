@@ -180,7 +180,6 @@ class TransactionResource extends Resource
                         ->visible()
                 ]),
             ])
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->orderBy('is_category_null'))
             ->defaultSort('date', 'desc');
     }
 
