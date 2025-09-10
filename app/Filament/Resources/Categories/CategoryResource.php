@@ -34,12 +34,7 @@ class CategoryResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->required(),
-                Select::make('direction')
                     ->required()
-                    ->options(Direction::class)
-                    ->enum(Direction::class),
-
             ]);
     }
 
@@ -50,9 +45,6 @@ class CategoryResource extends Resource
                 TextColumn::make('name')
             ])
             ->filters([
-                SelectFilter::make('direction')
-                    ->options(Direction::class)
-                    ->default(Direction::EXPENSE->value),
             ])
             ->recordActions([
                 EditAction::make(),
