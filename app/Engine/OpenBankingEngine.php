@@ -57,11 +57,18 @@ class OpenBankingEngine
 
     public static function parse(array $openBankingData): array {
         $currencies = Currency::all(['iso_code', 'id'])->pluck('id', 'iso_code');
+        // calculate date
+        if (isset($openBankingData['bookingDateTime']) || isset($openBankingData['bookingDate']))
+        {
+            $date = Carbon::parse($openBankingData['bookingDateTime'] ?? $openBankingData['bookingDate']);
+        } else {
+            $date = Carbon::parse($openBankingData['valueDateTime'] ?? $openBankingData['valueDate']);
+        }
         return [
             'description' => self::getDescription($openBankingData),
             'value' => abs(floatval($openBankingData['transactionAmount']['amount'])),
             'direction' => floatval($openBankingData['transactionAmount']['amount']) > 0 ? Direction::INCOME->value : Direction::EXPENSE->value,
-            'date' => Carbon::parse($openBankingData['bookingDateTime'] ?? $openBankingData['bookingDate']),
+            'date' => $date,
             'currency_id' => $currencies[$openBankingData['transactionAmount']['currency']],
             'open_banking_transaction' => json_encode($openBankingData),
             'common_id' => $openBankingData['transactionId'],

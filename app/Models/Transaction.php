@@ -41,7 +41,8 @@ class Transaction extends Model
         'date' => 'datetime',
         'open_banking_transaction' => 'array',
         'tags' => 'array',
-        'direction' => Direction::class
+        'direction' => Direction::class,
+        'is_pending' => 'boolean',
     ];
 
     protected $with = ['category'];
