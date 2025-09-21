@@ -101,7 +101,8 @@ class TransactionResource extends Resource
 
         return $table
             ->columns([
-                TextColumn::make('date'),
+                TextColumn::make('date')
+                    ->color(fn (Transaction $transaction) => $transaction->is_pending ? 'warning' : 'neutral'),
                 WorkingSelectColumn::make('category_id')
                     ->options(fn (Transaction $record) => $categories->pluck('name', 'id')),
                 TextColumn::make('formatted_value')
