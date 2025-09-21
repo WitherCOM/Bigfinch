@@ -15,6 +15,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
@@ -70,6 +71,7 @@ class CompleteTransactions extends TableWidget
                 //
             ])
             ->recordActions([
+                EditAction::make(),
                 DeleteAction::make()
                     ->icon('')
                     ->modal(false)
