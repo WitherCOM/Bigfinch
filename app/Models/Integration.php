@@ -201,7 +201,10 @@ class Integration extends Model
             $response = Http::withHeader('Authorization', "Bearer $access_token")
                 ->get("https://bankaccountdata.gocardless.com/api/v2/accounts/$account/transactions",$query);
             throw_if($response->failed(), new GocardlessException($response));
-            return $response->json('transactions.booked');
+            return [
+                'booked' => collect($response->json('transactions.booked')),
+                'pending' => collect($response->json('transactions.pending'))
+            ];
         });
         return $transactions;
     }
