@@ -190,23 +190,22 @@ class Integration extends Model
         $this->expires_at = Carbon::now()->addDays($response->json('access_valid_for_days'));
     }
 
-    public function getTransactions($start = null): Collection
+    public function getTransactions($start = null): array
     {
         $query = [];
         if (!is_null($start)) {
             $query['date_from'] = $start->toDateString();
         }
         $access_token = self::getAccessToken();
-        $transactions = collect($this->accounts)->flatMap(function ($account) use ($access_token, $query) {
+        return collect($this->accounts)->reduce(function ($acc, $account) use ($access_token, $query) {
             $response = Http::withHeader('Authorization', "Bearer $access_token")
                 ->get("https://bankaccountdata.gocardless.com/api/v2/accounts/$account/transactions",$query);
             throw_if($response->failed(), new GocardlessException($response));
             return [
-                'booked' => collect($response->json('transactions.booked')),
-                'pending' => collect($response->json('transactions.pending'))
+                'booked' => $acc['booked']->merge(collect($response->json('transactions.booked'))),
+                'pending' => $acc['pending']->merge(collect($response->json('transactions.pending')))
             ];
-        });
-        return $transactions;
+        }, ['booked' => collect(), 'pending' => collect()]);
     }
 
     public function user()

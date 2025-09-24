@@ -29,20 +29,10 @@ class SyncJobTest extends TestCase
         $this->seed(CurrencySeeder::class);
         Cache::set('gocardless_access_token', Str::uuid(), 3600);
         $this->user = User::factory()->create();
-        Integration::insert([
-            'id' => Str::uuid(),
-            'name' => 'asd',
-            'user_id' => $this->user->id,
-            'accounts' => json_encode([Str::uuid()]),
-            'institution_id' => 'id',
-            'institution_name' => 'name',
-            'institution_logo' => 'logo',
-            'requisition_id' => Str::uuid()
-        ]);
-        $this->integration = Integration::first();
     }
 
     public function test_allTransactionAreCreatedAndNotDuplicated(): void {
+        $integration = Integration::factory()->withAccountCount(1)->create();
         $booked = \Database\Factories\obapi\TransactionItemFactory::new()->many(30);
         $pending = \Database\Factories\obapi\TransactionItemFactory::new(false)->many(10);
         Http::fake([
@@ -63,20 +53,47 @@ class SyncJobTest extends TestCase
                         'pending' => $pending
                     ]])
         ]);
-        $job = new SyncTransactions($this->integration);
+        $job = new SyncTransactions($integration);
         $job->handle();
         $this->assertDatabaseCount(Transaction::class, 40);
 
-        $job = new SyncTransactions($this->integration);
+        $job = new SyncTransactions($integration);
         $job->handle();
         $this->assertDatabaseCount(Transaction::class, 40);
 
-        $job = new SyncTransactions($this->integration);
+        $job = new SyncTransactions($integration);
         $job->handle();
         $this->assertDatabaseCount(Transaction::class, 50);
     }
 
+    public function test_allTransactionAreCreatedWithMultipleAccount(): void {
+        $integration = Integration::factory()->withAccountCount(3)->create();
+        Http::fake([
+            'https://bankaccountdata.gocardless.com/api/v2/*' => Http::sequence()
+                ->push([
+                    'transactions' => [
+                        'booked' => \Database\Factories\obapi\TransactionItemFactory::new()->many(10),
+                        'pending' => \Database\Factories\obapi\TransactionItemFactory::new(false)->many(5)
+                    ]])
+                ->push([
+                    'transactions' => [
+                        'booked' => \Database\Factories\obapi\TransactionItemFactory::new()->many(10),
+                        'pending' => []
+                    ]])
+                ->push([
+                    'transactions' => [
+                        'booked' => \Database\Factories\obapi\TransactionItemFactory::new()->many(10),
+                        'pending' =>  \Database\Factories\obapi\TransactionItemFactory::new(false)->many(5)
+                    ]])
+        ]);
+
+        $job = new SyncTransactions($integration);
+        $job->handle();
+        $this->assertDatabaseCount(Transaction::class, 40);
+    }
+
     public function test_removingPendingTransactionsIfNotPendingAnymore(): void {
+        $integration = Integration::factory()->withAccountCount(1)->create();
         $booked = \Database\Factories\obapi\TransactionItemFactory::new()->many(20);
         $pending = \Database\Factories\obapi\TransactionItemFactory::new(false)->many(5);
         Http::fake([
@@ -93,16 +110,17 @@ class SyncJobTest extends TestCase
                     ]])
         ]);
 
-        $job = new SyncTransactions($this->integration);
+        $job = new SyncTransactions($integration);
         $job->handle();
         $this->assertDatabaseCount(Transaction::class, 25);
 
-        $job = new SyncTransactions($this->integration);
+        $job = new SyncTransactions($integration);
         $job->handle();
         $this->assertDatabaseCount(Transaction::class, 20);
     }
 
     public function test_switchPendingTransactionsToBooked(): void {
+        $integration = Integration::factory()->withAccountCount(1)->create();
         $booked = \Database\Factories\obapi\TransactionItemFactory::new()->many(20);
         $pending = \Database\Factories\obapi\TransactionItemFactory::new(false)->many(5);
         $bookedPending = array_map(function ($item) {
@@ -123,16 +141,17 @@ class SyncJobTest extends TestCase
                     ]])
         ]);
 
-        $job = new SyncTransactions($this->integration);
+        $job = new SyncTransactions($integration);
         $job->handle();
         $this->assertDatabaseCount(Transaction::class, 25);
 
-        $job = new SyncTransactions($this->integration);
+        $job = new SyncTransactions($integration);
         $job->handle();
         $this->assertDatabaseCount(Transaction::class, 25);
     }
 
     public function test_switchPendingTransactionsToBookedCheckParameterChanged() {
+        $integration = Integration::factory()->withAccountCount(1)->create();
         $pending = \Database\Factories\obapi\TransactionItemFactory::new(false)->many(1);
         $bookedPending = array_map(function ($item) {
             $item['bookingDateTime'] = Carbon::now()->toISOString();
@@ -152,13 +171,13 @@ class SyncJobTest extends TestCase
                     ]])
         ]);
 
-        $job = new SyncTransactions($this->integration);
+        $job = new SyncTransactions($integration);
         $job->handle();
         $this->assertDatabaseCount(Transaction::class, 1);
         $transactionFirst = Transaction::first();
         $this->assertTrue($transactionFirst->is_pending);
 
-        $job = new SyncTransactions($this->integration);
+        $job = new SyncTransactions($integration);
         $job->handle();
         $this->assertDatabaseCount(Transaction::class, 1);
         $transactionSecond = Transaction::first();
