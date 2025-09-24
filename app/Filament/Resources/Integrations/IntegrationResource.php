@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Integrations;
 
 use App\Enums\NavGroup;
+use Filament\Actions\ActionGroup;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -81,7 +82,15 @@ class IntegrationResource extends Resource
                     ->schema([
                         TextInput::make('name')
                     ]),
-                DeleteAction::make()
+                ActionGroup::make([
+                    Action::make('force_renew')
+                        ->action(function (Integration $record) {
+                            $record->deleteRequisition();
+                            $record->createRequisition();
+                            $record->save();
+                        }),
+                    DeleteAction::make()
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
