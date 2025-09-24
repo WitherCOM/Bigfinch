@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Forms\Components\TagsInput;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -121,6 +122,7 @@ class TransactionResource extends Resource
                     }),
                 TextColumn::make('description')
                     ->searchable(),
+                TextColumn::make('integration.name'),
                 TextColumn::make('merchant')
                     ->searchable(),
             ])
