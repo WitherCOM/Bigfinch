@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Transactions;
 
 use App\Enums\NavGroup;
+use App\Filament\Actions\Transactions\AddTagBulkAction;
 use App\Filament\Actions\Transactions\SetOriginalAction;
 use App\Filament\Forms\Components\PrettyJsonField;
 use App\Filament\Tables\Columns\WorkingSelectColumn;
@@ -13,6 +14,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Forms\Components\TagsInput;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\SelectColumn;
@@ -122,6 +124,8 @@ class TransactionResource extends Resource
                     }),
                 TextColumn::make('description')
                     ->searchable(),
+                TextColumn::make('tags')
+                    ->badge(),
                 TextColumn::make('integration.name'),
                 TextColumn::make('merchant')
                     ->searchable(),
@@ -179,6 +183,7 @@ class TransactionResource extends Resource
                         ->label('Exclude'),
                     RunEngineBulkAction::make('run_engine'),
                     MergeBulkAction::make('merge'),
+                    AddTagBulkAction::make('add_tag'),
                     ForceDeleteBulkAction::make()
                         ->visible()
                 ]),
