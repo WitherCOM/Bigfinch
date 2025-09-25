@@ -78,18 +78,12 @@ class CompleteTransactions extends TableWidget
                     ->requiresConfirmation(false)
                     ->label(__('Exclude')),
                 ActionGroup::make([
-                    SetOriginalAction::make('set_original')
-                        ->visible(fn(Transaction $record) => !is_null($record->open_banking_transaction))
-                        ->authorize('update'),
                     KeepOnlyAction::make('keep_only')
                         ->authorize('update')
                         ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE),
                     SplitAction::make('split')
                         ->authorize('update')
-                        ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE),
-                    ForceDeleteAction::make()
-                        ->label(__('Permanently Delete'))
-                        ->visible(),
+                        ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE)
                 ])
             ])
             ->toolbarActions([
