@@ -16,14 +16,14 @@ class CurrentMonthCategoryPie extends ChartWidget
 {
     public function getHeading(): string|Htmlable|null
     {
-        return __('Monthly category');
+        return __('Current month category');
     }
 
 
     protected function getData(): array
     {
         $displayCurrency = Currency::find(Auth::user()->default_currency_id);
-        $transactions = Auth::user()->getStatisticalTransactionData(Carbon::today()->startOfMonth()->subMonths(2),Direction::EXPENSE,$displayCurrency)
+        $transactions = Auth::user()->getStatisticalTransactionData(Carbon::today()->startOfMonth(),Direction::EXPENSE,$displayCurrency)
             ->groupBy('category')
             ->mapWithKeys(fn($group,$category) => [$category => $group->sum('value')]);
 
