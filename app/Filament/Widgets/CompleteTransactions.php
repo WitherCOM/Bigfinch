@@ -18,6 +18,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
@@ -71,7 +73,15 @@ class CompleteTransactions extends TableWidget
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->schema([
+                        TagsInput::make('tags'),
+                        Select::make('direction')
+                            ->required()
+                            ->live()
+                            ->options(Direction::class)
+                            ->enum(Direction::class)
+                    ]),
                 DeleteAction::make()
                     ->icon('')
                     ->modal(false)
