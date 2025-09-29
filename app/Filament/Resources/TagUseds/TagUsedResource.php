@@ -42,7 +42,10 @@ class TagUsedResource extends Resource
             ->columns([
                 //
                 TextColumn::make('tag'),
-                TextColumn::make('value'),
+                TextColumn::make('value')
+                    ->sortable(),
+                TextColumn::make('last_seen')
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -50,7 +53,8 @@ class TagUsedResource extends Resource
             ->recordActions([
             ])
             ->toolbarActions([
-            ]);
+            ])
+            ->defaultSort('last_seen','desc');
     }
 
     public static function getRelations(): array
