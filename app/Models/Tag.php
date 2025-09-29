@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Direction;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Sushi\Sushi;
 
 class Tag extends Model
@@ -27,11 +28,12 @@ class Tag extends Model
 
         return $tagsPerUserId->reduce(function ($tags, $item) use ($transactions, $displayCurrencies) {
             foreach ($item['tags'] as $tag) {
+                $relevantTransactions = $transactions->filter(fn (Transaction $transaction) => $transaction->user_id == $item['user_id'] && collect($transaction->tags)->contains($tag));
                 $tags[] = [
                     'user_id' => $item['user_id'],
                     'tag' => $tag,
-                    'value' => $transactions
-                        ->filter(fn (Transaction $transaction) => collect($transaction->tags)->contains($tag))
+                    'last_seen' => $relevantTransactions->max('date'),
+                    'value' => $relevantTransactions
                     ->sum(fn (Transaction $transaction) => $transaction->currency->nearestRate($transaction->date) * $transaction->value / $displayCurrencies[$item['user_id']]->nearestRate($transaction->date))
                 ];
             }
