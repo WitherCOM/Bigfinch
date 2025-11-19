@@ -10,6 +10,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class MergeBulkAction extends BulkAction
 {
@@ -25,8 +26,11 @@ class MergeBulkAction extends BulkAction
                 $sumIncome = $incomes->sum('value');
                 $expense = $expenses->first();
                 if ($expense->value > $sumIncome) {
+                    $mergeId = Str::uuid()->toString();
                     $expense->value -= $sumIncome;
+                    $expense->merge_id = $mergeId;
                     $expense->save();
+                    Transaction::query()->whereIn('id', $incomes->pluck('id'))->update(['merge_id' => $mergeId]);
                     $incomes->each(fn(Transaction $transaction) => $transaction->delete());
                 }
             }
