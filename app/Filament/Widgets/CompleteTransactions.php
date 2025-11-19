@@ -5,8 +5,6 @@ namespace App\Filament\Widgets;
 use App\Enums\Direction;
 use App\Filament\Actions\Transactions\KeepOnlyAction;
 use App\Filament\Actions\Transactions\MergeBulkAction;
-use App\Filament\Actions\Transactions\RunEngineBulkAction;
-use App\Filament\Actions\Transactions\SetOriginalAction;
 use App\Filament\Actions\Transactions\SplitAction;
 use App\Filament\Tables\Columns\WorkingSelectColumn;
 use App\Models\Category;
@@ -16,14 +14,15 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class CompleteTransactions extends TableWidget
 {
@@ -40,6 +39,7 @@ class CompleteTransactions extends TableWidget
                     Direction::EXPENSE->value,
                     Direction::INCOME->value
                 ])
+                ->where('date','>', Carbon::now()->subMonths(2))
                 ->whereNull('category_id')
             )
             ->defaultSort('date', 'desc')
@@ -75,6 +75,7 @@ class CompleteTransactions extends TableWidget
             ->recordActions([
                 EditAction::make()
                     ->schema([
+                        TextInput::make('description'),
                         TagsInput::make('tags'),
                         Select::make('direction')
                             ->required()

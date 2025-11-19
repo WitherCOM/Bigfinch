@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class SplitAction extends Action
 {
@@ -35,14 +36,17 @@ class SplitAction extends Action
                 ->searchable()
         ]);
         $this->action(function (Transaction $record, array $data) {
+            $mergeId = Str::uuid()->toString();
             $transaction = $record->replicate(['id']);
             $transaction->value = $data['value'];
             $transaction->category_id = $data['category_id'];
             $transaction->description = $data['description'];
+            $transaction->merge_id = $mergeId;
             $transaction->save();
             $record->refresh();
             $record->update([
-                'value' => $record->value - $data['value']
+                'value' => $record->value - $data['value'],
+                'merge_id' => $mergeId,
             ]);
         });
 
