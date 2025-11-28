@@ -36,7 +36,10 @@ class SplitAction extends Action
                 ->searchable()
         ]);
         $this->action(function (Transaction $record, array $data) {
-            $mergeId = Str::uuid()->toString();
+            $mergeId = $record->merge_id;
+            if (is_null($mergeId)) {
+                $mergeId = Str::uuid()->toString();
+            }
             $transaction = $record->replicate(['id']);
             $transaction->value = $data['value'];
             $transaction->category_id = $data['category_id'];
