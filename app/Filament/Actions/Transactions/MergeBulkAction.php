@@ -26,7 +26,10 @@ class MergeBulkAction extends BulkAction
                 $sumIncome = $incomes->sum('value');
                 $expense = $expenses->first();
                 if ($expense->value > $sumIncome) {
-                    $mergeId = Str::uuid()->toString();
+                    $mergeId = $expense->merge_id;
+                    if (is_null($mergeId)) {
+                        $mergeId = Str::uuid()->toString();
+                    }
                     $expense->value -= $sumIncome;
                     $expense->merge_id = $mergeId;
                     $expense->save();
@@ -35,6 +38,6 @@ class MergeBulkAction extends BulkAction
                 }
             }
         });
-
+        $this->deselectRecordsAfterCompletion();
     }
 }

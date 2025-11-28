@@ -36,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         Transaction::creating(function (Transaction $transaction) {
-            $transaction->tags = array_merge($transaction->tags, AutoTag::where('user_id', Auth::id())
+            $transaction->tags = array_merge($transaction->tags ?? [], AutoTag::where('user_id', Auth::id())
                 ->active()
                 ->pluck('tag')
                 ->toArray());
