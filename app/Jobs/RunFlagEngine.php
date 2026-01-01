@@ -3,14 +3,14 @@
 namespace App\Jobs;
 
 use App\Engine\FlagEngine;
-use App\Engine\FlagInternalTransactions;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Collection;
 
 class RunFlagEngine implements ShouldQueue
 {
-    use Queueable;
+    use Batchable, Queueable;
 
     private Collection $transactions;
 
