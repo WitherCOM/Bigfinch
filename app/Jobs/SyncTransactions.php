@@ -11,6 +11,7 @@ use App\Models\Merchant;
 use App\Models\RawMerchant;
 use App\Models\Transaction;
 use Filament\Notifications\Notification;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Carbon;
@@ -19,7 +20,7 @@ use Illuminate\Support\Str;
 
 class SyncTransactions implements ShouldQueue
 {
-    use Queueable;
+    use Batchable, Queueable;
 
     private Integration $integration;
 
