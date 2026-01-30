@@ -15,7 +15,7 @@ class PrettyJsonField extends Field
     protected bool | Closure $isDisabled = true;
     protected string $view = 'filament.forms.components.pretty-json-field';
 
-    protected bool | Closure $isDehydrated = false;
+    protected Closure|bool|null $isDehydrated = false;
 
     protected function setUp(): void
     {
