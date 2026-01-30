@@ -16,10 +16,11 @@ Schedule::call(function () {
     $batches = [];
     foreach(\App\Models\User::all() as $user)
     {
-        $batches[] = Bus::batch($user->integrations()->where('can_auto_sync',true)->get()->map(function (\App\Models\Integration $integration) {
+        $batch = Bus::batch($user->integrations()->where('can_auto_sync',true)->get()->map(function (\App\Models\Integration $integration) {
             return new \App\Jobs\SyncTransactions($integration);
         }));
-        $batches = new \App\Jobs\RunFlagEngine($user->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(config('app.retro_days')))->get());
+        $batch->add(new \App\Jobs\RunFlagEngine($user->transactions()->where('date','>=', \Carbon\Carbon::now()->subDays(config('app.retro_days')))->get()));
+        $batches[] = $batch;
     }
 
     Bus::chain($batches)->dispatch();
