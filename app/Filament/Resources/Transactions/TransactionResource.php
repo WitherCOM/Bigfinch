@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Transactions;
 
 use App\Enums\NavGroup;
 use App\Filament\Actions\Transactions\AddTagBulkAction;
+use App\Filament\Actions\Transactions\CompareBulkAction;
 use App\Filament\Actions\Transactions\SetOriginalAction;
 use App\Filament\Forms\Components\PrettyJsonField;
 use App\Filament\Tables\Columns\WorkingSelectColumn;
@@ -101,7 +102,6 @@ class TransactionResource extends Resource
         for ($month = 1; $month <= Carbon::now()->month; $month++) {
             $monthSelect[$month] = Carbon::create(month: $month)->format('M');
         }
-
         return $table
             ->columns([
                 TextColumn::make('date')
@@ -173,7 +173,7 @@ class TransactionResource extends Resource
                         ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE),
                     ForceDeleteAction::make()
                         ->label(__('Permanently Delete'))
-                        ->visible(),
+                        ->visible()
                 ])
             ])
             ->toolbarActions([
@@ -184,6 +184,7 @@ class TransactionResource extends Resource
                     RunEngineBulkAction::make('run_engine'),
                     MergeBulkAction::make('merge'),
                     AddTagBulkAction::make('add_tag'),
+                    CompareBulkAction::make('compare'),
                     ForceDeleteBulkAction::make()
                         ->visible()
                 ]),
