@@ -3,7 +3,9 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Forms\Components\PrettyJsonField;
+use App\Filament\Infolists\Components\PrettyJsonEntry;
 use App\Models\Transaction;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Pages\Page;
@@ -50,7 +52,7 @@ class ComparePage extends Page
                  \Filament\Infolists\Components\TextEntry::make('currency.iso_code'),
                  \Filament\Infolists\Components\TextEntry::make('category.name')->label('Category'),
                  \Filament\Infolists\Components\TextEntry ::make('tags')->badge(),
-                 PrettyJsonField::make('open_banking_transaction')
+                 PrettyJsonEntry::make('open_banking_transaction')
             ]);
 
     }
