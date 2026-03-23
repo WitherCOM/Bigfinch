@@ -5,7 +5,7 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.5",
         "antlr/antlr4-php-runtime": "^0.9.1",
         "calebporzio/sushi": "^2.5",
         "filament/filament": "^4.0",

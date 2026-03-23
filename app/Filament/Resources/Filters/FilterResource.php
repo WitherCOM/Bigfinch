@@ -31,7 +31,7 @@ use UnitEnum;
 class FilterResource extends Resource
 {
     protected static ?string $model = Filter::class;
-    protected static string | UnitEnum | null $navigationGroup = NavGroup::SETTINGS;
+    protected static string | UnitEnum | null $navigationGroup = NavGroup::TRANSACTIONS;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 

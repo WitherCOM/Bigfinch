@@ -19,7 +19,7 @@ use UnitEnum;
 class TagUsedResource extends Resource
 {
     protected static ?string $model = Tag::class;
-    protected static string | UnitEnum | null $navigationGroup = NavGroup::STATISTICS;
+    protected static string | UnitEnum | null $navigationGroup = NavGroup::ANALYTICS;
 
     public static function getEloquentQuery(): Builder
     {
