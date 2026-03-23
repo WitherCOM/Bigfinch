@@ -33,7 +33,7 @@ use Illuminate\Support\Facades\Bus;
 class IntegrationResource extends Resource
 {
     protected static ?string $model = Integration::class;
-    protected static string|null|\UnitEnum $navigationGroup = NavGroup::SETTINGS;
+    protected static string|null|\UnitEnum $navigationGroup = NavGroup::TRANSACTIONS;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-globe-alt';
 

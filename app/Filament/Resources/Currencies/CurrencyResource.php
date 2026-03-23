@@ -33,7 +33,7 @@ class CurrencyResource extends Resource
 {
     protected static ?string $model = Currency::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = NavGroup::SETTINGS;
+    protected static string | \UnitEnum | null $navigationGroup = NavGroup::MANAGEMENT;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-currency-dollar';
 
