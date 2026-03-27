@@ -10,6 +10,7 @@ enum NavGroup: string implements HasLabel
     case TRANSACTIONS = 'Transactions';
     case MANAGEMENT = 'Management';
     case ANALYTICS = 'Analytics';
+    case ADMIN = 'Admin';
 
     public function getLabel(): string|Htmlable|null
     {
