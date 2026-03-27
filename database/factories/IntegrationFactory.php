@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\GocardlessToken;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Collection;
@@ -33,6 +34,7 @@ class IntegrationFactory extends Factory
             'id' => Str::uuid(),
             'name' => $this->faker->word,
             'user_id' => User::all()->random()->id,
+            'gocardless_token_id' => GocardlessToken::factory()->create()->id,
             'accounts' => Collection::range(0,rand(0,10))->map(fn ($value) => Str::uuid())->toArray(),
             'institution_id' => 'id',
             'institution_name' => 'name',

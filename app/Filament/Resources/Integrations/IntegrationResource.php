@@ -19,6 +19,7 @@ use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\Integrations\Pages\ListIntegrations;
 use App\Filament\Resources\Integrations\Pages\CreateIntegration;
 use App\Jobs\SyncTransactions;
+use App\Models\GocardlessToken;
 use App\Models\Integration;
 use Carbon\Carbon;
 use Filament\Forms;
@@ -43,7 +44,7 @@ class IntegrationResource extends Resource
             ->components([
                 TextInput::make('name'),
                 Select::make('institution_id')
-                    ->options(Integration::listBanks())
+                    ->options(fn () => Integration::listBanks(GocardlessToken::firstOrFail()))
                     ->searchable(),
             ]);
     }
