@@ -33,9 +33,6 @@ class IntegrationsRelationManager extends RelationManager
                     ->required(),
                 Toggle::make('can_auto_sync')
                     ->required(),
-                Select::make('gocardless_token')
-                    ->multiple()
-                    ->relationship('gocardless_token'),
             ]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Gocardlesses\Schemas;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -16,6 +17,9 @@ class GocardlessForm
                 TextInput::make('max_connections')
                     ->integer()
                     ->default(50),
+                Select::make('integrations')
+                    ->multiple()
+                    ->relationship('integrations'),
             ]);
     }
 }
