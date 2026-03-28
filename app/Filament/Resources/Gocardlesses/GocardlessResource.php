@@ -3,15 +3,15 @@
 namespace App\Filament\Resources\Gocardlesses;
 
 use App\Enums\NavGroup;
-use App\Filament\Resources\Gocardlesses\RelationManagers\IntegrationsRelationManager;
-use App\Filament\Resources\Gocardlesses\RelationManagers\RequisitionsRelationManager;
 use App\Filament\Resources\Gocardlesses\Pages\CreateGocardless;
 use App\Filament\Resources\Gocardlesses\Pages\EditGocardless;
 use App\Filament\Resources\Gocardlesses\Pages\ListGocardlesses;
 use App\Filament\Resources\Gocardlesses\Pages\ViewGocardless;
+use App\Filament\Resources\Gocardlesses\RelationManagers\IntegrationsRelationManager;
+use App\Filament\Resources\Gocardlesses\RelationManagers\RequisitionsRelationManager;
 use App\Filament\Resources\Gocardlesses\Schemas\GocardlessForm;
 use App\Filament\Resources\Gocardlesses\Tables\GocardlessesTable;
-use App\Models\GocardlessToken;
+use App\Models\Gocardless\GocardlessToken;
 use BackedEnum;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
@@ -51,6 +51,8 @@ class GocardlessResource extends Resource
                 ->label('Refresh token expires')
                 ->dateTime()
                 ->placeholder('No token'),
+            TextEntry::make('active_integrations_count')
+                ->label('Active integrations'),
         ]);
     }
 

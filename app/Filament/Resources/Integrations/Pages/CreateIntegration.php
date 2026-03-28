@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Integrations\Pages;
 
 use App\Filament\Resources\Integrations\IntegrationResource;
+use App\Models\Gocardless\GocardlessToken;
 use App\Models\Integration;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
@@ -17,6 +18,7 @@ class CreateIntegration extends CreateRecord
     {
         $integration = new Integration($data);
         $integration->user_id = Auth::id();
+        $integration->gocardless_token_id = GocardlessToken::available()->id;
         $integration->fillBasics($data['institution_id']);
         $integration->createRequisition();
         $integration->save();

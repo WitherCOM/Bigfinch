@@ -12,14 +12,14 @@ class GocardlessForm
     {
         return $schema
             ->components([
-                TextInput::make('secret_id'),
-                TextInput::make('secret_key'),
+                TextInput::make('secret_id')
+                    ->required(),
+                TextInput::make('secret_key')
+                    ->required(),
                 TextInput::make('max_connections')
+                    ->required()
                     ->integer()
-                    ->default(50),
-                Select::make('integrations')
-                    ->multiple()
-                    ->relationship('integrations'),
+                    ->default(50)
             ]);
     }
 }

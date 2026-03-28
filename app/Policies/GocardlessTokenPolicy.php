@@ -2,10 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Currency;
-use App\Models\GocardlessToken;
+use App\Models\Gocardless\GocardlessToken;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class GocardlessTokenPolicy
 {

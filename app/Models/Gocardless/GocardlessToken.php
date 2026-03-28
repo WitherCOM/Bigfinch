@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Gocardless;
 
 use App\Exceptions\GocardlessException;
+use App\Models\Integration;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +37,19 @@ class GocardlessToken extends Model
     public function integrations(): HasMany
     {
         return $this->hasMany(Integration::class);
+    }
+
+    public function activeIntegrationsCount(): Attribute
+    {
+        return Attribute::get(fn () => $this->integrations
+            ->filter(fn (Integration $i) => $i->expires_at !== null && $i->expires_at->isFuture())->count());
+    }
+
+    public static function available(): static
+    {
+        return static::all()
+            ->first(fn (self $token) => $token->active_integrations->count() < $token->max_connections)
+            ?? throw new GocardlessException('No GoCardless tokens with available connections.');
     }
 
     public function requisitions(): HasMany

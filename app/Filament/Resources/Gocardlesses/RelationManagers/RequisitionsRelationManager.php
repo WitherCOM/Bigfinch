@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Gocardlesses\RelationManagers;
 
-use App\Models\GocardlessToken;
+use App\Models\Gocardless\GocardlessToken;
 use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\IconColumn;
@@ -43,6 +43,8 @@ class RequisitionsRelationManager extends RelationManager
                     ->numeric(),
                 IconColumn::make('active')
                     ->boolean(),
+                TextColumn::make('integration_name'),
+                TextColumn::make('user_name'),
             ])
             ->recordActions([
                 Action::make('delete')

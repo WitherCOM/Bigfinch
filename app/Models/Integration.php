@@ -2,17 +2,16 @@
 
 namespace App\Models;
 
-use Database\Factories\IntegrationFactory;
 use App\Exceptions\GocardlessException;
+use App\Models\Gocardless\GocardlessToken;
 use App\Models\Scopes\OwnerScope;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Database\Factories\IntegrationFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;

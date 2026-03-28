@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\GocardlessToken;
+use App\Models\Gocardless\GocardlessToken;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Collection;
