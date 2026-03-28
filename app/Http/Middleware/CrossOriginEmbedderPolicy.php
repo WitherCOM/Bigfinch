@@ -16,7 +16,7 @@ class CrossOriginEmbedderPolicy
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
-        $response->headers->set('Cross-Origin-Embedder-Policy', 'credentialless');
+        $response->headers->set('Cross-Origin-Embedder-Policy', 'cross-origin');
         return $next($request);
     }
 }
