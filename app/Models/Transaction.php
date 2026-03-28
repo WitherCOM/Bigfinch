@@ -57,6 +57,11 @@ class Transaction extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function integration(): BelongsTo
+    {
+        return $this->belongsTo(Integration::class);
+    }
+
     public function formattedValue(): Attribute
     {
         return Attribute::get(function () {

@@ -38,7 +38,7 @@ class FlagEngine
             if (!is_null($transactions[$index]->integration_id)) {
                 $creditorName = Str::lower($transactions[$index]->open_banking_transaction['creditorName'] ?? "");
                 $debitorName = Str::lower($transactions[$index]->open_banking_transaction['debitorName'] ?? "");
-                $info = Str::lower(implode(" ", $transactions[$index]->open_banking_transaction["remittanceInformationUnstructuredArray"]));
+                $info = Str::lower(implode(" ", $transactions[$index]->open_banking_transaction["remittanceInformationUnstructuredArray"] ?? ""));
                 if ($transactions[$index] == Direction::INCOME && Str::contains($info, self::INTERNAL_TO_KEYWORDS)) {
                     $transactions[$index]->direction = Direction::INTERNAL_TO;
                     continue;

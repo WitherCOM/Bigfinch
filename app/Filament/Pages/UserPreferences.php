@@ -21,7 +21,7 @@ class UserPreferences extends Page implements HasForms
 
     public ?array $data = [];
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
-    protected static string | UnitEnum | null $navigationGroup = NavGroup::SETTINGS;
+    protected static string | UnitEnum | null $navigationGroup = NavGroup::MANAGEMENT;
 
     protected string $view = 'filament.pages.user-preferences';
 
