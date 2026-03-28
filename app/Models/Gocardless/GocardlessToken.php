@@ -5,6 +5,8 @@ namespace App\Models\Gocardless;
 use App\Exceptions\GocardlessException;
 use App\Models\Integration;
 use Carbon\Carbon;
+use Database\Factories\GocardlessTokenFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
+#[UseFactory(GocardlessTokenFactory::class)]
 class GocardlessToken extends Model
 {
     use HasUuids;
