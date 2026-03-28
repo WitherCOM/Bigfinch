@@ -1,11 +1,10 @@
-FROM ghcr.io/withercom/docker-laravel:php8.2 as builder
-WORKDIR /usr/src/app
+FROM registry.pandora-new.ktk.bme.hu/core/docker/laravel:8.5 as builder
+WORKDIR /srv/http
 COPY . .
-RUN apk add nodejs npm wget
-RUN wget -O - https://getcomposer.org/installer | php -- --filename=composer --install-dir=/usr/bin
-RUN composer install --no-scripts --no-ansi --no-dev --no-interaction --no-plugins --no-progress --optimize-autoloader
+RUN install-php-extensions soap
+RUN composer install --no-ansi --no-dev --no-interaction --no-plugins --no-progress --optimize-autoloader --no-scripts
 RUN npm install --no-package-lock && npm run build
 RUN composer install --no-ansi --no-dev --no-interaction --no-plugins --no-progress --optimize-autoloader
 
-FROM ghcr.io/withercom/docker-laravel:php8.2
-COPY --chown=www-data:www-data --from=builder /usr/src/app /app
+FROM registry.pandora-new.ktk.bme.hu/core/docker/laravel:8.5
+COPY --from=builder /srv/http /srv/http

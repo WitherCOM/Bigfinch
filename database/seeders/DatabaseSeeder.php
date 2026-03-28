@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'can_manage_settings' => true,
             'password' => bcrypt('password'),
         ]);
         $this->call(CurrencySeeder::class);
