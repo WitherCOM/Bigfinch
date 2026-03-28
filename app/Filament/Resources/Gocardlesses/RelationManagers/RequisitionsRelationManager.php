@@ -1,32 +1,27 @@
 <?php
 
-namespace App\Filament\Resources\Gocardlesses\Widgets;
+namespace App\Filament\Resources\Gocardlesses\RelationManagers;
 
 use App\Models\GocardlessToken;
 use Filament\Actions\Action;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Widgets\TableWidget;
-use Illuminate\Database\Eloquent\Model;
 
-class RequisitionsTable extends TableWidget
+class RequisitionsRelationManager extends RelationManager
 {
-    public ?Model $record = null;
-
-    protected int | string | array $columnSpan = 2;
+    protected static string $relationship = 'requisitions';
 
     public function table(Table $table): Table
     {
         return $table
-            ->heading('RequisitionsRelationManager')
-            ->records(fn () => $this->fetchRequisitions())
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->copyable()
                     ->limit(8)
-                    ->tooltip(fn ($record) => $record['id']),
+                    ->tooltip(fn ($record) => $record->id),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state) => match ($state) {
@@ -54,19 +49,13 @@ class RequisitionsTable extends TableWidget
                     ->icon('heroicon-o-trash')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(function (array $record) {
+                    ->action(function ($record) {
                         /** @var GocardlessToken $token */
-                        $token = $this->record;
-                        $token->deleteRequisition($record['id']);
+                        $token = $this->ownerRecord;
+                        $token->deleteRequisition($record->id);
                     }),
             ])
+            ->defaultSort('created','desc')
             ->paginated(false);
-    }
-
-    protected function fetchRequisitions(): array
-    {
-        /** @var GocardlessToken $token */
-        $token = $this->record;
-        return $token->listRequisitions();
     }
 }
