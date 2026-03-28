@@ -1,10 +1,8 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\gocardless;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
