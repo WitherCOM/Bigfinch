@@ -28,7 +28,6 @@ class GocardlessToken extends Model
     ];
 
     protected $hidden = [
-        'secret_key',
         'access_token',
         'refresh_token',
     ];
@@ -36,6 +35,13 @@ class GocardlessToken extends Model
     public function integrations(): HasMany
     {
         return $this->hasMany(Integration::class);
+    }
+
+    public function requisitions(): HasMany
+    {
+        Requisition::forToken($this);
+
+        return $this->hasMany(Requisition::class);
     }
 
     /**
@@ -71,7 +77,7 @@ class GocardlessToken extends Model
             throw new GocardlessException($response);
         }
 
-        $response = Http::withoutVerifying()->post("$base/token/new/", [
+        $response = Http::post("$base/token/new/", [
             'secret_id' => $this->secret_id,
             'secret_key' => $this->secret_key,
         ]);
@@ -101,7 +107,6 @@ class GocardlessToken extends Model
         $accessToken = $this->getAccessToken();
 
         $response = Http::withHeader('Authorization', "Bearer $accessToken")
-            ->withoutVerifying()
             ->get("$base/agreements/enduser/");
 
         throw_if($response->failed(), new GocardlessException($response));
@@ -114,7 +119,7 @@ class GocardlessToken extends Model
         $base = config('gocardless.base_url');
         $accessToken = $this->getAccessToken();
 
-        $response = Http::withoutVerifying()->withHeader('Authorization', "Bearer $accessToken")
+        $response = Http::withHeader('Authorization', "Bearer $accessToken")
             ->get("$base/requisitions/");
 
         throw_if($response->failed(), new GocardlessException($response));

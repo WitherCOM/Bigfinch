@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Gocardlesses;
 
 use App\Enums\NavGroup;
+use App\Filament\Resources\Gocardlesses\RelationManagers\IntegrationsRelationManager;
+use App\Filament\Resources\Gocardlesses\RelationManagers\RequisitionsRelationManager;
 use App\Filament\Resources\Gocardlesses\Pages\CreateGocardless;
 use App\Filament\Resources\Gocardlesses\Pages\EditGocardless;
 use App\Filament\Resources\Gocardlesses\Pages\ListGocardlesses;
@@ -55,7 +57,8 @@ class GocardlessResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            IntegrationsRelationManager::make(),
+            RequisitionsRelationManager::make()
         ];
     }
 
