@@ -8,8 +8,13 @@ use Nette\Utils\Json;
 
 class GocardlessException extends Exception
 {
-    public function __construct(Response $response)
+    public function __construct(Response|string $response)
     {
+        if (is_string($response)) {
+            parent::__construct($response);
+            return;
+        }
+
         if ($response->paymentRequired())
         {
             parent::__construct("Gocardless is out of free credits!");

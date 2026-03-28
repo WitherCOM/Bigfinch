@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Gocardlesses\Widgets;
 
-use App\Models\GocardlessToken;
+use App\Models\Gocardless\GocardlessToken;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;

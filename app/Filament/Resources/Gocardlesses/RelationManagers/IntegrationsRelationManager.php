@@ -18,6 +18,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -41,24 +42,15 @@ class IntegrationsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
-                    ->searchable(),
+                ImageColumn::make('institution_logo')->label(''),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('institution_name')
                     ->searchable(),
-                TextColumn::make('institution_logo')
-                    ->searchable(),
-                TextColumn::make('requisition_id')
-                    ->searchable(),
-                TextColumn::make('link')
-                    ->searchable(),
                 TextColumn::make('expires_at')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('user_id')
-                    ->numeric()
+                TextColumn::make('user.name')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -72,26 +64,20 @@ class IntegrationsRelationManager extends RelationManager
                     ->dateTime()
                     ->sortable(),
                 IconColumn::make('can_auto_sync')
-                    ->boolean(),
-                TextColumn::make('institution_id')
-                    ->searchable(),
+                    ->boolean()
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
                 AssociateAction::make(),
             ])
             ->recordActions([
-                EditAction::make(),
                 DissociateAction::make(),
-                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DissociateBulkAction::make(),
-                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
