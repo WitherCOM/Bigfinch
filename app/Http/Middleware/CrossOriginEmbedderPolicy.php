@@ -17,6 +17,6 @@ class CrossOriginEmbedderPolicy
     {
         $response = $next($request);
         $response->headers->set('Cross-Origin-Embedder-Policy', 'cross-origin');
-        return $next($request);
+        return $response;
     }
 }
