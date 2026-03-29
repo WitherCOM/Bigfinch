@@ -1,14 +1,12 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\Gocardless;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Integration>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Gocardless\GocardlessToken>
  */
 class GocardlessTokenFactory extends Factory
 {
