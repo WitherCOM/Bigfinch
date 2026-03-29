@@ -28,7 +28,6 @@ class TransactionInfo extends Widget implements HasForms, HasInfolists
             ->record($this->record)
             ->components([
                 Flex::make([
-                    TextEntry::make('Integration'),
                     ImageEntry::make('integration.institution_logo')
                         ->label(''),
                     TextEntry::make('integration.name')

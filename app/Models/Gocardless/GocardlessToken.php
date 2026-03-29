@@ -22,6 +22,10 @@ class GocardlessToken extends Model
         'secret_id',
         'secret_key',
         'max_connections',
+        'access_token',
+        'access_token_expires_at',
+        'refresh_token_expires_at',
+        'refresh_token',
     ];
 
     protected $casts = [
@@ -52,11 +56,32 @@ class GocardlessToken extends Model
             ?? throw new GocardlessException('No GoCardless tokens with available connections.');
     }
 
-    public function requisitions(): HasMany
+    /**
+     * @return RequisitionDto[]
+     */
+    public function getRequisitions(): array
     {
-        Requisition::forToken($this);
+        $integrations = Integration::withoutGlobalScopes()
+            ->with('user')
+            ->whereNotNull('requisition_id')
+            ->get()
+            ->keyBy('requisition_id');
 
-        return $this->hasMany(Requisition::class);
+        return collect($this->listRequisitions())->map(function (array $requisition) use ($integrations) {
+            $integration = $integrations->get($requisition['id']);
+
+            return new RequisitionDto(
+                id: $requisition['id'],
+                gocardlessTokenId: $this->id,
+                status: $requisition['status'] ?? null,
+                institutionId: $requisition['institution_id'] ?? null,
+                created: $requisition['created'] ?? null,
+                accountsCount: $requisition['accounts_count'] ?? 0,
+                active: $requisition['active'] ?? false,
+                integrationName: $integration?->name,
+                userName: $integration?->user?->name,
+            );
+        })->all();
     }
 
     /**
