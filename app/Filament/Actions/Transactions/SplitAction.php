@@ -30,9 +30,7 @@ class SplitAction extends Action
                     $component->state($transaction->category_id);
                 })
                 ->preload()
-                ->relationship('category', 'name', function (Builder $query, Transaction $record) {
-                    $query->where('direction', $record->direction);
-                })
+                ->relationship('category', 'name')
                 ->searchable()
         ]);
         $this->action(function (Transaction $record, array $data) {
