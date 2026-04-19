@@ -7,4 +7,5 @@ RUN npm install --no-package-lock && npm run build
 RUN composer install --no-ansi --no-dev --no-interaction --no-plugins --no-progress --optimize-autoloader
 
 FROM registry.pandora-new.ktk.bme.hu/core/docker/laravel:8.5
+RUN install-php-extensions soap
 COPY --from=builder /srv/http /srv/http
