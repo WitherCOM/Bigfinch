@@ -2,7 +2,7 @@
     <div class="max-w-md mx-auto">
         <form wire:submit.prevent="register" class="space-y-6">
             {{ $this->form }}
-
+            <br/>
             <x-filament::button type="submit" class="w-full">
                 Register
             </x-filament::button>

@@ -2,8 +2,7 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Pages\MyDashboard;
-
+use App\Filament\Public\Pages\InvitationRegister;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -18,29 +17,20 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class AdminPanelProvider extends PanelProvider
+class PublicPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->id('admin')
-            ->path('/')
-            ->login()
-            ->profile()
-            ->passwordReset()
+            ->id('public')
+            ->path('/public')
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->viteTheme('resources/css/app.css')
-            ->databaseNotifications()
-            ->databaseNotificationsPolling(10)
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                MyDashboard::class,
+                InvitationRegister::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([])
             ->middleware([
                 EncryptCookies::class,
@@ -54,7 +44,6 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                Authenticate::class,
             ]);
     }
 }
