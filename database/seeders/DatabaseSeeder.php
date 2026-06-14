@@ -17,9 +17,15 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Test Admin',
+            'email' => 'test-admin@example.com',
             'can_manage_settings' => true,
+            'password' => bcrypt('password'),
+        ]);
+        User::factory()->create([
+            'name' => 'Test Normal',
+            'email' => 'test-normal@example.com',
+            'can_manage_settings' => false,
             'password' => bcrypt('password'),
         ]);
         $this->call(CurrencySeeder::class);
