@@ -100,6 +100,18 @@ class User extends Authenticatable implements FilamentUser
         });
     }
 
+    public function userTimezone(): Attribute {
+        return Attribute::get(function () {
+            if (!isset($this->settings['user_timezone'])) {
+                $settings = $this->settings;
+                $settings['user_timezone'] = config('app.timezone');
+                $this->settings = $settings;
+                $this->save();
+            }
+            return $this->settings['user_timezone'];
+        });
+    }
+
     public function getStatisticalTransactionData(Carbon $fromDate, Direction $direction, Currency $displayCurrency): Collection
     {
         $rawTransactions = $this->transactions()

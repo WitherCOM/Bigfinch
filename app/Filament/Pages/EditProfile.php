@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 use App\Models\Currency;
 use Filament\Auth\Pages\EditProfile as BaseEditProfile;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -14,6 +15,7 @@ class EditProfile extends BaseEditProfile
         parent::mount();
         $this->form->fill([
             ...$this->data,
+            'user_timezone' => $this->getUser()->user_profile,
             'default_currency_id' => $this->getUser()->default_currency_id,
         ]);
     }
@@ -25,6 +27,8 @@ class EditProfile extends BaseEditProfile
                 Section::make('General')->schema([
                     $this->getNameFormComponent(),
                     $this->getEmailFormComponent(),
+                    TextInput::make('user_profile')
+                        ->required(),
                     Select::make('default_currency_id')
                         ->label(__('Default Currency'))
                         ->options(fn () => Currency::query()

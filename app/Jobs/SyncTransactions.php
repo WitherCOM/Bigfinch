@@ -46,7 +46,7 @@ class SyncTransactions implements ShouldQueue
                 // Create bookings that does not exists
                 $toCreate = $allTransactions['booked']->whereNotIn('transactionId', $transactionCommonIds->pluck('common_id'))
                     ->map(function ($transaction) {
-                        $data = OpenBankingEngine::parse($transaction);
+                        $data = OpenBankingEngine::parse($transaction, $this->integration->user);
                         $data['id'] = Str::uuid()->toString();
                         $data['integration_id'] = $this->integration->id;
                         $data['user_id'] = $this->integration->user_id;
@@ -61,7 +61,7 @@ class SyncTransactions implements ShouldQueue
                 // Create pendings that does not exists
                 $toCreate = $allTransactions['pending']->whereNotIn('transactionId', $transactionCommonIds->pluck('common_id'))
                 ->map(function ($transaction) {
-                    $data = OpenBankingEngine::parse($transaction);
+                    $data = OpenBankingEngine::parse($transaction,$this->integration->user);
                     $data['id'] = Str::uuid()->toString();
                     $data['integration_id'] = $this->integration->id;
                     $data['user_id'] = $this->integration->user_id;
@@ -77,7 +77,7 @@ class SyncTransactions implements ShouldQueue
             foreach ($pendingIds as $pendingId) {
                 foreach($allTransactions['booked'] as $transaction) {
                     if ($transaction['transactionId'] == $pendingId->common_id) {
-                        $data = OpenBankingEngine::parse($transaction);
+                        $data = OpenBankingEngine::parse($transaction, $this->integration->user);
 
                         $toUpdate->push([
                             'id' => $pendingId->id,
