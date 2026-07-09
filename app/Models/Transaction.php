@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\DatetimeCast;
 use Database\Factories\TransactionFactory;
 use App\Casts\FlagArray;
 use App\Engine\OpenBankingEngine;
@@ -38,7 +39,7 @@ class Transaction extends Model
     ];
 
     protected $casts = [
-        'date' => 'datetime',
+        'date' => DatetimeCast::class,
         'open_banking_transaction' => 'array',
         'tags' => 'array',
         'direction' => Direction::class,
