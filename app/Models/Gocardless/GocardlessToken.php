@@ -103,7 +103,7 @@ class GocardlessToken extends Model
             if ($response->successful()) {
                 $this->update([
                     'access_token' => $response->json('access'),
-                    'access_token_expires_at' => now()->addSeconds($response->json('access_expires') - 10),
+                    'access_token_expires_at' => now()->addSeconds($response->json('access_expires'))->startOfDay(),
                 ]);
                 return $response->json('access');
             }
@@ -126,8 +126,8 @@ class GocardlessToken extends Model
             $this->update([
                 'access_token' => $response->json('access'),
                 'refresh_token' => $response->json('refresh'),
-                'access_token_expires_at' => now()->addSeconds($response->json('access_expires') - 10),
-                'refresh_token_expires_at' => now()->addSeconds($response->json('refresh_expires') - 10),
+                'access_token_expires_at' => now()->addSeconds($response->json('access_expires'))->startOfDay(),
+                'refresh_token_expires_at' => now()->addSeconds($response->json('refresh_expires'))->startOfDay(),
             ]);
             return $response->json('access');
         }
