@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class SetOriginalAction extends Action
 {
@@ -17,7 +18,7 @@ class SetOriginalAction extends Action
         $this->action(function (Transaction $record) {
             if (!is_null($record->open_banking_transaction))
             {
-                $record->setRawAttributes(OpenBankingEngine::parse($record->open_banking_transaction));
+                $record->setRawAttributes(OpenBankingEngine::parse($record->open_banking_transaction, Auth::user()));
                 $record->save();
             }
         });

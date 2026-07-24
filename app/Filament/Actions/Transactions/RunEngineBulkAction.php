@@ -7,6 +7,7 @@ use App\Engine\FlagEngine;
 use App\Engine\OpenBankingEngine;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class RunEngineBulkAction extends BulkAction
 {
@@ -27,7 +28,7 @@ class RunEngineBulkAction extends BulkAction
                 foreach ($records as $record) {
                     if (!is_null($record->open_banking_transaction))
                     {
-                        $bankingData = OpenBankingEngine::parse($record->open_banking_transaction);
+                        $bankingData = OpenBankingEngine::parse($record->open_banking_transaction, Auth::user());
                         $record->merchant = $bankingData['merchant'];
                     }
                 }

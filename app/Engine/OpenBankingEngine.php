@@ -3,7 +3,9 @@
 namespace App\Engine;
 
 use App\Enums\Direction;
+use App\Helpers\TimezoneHelper;
 use App\Models\Currency;
+use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
@@ -55,14 +57,14 @@ class OpenBankingEngine
         return $name;
     }
 
-    public static function parse(array $openBankingData): array {
+    public static function parse(array $openBankingData, User $user): array {
         $currencies = Currency::all(['iso_code', 'id'])->pluck('id', 'iso_code');
         // calculate date
         if (isset($openBankingData['bookingDateTime']) || isset($openBankingData['bookingDate']))
         {
-            $date = Carbon::parse($openBankingData['bookingDateTime'] ?? $openBankingData['bookingDate']);
+            $date = $openBankingData['bookingDateTime'] ?? $openBankingData['bookingDate'];
         } else {
-            $date = Carbon::parse($openBankingData['valueDateTime'] ?? $openBankingData['valueDate']);
+            $date = $openBankingData['valueDateTime'] ?? $openBankingData['valueDate'];
         }
         return [
             'description' => self::getDescription($openBankingData),

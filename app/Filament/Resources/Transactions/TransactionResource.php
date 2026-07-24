@@ -81,7 +81,7 @@ class TransactionResource extends Resource
                     ->enum(Direction::class),
                 DateTimePicker::make('date')
                     ->required()
-                    ->default(Carbon::now()),
+                    ->default(Carbon::now(Auth::user()->user_timezone)),
                 Select::make('category_id')
                     ->preload()
                     ->relationship('category', 'name', function (Builder $query, Get $get) {
