@@ -10,15 +10,14 @@ use App\Models\Currency;
 use App\Models\Transaction;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
-use Filament\Forms\Components\DateTimePicker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 use Tests\TestCase;
 
 class TransactionTest extends TestCase
 {
     use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -26,7 +25,8 @@ class TransactionTest extends TestCase
         $user->user_timezone = 'Europe/Budapest';
         $user->save();
         $this->actingAs($user);
-        (new CurrencySeeder())->run();
+        Livewire::actingAs($user);
+        (new CurrencySeeder)->run();
     }
 
     public function test_create_transaction_manually(): void
@@ -46,20 +46,23 @@ class TransactionTest extends TestCase
             ->assertHasNoFormErrors();
         $this->assertDatabaseHas('transactions', [
             'description' => 'Test Transaction',
-            'date' => '2019-01-01 09:00:00'
+            'date' => '2019-01-01 09:00:00',
         ]);
+        $this->assertEquals('2019-01-01 09:00:00', Transaction::first()->date->format('Y-m-d H:i:s'));
     }
 
     public function test_update_transaction_without_date_modify(): void
     {
         Category::factory()->create();
+        $originalDate = '2019-01-01 09:00:00';
         $transaction = Transaction::factory()->create();
-        $originalDate = $transaction->date;
-        Livewire::test(EditTransaction::class,[
+        $transaction->date = $originalDate;
+        $transaction->save();
+        Livewire::test(EditTransaction::class, [
             'record' => $transaction->id,
         ])
             ->assertOk()
-            ->assertSchemaStateSet(['date' => $originalDate->format('Y-m-d H:i:s')])
+            ->assertSchemaStateSet(['date' => $originalDate])
             ->fillForm([
                 'description' => 'EditTransaction',
             ])
@@ -67,8 +70,7 @@ class TransactionTest extends TestCase
             ->assertHasNoFormErrors();
         $this->assertDatabaseHas('transactions', [
             'description' => 'EditTransaction',
-            'date' => Carbon::parse($originalDate)->subHours(2)->format('Y-m-d H:i:s')
+            'date' => $originalDate,
         ]);
     }
-
 }

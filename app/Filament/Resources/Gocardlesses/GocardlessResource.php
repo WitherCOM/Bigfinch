@@ -18,16 +18,15 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class GocardlessResource extends Resource
 {
     protected static ?string $model = GocardlessToken::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = NavGroup::ADMIN;
+    protected static string|\UnitEnum|null $navigationGroup = NavGroup::ADMIN;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
-
 
     public static function form(Schema $schema): Schema
     {
@@ -41,13 +40,17 @@ class GocardlessResource extends Resource
 
     public static function infolist(Schema $schema): Schema
     {
+        $user = Auth::user();
+
         return $schema->components([
             TextEntry::make('secret_id'),
             TextEntry::make('access_token_expires_at')
+                ->timezone($user->user_timezone)
                 ->label('Access token expires')
                 ->dateTime()
                 ->placeholder('No token'),
             TextEntry::make('refresh_token_expires_at')
+                ->timezone($user->user_timezone)
                 ->label('Refresh token expires')
                 ->dateTime()
                 ->placeholder('No token'),
@@ -60,7 +63,7 @@ class GocardlessResource extends Resource
     {
         return [
             IntegrationsRelationManager::make(),
-            RequisitionsRelationManager::make()
+            RequisitionsRelationManager::make(),
         ];
     }
 

@@ -2,21 +2,19 @@
 
 namespace App\Casts;
 
-use App\Helpers\TimezoneHelper;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 
 class DateTimeCast implements CastsAttributes
 {
-
-    public function get(Model $model, string $key, mixed $value, array $attributes)
+    public function get(Model $model, string $key, mixed $value, array $attributes): ?Carbon
     {
-        return TimezoneHelper::dateToUserTimezone($value, Auth::user());
+        return Carbon::parse($value);
     }
 
     public function set(Model $model, string $key, mixed $value, array $attributes)
     {
-        return TimezoneHelper::strToSavableFormat($value, Auth::user());
+        return Carbon::parse($value)->setTimezone(config('app.timezone'));
     }
 }

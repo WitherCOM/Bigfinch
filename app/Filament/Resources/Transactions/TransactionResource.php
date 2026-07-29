@@ -2,57 +2,53 @@
 
 namespace App\Filament\Resources\Transactions;
 
+use App\Enums\Direction;
 use App\Enums\NavGroup;
 use App\Filament\Actions\Transactions\AddTagBulkAction;
 use App\Filament\Actions\Transactions\CompareBulkAction;
-use App\Filament\Actions\Transactions\SetOriginalAction;
-use App\Filament\Forms\Components\PrettyJsonField;
-use App\Filament\Tables\Columns\WorkingSelectColumn;
-use Filament\Actions\ActionGroup;
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Forms\Components\TagsInput;
-use Filament\Tables\Columns\BadgeColumn;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\SelectColumn;
-use Filament\Tables\Filters\TrashedFilter;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use App\Filament\Resources\Transactions\Pages\ListTransactions;
-use App\Filament\Resources\Transactions\Pages\CreateTransaction;
-use App\Filament\Resources\Transactions\Pages\EditTransaction;
-use App\Enums\Direction;
 use App\Filament\Actions\Transactions\KeepOnlyAction;
 use App\Filament\Actions\Transactions\MergeBulkAction;
 use App\Filament\Actions\Transactions\RunEngineBulkAction;
+use App\Filament\Actions\Transactions\SetOriginalAction;
 use App\Filament\Actions\Transactions\SplitAction;
+use App\Filament\Forms\Components\PrettyJsonField;
+use App\Filament\Resources\Transactions\Pages\CreateTransaction;
+use App\Filament\Resources\Transactions\Pages\EditTransaction;
+use App\Filament\Resources\Transactions\Pages\ListTransactions;
+use App\Filament\Tables\Columns\WorkingSelectColumn;
 use App\Models\Category;
 use App\Models\Transaction;
 use Carbon\Carbon;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use UnitEnum;
 
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
-    protected static string | UnitEnum | null $navigationGroup = NavGroup::TRANSACTIONS;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static string|UnitEnum|null $navigationGroup = NavGroup::TRANSACTIONS;
+
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-cart';
 
     public static function getEloquentQuery(): Builder
     {
@@ -81,7 +77,8 @@ class TransactionResource extends Resource
                     ->enum(Direction::class),
                 DateTimePicker::make('date')
                     ->required()
-                    ->default(Carbon::now(Auth::user()->user_timezone)),
+                    ->timezone(Auth::user()->user_timezone)
+                    ->default(Carbon::now()),
                 Select::make('category_id')
                     ->preload()
                     ->relationship('category', 'name', function (Builder $query, Get $get) {
@@ -91,32 +88,35 @@ class TransactionResource extends Resource
                     })
                     ->searchable(),
                 TagsInput::make('tags'),
-                PrettyJsonField::make('open_banking_transaction')
+                PrettyJsonField::make('open_banking_transaction'),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         $categories = Category::all();
+        $user = Auth::user();
         $monthSelect = [];
         for ($month = 1; $month <= Carbon::now()->month; $month++) {
             $monthSelect[$month] = Carbon::create(month: $month)->format('M');
         }
+
         return $table
             ->columns([
                 TextColumn::make('date')
+                    ->dateTime('Y-m-d H:i:s', $user->user_timezone)
                     ->color(fn (Transaction $transaction) => $transaction->is_pending ? 'warning' : 'neutral'),
                 WorkingSelectColumn::make('category_id')
                     ->options(fn (Transaction $record) => $categories->pluck('name', 'id')),
                 TextColumn::make('formatted_value')
                     ->color(function (Transaction $transaction) {
-                        if ($transaction->direction == Direction::INTERNAL_TO || $transaction->direction == Direction::INTERNAL_FROM){
+                        if ($transaction->direction == Direction::INTERNAL_TO || $transaction->direction == Direction::INTERNAL_FROM) {
                             return 'info';
-                        } else if ($transaction->direction == Direction::INVESTMENT) {
+                        } elseif ($transaction->direction == Direction::INVESTMENT) {
                             return 'warning';
-                        } else if ($transaction->direction == Direction::EXPENSE) {
+                        } elseif ($transaction->direction == Direction::EXPENSE) {
                             return 'danger';
-                        } else if ($transaction->direction == Direction::INCOME) {
+                        } elseif ($transaction->direction == Direction::INCOME) {
                             return 'success';
                         } else {
                             return 'neutral';
@@ -147,9 +147,9 @@ class TransactionResource extends Resource
                     ->query(fn (Builder $query, array $data) => $query->when($data['value'], fn (Builder $query, $month) => $query->whereMonth('date', $month)))
                     ->options($monthSelect),
                 SelectFilter::make('direction')
-                    ->options(Direction::class)
+                    ->options(Direction::class),
             ])
-            ->recordClasses(fn(Transaction $transaction) => $transaction->trashed() ? 'opacity-50' : null)
+            ->recordClasses(fn (Transaction $transaction) => $transaction->trashed() ? 'opacity-50' : null)
             ->recordActions([
                 EditAction::make(),
                 RestoreAction::make()
@@ -163,18 +163,18 @@ class TransactionResource extends Resource
                     ->label(__('Exclude')),
                 ActionGroup::make([
                     SetOriginalAction::make('set_original')
-                        ->visible(fn(Transaction $record) => !is_null($record->open_banking_transaction))
+                        ->visible(fn (Transaction $record) => ! is_null($record->open_banking_transaction))
                         ->authorize('update'),
                     KeepOnlyAction::make('keep_only')
                         ->authorize('update')
-                        ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE),
+                        ->visible(fn (Transaction $record) => $record->direction === Direction::EXPENSE),
                     SplitAction::make('split')
                         ->authorize('update')
-                        ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE),
+                        ->visible(fn (Transaction $record) => $record->direction === Direction::EXPENSE),
                     ForceDeleteAction::make()
                         ->label(__('Permanently Delete'))
-                        ->visible()
-                ])
+                        ->visible(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -186,7 +186,7 @@ class TransactionResource extends Resource
                     AddTagBulkAction::make('add_tag'),
                     CompareBulkAction::make('compare'),
                     ForceDeleteBulkAction::make()
-                        ->visible()
+                        ->visible(),
                 ]),
             ])
             ->defaultSort('date', 'desc');
