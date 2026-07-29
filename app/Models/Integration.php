@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Casts\DateTimeCast;
 use App\Exceptions\GocardlessException;
 use App\Models\Gocardless\GocardlessToken;
-use App\Models\Scopes\OwnerScope;
 use Carbon\Carbon;
 use Database\Factories\IntegrationFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -20,25 +20,27 @@ class Integration extends Model
 {
     /** @use HasFactory<IntegrationFactory> */
     use HasFactory;
+
     use HasUuids;
 
     protected $fillable = [
-        'name'
+        'name',
     ];
 
     protected $casts = [
         'accounts' => 'collection',
-        'expires_at' => 'datetime',
-        'last_synced_at' => 'datetime',
-        'can_auto_sync' => 'boolean'
-     ];
+        'expires_at' => DateTimeCast::class,
+        'last_synced_at' => DateTimeCast::class,
+        'can_auto_sync' => 'boolean',
+    ];
 
     public function all_transactions()
     {
         return $this->hasMany(Transaction::class)->withTrashed();
     }
 
-    public function gocardless_token(): BelongsTo {
+    public function gocardless_token(): BelongsTo
+    {
         return $this->belongsTo(GocardlessToken::class);
     }
 
@@ -50,7 +52,7 @@ class Integration extends Model
         });
     }
 
-    public static function listBanks(): Collection|null
+    public static function listBanks(): ?Collection
     {
         return Cache::remember('banks', 86400, function () {
             $base = config('gocardless.base_url');
@@ -59,8 +61,8 @@ class Integration extends Model
                 ->get("$base/institutions/");
             throw_if($response->failed(), new GocardlessException($response));
 
-            return collect($response->json())->mapWithKeys(fn($bank) => [
-                $bank['id'] => $bank['name'] . ' (' . collect($bank['countries'])->implode(', ') . ')'
+            return collect($response->json())->mapWithKeys(fn ($bank) => [
+                $bank['id'] => $bank['name'].' ('.collect($bank['countries'])->implode(', ').')',
             ]);
         });
     }
@@ -72,7 +74,7 @@ class Integration extends Model
 
     public function expired(): Attribute
     {
-        return Attribute::get(fn () => !is_null($this->expires_at) && Carbon::now()->gt($this->expires_at));
+        return Attribute::get(fn () => ! is_null($this->expires_at) && Carbon::now()->gt($this->expires_at));
     }
 
     public function deleteRequisition()
@@ -82,7 +84,7 @@ class Integration extends Model
         $requisition_id = $this->requisition_id;
         $response = Http::withHeader('Authorization', "Bearer $access_token")
             ->delete("$base/requisitions/$requisition_id/");
-        throw_if(!$response->notFound() && $response->failed(), new GocardlessException($response));
+        throw_if(! $response->notFound() && $response->failed(), new GocardlessException($response));
     }
 
     public function fillBasics($institution_id)
@@ -117,8 +119,8 @@ class Integration extends Model
                 'access_valid_for_days' => $max_access_valid_for_days,
                 'access_scope' => [
                     'transactions',
-                    'details'
-                ]
+                    'details',
+                ],
             ]);
         throw_if($response->failed(), new GocardlessException($response));
         $agreement_id = $response->json('id');
@@ -127,7 +129,7 @@ class Integration extends Model
             ->post("$base/requisitions/", [
                 'institution_id' => $institution_id,
                 'redirect' => route('gocardless.callback'),
-                'agreement' => $agreement_id
+                'agreement' => $agreement_id,
             ]);
         throw_if($response->failed(), new GocardlessException($response));
         $this->requisition_id = $response->json('id');
@@ -158,17 +160,19 @@ class Integration extends Model
     {
         $base = config('gocardless.base_url');
         $query = [];
-        if (!is_null($start)) {
+        if (! is_null($start)) {
             $query['date_from'] = $start->toDateString();
         }
         $access_token = $this->gocardless_token->getAccessToken();
+
         return collect($this->accounts)->reduce(function ($acc, $account) use ($access_token, $query, $base) {
             $response = Http::withHeader('Authorization', "Bearer $access_token")
                 ->get("$base/accounts/$account/transactions", $query);
             throw_if($response->failed(), new GocardlessException($response));
+
             return [
                 'booked' => $acc['booked']->merge(collect($response->json('transactions.booked'))),
-                'pending' => $acc['pending']->merge(collect($response->json('transactions.pending')))
+                'pending' => $acc['pending']->merge(collect($response->json('transactions.pending'))),
             ];
         }, ['booked' => collect(), 'pending' => collect()]);
     }
@@ -177,5 +181,4 @@ class Integration extends Model
     {
         return $this->belongsTo(User::class);
     }
-
 }
