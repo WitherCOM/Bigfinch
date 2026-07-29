@@ -2,6 +2,7 @@
 
 namespace App\Models\Gocardless;
 
+use App\Casts\DateTimeCast;
 use App\Exceptions\GocardlessException;
 use App\Models\Integration;
 use Carbon\Carbon;
@@ -15,8 +16,8 @@ use Illuminate\Support\Facades\Http;
 
 class GocardlessToken extends Model
 {
-    use HasUuids;
     use HasFactory;
+    use HasUuids;
 
     protected $fillable = [
         'secret_id',
@@ -29,8 +30,8 @@ class GocardlessToken extends Model
     ];
 
     protected $casts = [
-        'access_token_expires_at' => 'datetime',
-        'refresh_token_expires_at' => 'datetime',
+        'access_token_expires_at' => DateTimeCast::class,
+        'refresh_token_expires_at' => DateTimeCast::class,
     ];
 
     protected $hidden = [
@@ -87,7 +88,7 @@ class GocardlessToken extends Model
     /**
      * @throws ConnectionException
      */
-    public function getAccessToken(): string|null
+    public function getAccessToken(): ?string
     {
         $base = config('gocardless.base_url');
 
@@ -105,6 +106,7 @@ class GocardlessToken extends Model
                     'access_token' => $response->json('access'),
                     'access_token_expires_at' => now()->addSeconds($response->json('access_expires'))->startOfDay(),
                 ]);
+
                 return $response->json('access');
             }
 
@@ -129,6 +131,7 @@ class GocardlessToken extends Model
                 'access_token_expires_at' => now()->addSeconds($response->json('access_expires'))->startOfDay(),
                 'refresh_token_expires_at' => now()->addSeconds($response->json('refresh_expires'))->startOfDay(),
             ]);
+
             return $response->json('access');
         }
 
@@ -166,12 +169,12 @@ class GocardlessToken extends Model
 
         $agreements = collect($this->listAgreements())->keyBy('id');
 
-
         $result = $response->json('results', []);
         foreach ($result as &$requisition) {
             $requisition['accounts_count'] = count($requisition['accounts'] ?? []);
             $requisition['active'] = $this->isRequisitionActive($requisition, $agreements);
         }
+
         return $result;
     }
 
@@ -186,7 +189,7 @@ class GocardlessToken extends Model
         }
 
         $agreement = $agreements->get($requisition['agreement'] ?? '');
-        if (!$agreement || empty($agreement['accepted'])) {
+        if (! $agreement || empty($agreement['accepted'])) {
             return false;
         }
 
@@ -208,6 +211,6 @@ class GocardlessToken extends Model
         $response = Http::withHeader('Authorization', "Bearer $accessToken")
             ->delete("$base/requisitions/$requisitionId/");
 
-        throw_if(!$response->notFound() && $response->failed(), new GocardlessException($response));
+        throw_if(! $response->notFound() && $response->failed(), new GocardlessException($response));
     }
 }

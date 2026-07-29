@@ -2,6 +2,8 @@
 
 namespace App\Models\Gocardless;
 
+use Carbon\Carbon;
+
 class RequisitionDto
 {
     public function __construct(
@@ -23,7 +25,7 @@ class RequisitionDto
             'gocardless_token_id' => $this->gocardlessTokenId,
             'status' => $this->status,
             'institution_id' => $this->institutionId,
-            'created' => $this->created,
+            'created' => Carbon::parse($this->created)->setTimezone(config('app.timezone')),
             'accounts_count' => $this->accountsCount,
             'active' => $this->active,
             'integration_name' => $this->integrationName,

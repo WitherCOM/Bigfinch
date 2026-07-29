@@ -10,6 +10,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class RequisitionsRelationManager extends RelationManager
 {
@@ -54,6 +55,7 @@ class RequisitionsRelationManager extends RelationManager
                 TextColumn::make('institution_id')
                     ->label('Institution'),
                 TextColumn::make('created')
+                    ->timezone(Auth::user()->user_timezone)
                     ->label('Created')
                     ->dateTime(),
                 TextColumn::make('accounts_count')

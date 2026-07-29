@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Filament\Pages;
+
 use App\Models\Currency;
 use Filament\Auth\Pages\EditProfile as BaseEditProfile;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -15,7 +15,7 @@ class EditProfile extends BaseEditProfile
         parent::mount();
         $this->form->fill([
             ...$this->data,
-            'user_timezone' => $this->getUser()->user_profile,
+            'user_timezone' => $this->getUser()->user_timezone,
             'default_currency_id' => $this->getUser()->default_currency_id,
         ]);
     }
@@ -27,7 +27,10 @@ class EditProfile extends BaseEditProfile
                 Section::make('General')->schema([
                     $this->getNameFormComponent(),
                     $this->getEmailFormComponent(),
-                    TextInput::make('user_profile')
+                    Select::make('user_timezone')
+                        ->label(__('Timezone'))
+                        ->options(fn () => collect(\DateTimeZone::listIdentifiers())->mapWithKeys(fn ($tz) => [$tz => $tz]))
+                        ->searchable()
                         ->required(),
                     Select::make('default_currency_id')
                         ->label(__('Default Currency'))
@@ -40,7 +43,7 @@ class EditProfile extends BaseEditProfile
                 Section::make('Password')->schema([
                     $this->getPasswordFormComponent(),
                     $this->getPasswordConfirmationFormComponent(),
-                ])
+                ]),
             ]);
     }
 
@@ -50,6 +53,7 @@ class EditProfile extends BaseEditProfile
 
         $settings = $user->settings ?? [];
         $settings['default_currency_id'] = $data['default_currency_id'];
+        $settings['user_timezone'] = $data['user_timezone'];
 
         $user->settings = $settings;
         $user->save();
