@@ -7,6 +7,7 @@ use App\Filament\Actions\Transactions\KeepOnlyAction;
 use App\Filament\Actions\Transactions\MergeBulkAction;
 use App\Filament\Actions\Transactions\SplitAction;
 use App\Filament\Tables\Columns\WorkingSelectColumn;
+use App\Helpers\TimezoneHelper;
 use App\Models\Category;
 use App\Models\Transaction;
 use Filament\Actions\ActionGroup;
@@ -23,6 +24,7 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class CompleteTransactions extends TableWidget
 {
@@ -32,7 +34,7 @@ class CompleteTransactions extends TableWidget
     public function table(Table $table): Table
     {
         $categories = Category::all();
-
+        $user = Auth::user();
         return $table
             ->query(fn (): Builder => Transaction::query()
                 ->whereIn('direction', [
@@ -44,7 +46,8 @@ class CompleteTransactions extends TableWidget
             )
             ->defaultSort('date', 'desc')
             ->columns([
-                TextColumn::make('date'),
+                TextColumn::make('date')
+                    ->formatStateUsing(fn ($state) => TimezoneHelper::dateToUserTimezone($state, $user)),
                 WorkingSelectColumn::make('category_id')
                     ->options(fn (Transaction $record) => $categories->pluck('name', 'id')),
                 TextColumn::make('formatted_value')

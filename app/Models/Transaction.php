@@ -4,14 +4,7 @@ namespace App\Models;
 
 use App\Casts\DatetimeCast;
 use Database\Factories\TransactionFactory;
-use App\Casts\FlagArray;
-use App\Engine\OpenBankingEngine;
-use App\Enums\ActionType;
-use App\Enums\CurrencyPosition;
 use App\Enums\Direction;
-use App\Models\Scopes\OwnerScope;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -39,7 +32,7 @@ class Transaction extends Model
     ];
 
     protected $casts = [
-        'date' => DatetimeCast::class,
+        'date' => DateTimeCast::class,
         'open_banking_transaction' => 'array',
         'tags' => 'array',
         'direction' => Direction::class,
