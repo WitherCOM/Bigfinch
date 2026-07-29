@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\DateTimeCast;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,8 +24,8 @@ class AutoTag extends Model
     ];
 
     protected $casts = [
-        'from' => 'datetime',
-        'to' => 'datetime',
+        'from' => DateTimeCast::class,
+        'to' => DateTimeCast::class,
     ];
 
     public function user(): BelongsTo

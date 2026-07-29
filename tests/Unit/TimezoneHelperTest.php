@@ -30,12 +30,12 @@ class TimezoneHelperTest extends TestCase
 
     private static function assertCarbon(Carbon $c, int $y, int $mo, int $d, int $h, int $mi, int $s): void
     {
-        self::assertEquals($y,  $c->year);
-        self::assertEquals($mo, $c->month);
-        self::assertEquals($d,  $c->day);
-        self::assertEquals($h,  $c->hour);
-        self::assertEquals($mi, $c->minute);
-        self::assertEquals($s,  $c->second);
+        self::assertEquals($c->year, $y);
+        self::assertEquals($c->month, $mo);
+        self::assertEquals($c->day, $d);
+        self::assertEquals($c->hour, $h);
+        self::assertEquals($c->minute, $mi);
+        self::assertEquals($c->second, $s);
     }
 
     // test name format test_date_#appTimezone_#userTimezone
@@ -56,7 +56,7 @@ class TimezoneHelperTest extends TestCase
         config(['app.timezone' => 'UTC']);
         $user = $this->userWithTimezone('Europe/Budapest');
         $dbDate = TimezoneHelper::strToSavableFormat(self::DATE_INPUT, $user);
-        self::assertCarbon($dbDate, 2025, 10, 10, 0, 0, 0);
+        self::assertCarbon($dbDate, 2025, 10, 9, 22, 0, 0);
         $userDate = TimezoneHelper::dateToUserTimezone($dbDate, $user);
         self::assertCarbon($userDate, 2025, 10, 10, 0, 0, 0);
     }
@@ -92,7 +92,7 @@ class TimezoneHelperTest extends TestCase
         config(['app.timezone' => 'UTC']);
         $user = $this->userWithTimezone('UTC');
         $dbDate = TimezoneHelper::strToSavableFormat(self::DATETIME_BUDAPEST, $user);
-        self::assertCarbon($dbDate, 2025, 10, 10, 2, 0, 0);
+        self::assertCarbon($dbDate, 2025, 10, 10, 0, 0, 0);
         $userDate = TimezoneHelper::dateToUserTimezone($dbDate, $user);
         // 02:00+02:00 → 00:00 UTC
         self::assertCarbon($userDate, 2025, 10, 10, 0, 0, 0);
@@ -103,7 +103,7 @@ class TimezoneHelperTest extends TestCase
         config(['app.timezone' => 'UTC']);
         $user = $this->userWithTimezone('Europe/Budapest');
         $dbDate = TimezoneHelper::strToSavableFormat(self::DATETIME_BUDAPEST, $user);
-        self::assertCarbon($dbDate, 2025, 10, 10, 2, 0, 0);
+        self::assertCarbon($dbDate, 2025, 10, 10, 0, 0, 0);
         $userDate = TimezoneHelper::dateToUserTimezone($dbDate, $user);
         // 02:00+02:00 → 00:00 UTC → 02:00 CEST
         self::assertCarbon($userDate, 2025, 10, 10, 2, 0, 0);
@@ -114,7 +114,7 @@ class TimezoneHelperTest extends TestCase
         config(['app.timezone' => 'UTC']);
         $user = $this->userWithTimezone('Pacific/Honolulu');
         $dbDate = TimezoneHelper::strToSavableFormat(self::DATETIME_BUDAPEST, $user);
-        self::assertCarbon($dbDate, 2025, 10, 10, 2, 0, 0);
+        self::assertCarbon($dbDate, 2025, 10, 10, 0, 0, 0);
         $userDate = TimezoneHelper::dateToUserTimezone($dbDate, $user);
         // 02:00+02:00 → 00:00 UTC → 14:00 HST prev day
         self::assertCarbon($userDate, 2025, 10, 9, 14, 0, 0);
