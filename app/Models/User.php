@@ -101,7 +101,7 @@ class User extends Authenticatable implements FilamentUser
     }
 
     public function userTimezone(): Attribute {
-        return Attribute::get(function () {
+        return Attribute::make(get: function () {
             if (!isset($this->settings['user_timezone'])) {
                 $settings = $this->settings;
                 $settings['user_timezone'] = config('app.timezone');
@@ -109,6 +109,13 @@ class User extends Authenticatable implements FilamentUser
                 $this->save();
             }
             return $this->settings['user_timezone'];
+        },
+        set: function ($value) {
+            if (!isset($this->settings['user_timezone'])) {
+                $settings = $this->settings;
+                $settings['user_timezone'] = $value;
+                return ['settings' => json_encode($settings)];
+            }
         });
     }
 
