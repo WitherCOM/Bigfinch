@@ -131,11 +131,6 @@ class TransactionResource extends Resource
                     ->searchable(),
             ])
             ->filters([
-                TrashedFilter::make()
-                    ->label('Visibility')
-                    ->trueLabel('With excluded')
-                    ->falseLabel('Only excluded')
-                    ->placeholder('Without excluded'),
                 SelectFilter::make('category_id')
                     ->preload()
                     ->relationship('category', 'name', function (Builder $query) {

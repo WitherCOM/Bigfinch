@@ -46,7 +46,7 @@ class CompleteTransactions extends TableWidget
             ->defaultSort('date', 'desc')
             ->columns([
                 TextColumn::make('date')
-                    ->timezone($user->user_timezone),
+                    ->dateTime('Y-m-d H:i:s', $user->user_timezone),
                 WorkingSelectColumn::make('category_id')
                     ->options(fn (Transaction $record) => $categories->pluck('name', 'id')),
                 TextColumn::make('formatted_value')
