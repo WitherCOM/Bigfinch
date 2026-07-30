@@ -7,7 +7,6 @@ use App\Filament\Actions\Transactions\KeepOnlyAction;
 use App\Filament\Actions\Transactions\MergeBulkAction;
 use App\Filament\Actions\Transactions\SplitAction;
 use App\Filament\Tables\Columns\WorkingSelectColumn;
-use App\Helpers\TimezoneHelper;
 use App\Models\Category;
 use App\Models\Transaction;
 use Filament\Actions\ActionGroup;
@@ -47,7 +46,7 @@ class CompleteTransactions extends TableWidget
             ->defaultSort('date', 'desc')
             ->columns([
                 TextColumn::make('date')
-                    ->formatStateUsing(fn ($state) => TimezoneHelper::dateToUserTimezone($state, $user)),
+                    ->timezone($user->user_timezone),
                 WorkingSelectColumn::make('category_id')
                     ->options(fn (Transaction $record) => $categories->pluck('name', 'id')),
                 TextColumn::make('formatted_value')
