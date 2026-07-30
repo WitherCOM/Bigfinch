@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Casts\DatetimeCast;
+use App\Casts\DateTimeCast;
 use Database\Factories\TransactionFactory;
 use App\Enums\Direction;
 use Illuminate\Database\Eloquent\Casts\Attribute;
