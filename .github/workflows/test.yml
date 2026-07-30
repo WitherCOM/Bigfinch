@@ -1,0 +1,22 @@
+name: Run test on PR
+
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, ctype, curl, dom, fileinfo, filter, hash, mbstring, openssl, pcre, pdo, tokenizer, xml, pdo_sqlite, zip, intl, exif, sodium
+      - name: Install composer dependencies
+        run: |
+          composer install --no-scripts
+          npm install && npm run build
+      - name: Run Testsuite
+        run: vendor/bin/phpunit tests/
