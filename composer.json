@@ -15,6 +15,7 @@
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.2",
+        "dutchcodingcompany/filament-developer-logins": "^2.1",
         "fakerphp/faker": "^1.23",
         "filament/upgrade": "^5.0",
         "laravel/boost": "^2.4",

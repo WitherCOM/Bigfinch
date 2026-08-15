@@ -6,6 +6,7 @@ use App\Enums\Direction;
 use App\Filament\Actions\Transactions\KeepOnlyAction;
 use App\Filament\Actions\Transactions\MergeBulkAction;
 use App\Filament\Actions\Transactions\SplitAction;
+use App\Filament\Forms\Components\ContextTagsInput;
 use App\Filament\Tables\Columns\WorkingSelectColumn;
 use App\Models\Category;
 use App\Models\Transaction;
@@ -78,7 +79,7 @@ class CompleteTransactions extends TableWidget
                 EditAction::make()
                     ->schema([
                         TextInput::make('description'),
-                        TagsInput::make('tags'),
+                        ContextTagsInput::make('tags'),
                         Select::make('direction')
                             ->required()
                             ->live()
