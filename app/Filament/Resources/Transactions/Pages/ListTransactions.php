@@ -7,10 +7,7 @@ use Filament\Actions\CreateAction;
 use App\Enums\ActionType;
 use App\Filament\Actions\Transactions\LastFlagEngineAction;
 use App\Filament\Resources\Transactions\TransactionResource;
-use App\Models\Merchant;
-use App\Models\Modules\CategorizeByMerchant;
-use App\Models\RawMerchant;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,7 +25,7 @@ class ListTransactions extends ListRecords
                     ->whereIn('direction', [Direction::EXPENSE->value, Direction::INCOME->value])),
             'all' => Tab::make()
                 ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('deleted_at')),
-            'with_excluded' => Tab::make()
+            'with_excluded' => Tab::make(),
         ];
     }
 

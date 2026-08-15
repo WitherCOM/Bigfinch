@@ -11,6 +11,7 @@ use App\Filament\Actions\Transactions\MergeBulkAction;
 use App\Filament\Actions\Transactions\RunEngineBulkAction;
 use App\Filament\Actions\Transactions\SetOriginalAction;
 use App\Filament\Actions\Transactions\SplitAction;
+use App\Filament\Forms\Components\ContextTextInput;
 use App\Filament\Forms\Components\PrettyJsonField;
 use App\Filament\Resources\Transactions\Pages\CreateTransaction;
 use App\Filament\Resources\Transactions\Pages\EditTransaction;
@@ -36,7 +37,6 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -88,6 +88,7 @@ class TransactionResource extends Resource
                     })
                     ->searchable(),
                 TagsInput::make('tags'),
+                ContextTextInput::make('merchant'),
                 PrettyJsonField::make('open_banking_transaction'),
             ]);
     }
