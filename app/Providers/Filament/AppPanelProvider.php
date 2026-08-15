@@ -4,7 +4,8 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\MyDashboard;
-
+use App\Models\User;
+use DutchCodingCompany\FilamentDeveloperLogins\FilamentDeveloperLoginsPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -54,6 +55,14 @@ class AppPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            ->when(
+                ! app()->isProduction() && class_exists(FilamentDeveloperLoginsPlugin::class),
+                fn (Panel $panel) => $panel->plugin(
+                    FilamentDeveloperLoginsPlugin::make()
+                        ->enabled(true)
+                        ->users(fn () => User::pluck('email', 'name')->toArray())
+                )
+            )
             ->authMiddleware([
                 Authenticate::class,
             ]);
