@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Direction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Sushi\Sushi;
 
 class Tag extends Model
@@ -13,31 +14,27 @@ class Tag extends Model
 
     public function getRows()
     {
-        $displayCurrencies = User::all()->mapWithKeys(fn (User $user) => [$user->id => Currency::find($user->default_currency_id)]);
+        $user = Auth::user();
+        if (is_null($user)) {
+            return [];
+        }
+        $displayCurrency = Currency::find($user->default_currency_id);
         $transactions = Transaction::with('currency')
+            ->where('user_id', $user->id)
             ->where('direction', Direction::EXPENSE->value)
             ->select(['user_id', 'currency_id', 'value', 'tags', 'date'])
             ->get();
-        $tagsPerUserId = $transactions->groupBy('user_id')
-            ->map(function ($transactions, $userId) {
-                return [
-                    'user_id' => $userId,
-                    'tags' => $transactions->flatMap(fn (Transaction $transaction) => $transaction->tags)->unique()
-                ];
-            });
-
-        return $tagsPerUserId->reduce(function ($tags, $item) use ($transactions, $displayCurrencies) {
-            foreach ($item['tags'] as $tag) {
-                $relevantTransactions = $transactions->filter(fn (Transaction $transaction) => $transaction->user_id == $item['user_id'] && collect($transaction->tags)->contains($tag));
-                $tags[] = [
-                    'user_id' => $item['user_id'],
-                    'tag' => $tag,
-                    'last_seen' => $relevantTransactions->max('date'),
-                    'value' => $relevantTransactions
-                    ->sum(fn (Transaction $transaction) => $transaction->currency->nearestRate($transaction->date) * $transaction->value / $displayCurrencies[$item['user_id']]->nearestRate($transaction->date))
-                ];
-            }
-            return $tags;
-        },[]);
+        return $transactions
+            ->flatMap(fn (Transaction $transaction) => collect($transaction->tags)->map(fn ($tag) => ['tag' => $tag, 'transaction' => $transaction]))
+            ->groupBy('tag')
+            ->map(fn (Collection $entries, $tag) => [
+                'tag' => $tag,
+                'last_seen' => $entries->pluck('transaction')->max('date'),
+                'value' => $entries->pluck('transaction')->sum(
+                    fn (Transaction $transaction) => $transaction->currency->nearestRate($transaction->date) * $transaction->value / $displayCurrency->nearestRate($transaction->date)
+                ),
+            ])
+            ->values()
+            ->toArray();
     }
 }
