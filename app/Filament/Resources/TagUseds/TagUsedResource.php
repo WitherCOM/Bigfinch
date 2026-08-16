@@ -20,12 +20,6 @@ class TagUsedResource extends Resource
 {
     protected static ?string $model = Tag::class;
     protected static string | UnitEnum | null $navigationGroup = NavGroup::ANALYTICS;
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()->where('user_id', auth()->id());
-    }
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Schema $schema): Schema
