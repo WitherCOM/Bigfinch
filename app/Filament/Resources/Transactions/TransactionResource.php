@@ -17,6 +17,7 @@ use App\Filament\Forms\Components\PrettyJsonField;
 use App\Filament\Resources\Transactions\Pages\CreateTransaction;
 use App\Filament\Resources\Transactions\Pages\EditTransaction;
 use App\Filament\Resources\Transactions\Pages\ListTransactions;
+use App\Filament\Resources\Transactions\RelationManagers\MergedTransactionsRelationManager;
 use App\Filament\Tables\Columns\WorkingSelectColumn;
 use App\Models\Category;
 use App\Models\Transaction;
@@ -192,7 +193,7 @@ class TransactionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            MergedTransactionsRelationManager::class,
         ];
     }
 
