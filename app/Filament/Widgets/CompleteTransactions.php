@@ -3,7 +3,6 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\Direction;
-use App\Filament\Actions\Transactions\KeepOnlyAction;
 use App\Filament\Actions\Transactions\MergeBulkAction;
 use App\Filament\Actions\Transactions\SplitAction;
 use App\Filament\Forms\Components\ContextTagsInput;
@@ -92,9 +91,6 @@ class CompleteTransactions extends TableWidget
                     ->requiresConfirmation(false)
                     ->label(__('Exclude')),
                 ActionGroup::make([
-                    KeepOnlyAction::make('keep_only')
-                        ->authorize('update')
-                        ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE),
                     SplitAction::make('split')
                         ->authorize('update')
                         ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE)
