@@ -38,6 +38,24 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\EditAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use App\Filament\Resources\Transactions\Pages\ListTransactions;
+use App\Filament\Resources\Transactions\Pages\CreateTransaction;
+use App\Filament\Resources\Transactions\Pages\EditTransaction;
+use App\Enums\Direction;
+use App\Filament\Actions\Transactions\MergeBulkAction;
+use App\Filament\Actions\Transactions\RunEngineBulkAction;
+use App\Filament\Actions\Transactions\SplitAction;
+use App\Models\Category;
+use App\Models\Transaction;
+use Carbon\Carbon;
+use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -46,10 +64,9 @@ use UnitEnum;
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
+    protected static string | UnitEnum | null $navigationGroup = NavGroup::TRANSACTIONS;
 
-    protected static string|UnitEnum|null $navigationGroup = NavGroup::TRANSACTIONS;
-
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-cart';
 
     public static function getEloquentQuery(): Builder
     {
@@ -162,9 +179,6 @@ class TransactionResource extends Resource
                     SetOriginalAction::make('set_original')
                         ->visible(fn (Transaction $record) => ! is_null($record->open_banking_transaction))
                         ->authorize('update'),
-                    KeepOnlyAction::make('keep_only')
-                        ->authorize('update')
-                        ->visible(fn (Transaction $record) => $record->direction === Direction::EXPENSE),
                     SplitAction::make('split')
                         ->authorize('update')
                         ->visible(fn (Transaction $record) => $record->direction === Direction::EXPENSE),
