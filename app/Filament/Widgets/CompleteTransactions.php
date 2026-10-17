@@ -6,17 +6,14 @@ use App\Enums\Direction;
 use App\Filament\Actions\Transactions\MergeBulkAction;
 use App\Filament\Actions\Transactions\SplitAction;
 use App\Filament\Forms\Components\ContextTagsInput;
-use App\Filament\Tables\Columns\WorkingSelectColumn;
-use App\Models\Category;
 use App\Models\Transaction;
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -32,7 +29,6 @@ class CompleteTransactions extends TableWidget
 
     public function table(Table $table): Table
     {
-        $categories = Category::all();
         $user = Auth::user();
         return $table
             ->query(fn (): Builder => Transaction::query()
@@ -47,8 +43,6 @@ class CompleteTransactions extends TableWidget
             ->columns([
                 TextColumn::make('date')
                     ->dateTime('Y-m-d H:i:s', $user->user_timezone),
-                WorkingSelectColumn::make('category_id')
-                    ->options(fn (Transaction $record) => $categories->pluck('name', 'id')),
                 TextColumn::make('formatted_value')
                     ->color(function (Transaction $transaction) {
                         if ($transaction->direction == Direction::INTERNAL_TO || $transaction->direction == Direction::INTERNAL_FROM){
@@ -75,16 +69,29 @@ class CompleteTransactions extends TableWidget
                 //
             ])
             ->recordActions([
-                EditAction::make()
+                Action::make('book_transaction')
+                    ->hiddenLabel(true)
+                    ->icon('heroicon-o-book-open')
+                    ->fillForm(fn (Transaction $record): array => [
+                        'description' => $record->description,
+                        'tags' => $record->tags,
+                        'category_id' => $record->category_id,
+                        'direction' => $record->direction,
+                    ])
                     ->schema([
-                        TextInput::make('description'),
-                        ContextTagsInput::make('tags'),
+                        Select::make('category_id')
+                            ->required()
+                            ->label(__('Category'))
+                            ->options(fn () => Category::query()->pluck('name', 'id')),
                         Select::make('direction')
                             ->required()
                             ->live()
                             ->options(Direction::class)
-                            ->enum(Direction::class)
-                    ]),
+                            ->enum(Direction::class),
+                        TextInput::make('description'),
+                        ContextTagsInput::make('tags'),
+                    ])
+                    ->action(fn (Transaction $record, array $data) => $record->update($data)),
                 DeleteAction::make()
                     ->icon('')
                     ->modal(false)
