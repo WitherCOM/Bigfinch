@@ -6,6 +6,7 @@ use App\Enums\Direction;
 use App\Filament\Actions\Transactions\MergeBulkAction;
 use App\Filament\Actions\Transactions\SplitAction;
 use App\Filament\Forms\Components\ContextTagsInput;
+use App\Models\Category;
 use App\Models\Transaction;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -70,7 +71,7 @@ class CompleteTransactions extends TableWidget
             ])
             ->recordActions([
                 Action::make('book_transaction')
-                    ->hiddenLabel(true)
+                    ->hiddenLabel()
                     ->icon('heroicon-o-book-open')
                     ->fillForm(fn (Transaction $record): array => [
                         'description' => $record->description,
