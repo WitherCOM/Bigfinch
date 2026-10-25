@@ -19,6 +19,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use MarcelWeidum\Passkeys\PasskeysPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -55,6 +56,7 @@ class AppPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            ->plugin(PasskeysPlugin::make())
             ->when(
                 ! app()->isProduction() && class_exists(FilamentDeveloperLoginsPlugin::class),
                 fn (Panel $panel) => $panel->plugin(
