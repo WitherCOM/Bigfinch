@@ -77,6 +77,7 @@ class IntegrationResource extends Resource
                         $record->deleteRequisition();
                         $record->createRequisition();
                         $record->save();
+                        redirect($record->link);
                     })
                     ->visible(fn (Integration $record): bool => $record->expired),
                 EditAction::make()
