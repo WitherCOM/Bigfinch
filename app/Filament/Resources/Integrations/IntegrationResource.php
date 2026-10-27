@@ -61,7 +61,7 @@ class IntegrationResource extends Resource
                 CheckboxColumn::make('can_auto_sync'),
                 TextColumn::make('last_synced_at')
                     ->timezone($user->user_timezone)
-                    ->color(fn (Integration $record) => $record->last_synced_at->lt(Carbon::today()) ? 'danger' : 'success'),
+                    ->color(fn (Integration $record) => ($record->last_synced_at?->lt(Carbon::today()) ?? true) ? 'danger' : 'success'),
             ])
             ->filters([
                 //

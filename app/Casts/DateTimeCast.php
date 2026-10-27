@@ -10,11 +10,11 @@ class DateTimeCast implements CastsAttributes
 {
     public function get(Model $model, string $key, mixed $value, array $attributes): ?Carbon
     {
-        return Carbon::parse($value);
+        return is_null($value) ? null : Carbon::parse($value);
     }
 
     public function set(Model $model, string $key, mixed $value, array $attributes)
     {
-        return Carbon::parse($value)->setTimezone(config('app.timezone'));
+        return is_null($value) ? null : Carbon::parse($value)->setTimezone(config('app.timezone'));
     }
 }
