@@ -12,6 +12,14 @@ class EditProfile extends BaseEditProfile
 {
     public function mount(): void
     {
+        $confirmedAt = (int) session('auth.password_confirmed_at', 0);
+
+        if (time() - $confirmedAt > config('auth.password_timeout')) {
+            redirect()->guest(route('password.confirm'));
+
+            return;
+        }
+
         parent::mount();
         $this->form->fill([
             ...$this->data,
