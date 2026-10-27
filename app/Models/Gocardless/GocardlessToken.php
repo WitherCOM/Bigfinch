@@ -53,7 +53,7 @@ class GocardlessToken extends Model
     public static function available(): static
     {
         return static::all()
-            ->first(fn (self $token) => $token->active_integrations->count() < $token->max_connections)
+            ->first(fn (self $token) => $token->active_integrations_count < $token->max_connections)
             ?? throw new GocardlessException('No GoCardless tokens with available connections.');
     }
 
