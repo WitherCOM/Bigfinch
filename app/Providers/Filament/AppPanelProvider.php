@@ -2,9 +2,11 @@
 
 namespace App\Providers\Filament;
 
+use App\Enums\NavGroup;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\MyDashboard;
 use App\Models\User;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use DutchCodingCompany\FilamentDeveloperLogins\FilamentDeveloperLoginsPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -55,6 +57,10 @@ class AppPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+            ])
+            ->plugins([
+                FilamentShieldPlugin::make()
+                    ->navigationGroup(NavGroup::ADMIN),
             ])
             ->plugin(PasskeysPlugin::make())
             ->when(

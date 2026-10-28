@@ -15,11 +15,12 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Laravel\Passkeys\Contracts\PasskeyUser;
 use Laravel\Passkeys\PasskeyAuthenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable;
+    use HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -30,7 +31,7 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
         'name',
         'email',
         'password',
-        'can_manage_settings'
+        'can_manage_settings',
     ];
 
     /**
@@ -83,49 +84,55 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
         return $this->hasMany(Category::class);
     }
 
-    public function defaultCurrencyId(): Attribute {
+    public function defaultCurrencyId(): Attribute
+    {
         return Attribute::get(function () {
-            if (!isset($this->settings['default_currency_id'])) {
+            if (! isset($this->settings['default_currency_id'])) {
                 $settings = $this->settings;
                 $settings['default_currency_id'] = Currency::first()->id;
                 $this->settings = $settings;
                 $this->save();
             }
+
             return $this->settings['default_currency_id'];
         });
     }
 
-    public function userTimezone(): Attribute {
+    public function userTimezone(): Attribute
+    {
         return Attribute::make(get: function () {
-            if (!isset($this->settings['user_timezone'])) {
+            if (! isset($this->settings['user_timezone'])) {
                 $settings = $this->settings;
                 $settings['user_timezone'] = config('app.timezone');
                 $this->settings = $settings;
                 $this->save();
             }
+
             return $this->settings['user_timezone'];
         },
-        set: function ($value) {
-            if (!isset($this->settings['user_timezone'])) {
-                $settings = $this->settings;
-                $settings['user_timezone'] = $value;
-                return ['settings' => json_encode($settings)];
-            }
-        });
+            set: function ($value) {
+                if (! isset($this->settings['user_timezone'])) {
+                    $settings = $this->settings;
+                    $settings['user_timezone'] = $value;
+
+                    return ['settings' => json_encode($settings)];
+                }
+            });
     }
 
     public function getStatisticalTransactionData(Carbon $fromDate, Direction $direction, Currency $displayCurrency): Collection
     {
         $rawTransactions = $this->transactions()
-            ->with(['currency','currency.rates'])
+            ->with(['currency', 'currency.rates'])
             ->where('direction', $direction->value)
-            ->where('date','>=', $fromDate)
+            ->where('date', '>=', $fromDate)
             ->orderBy('date')
             ->get();
-        return $rawTransactions->map(fn(Transaction $transaction) => [
+
+        return $rawTransactions->map(fn (Transaction $transaction) => [
             'date' => $transaction->date,
             'category' => $transaction->category?->name ?? __('Other'),
-            'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value / $displayCurrency->nearestRate($transaction->date)
+            'value' => $transaction->currency->nearestRate($transaction->date) * $transaction->value / $displayCurrency->nearestRate($transaction->date),
         ]);
     }
 }
