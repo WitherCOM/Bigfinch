@@ -11,11 +11,19 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class InvitationTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function createAdminUser(): User
+    {
+        $role = Role::firstOrCreate(['name' => config('filament-shield.super_admin.name'), 'guard_name' => 'web']);
+
+        return User::factory()->create()->assignRole($role);
+    }
 
     // ─────────────────────────────────────────────────────────────────────────
     // LIST PAGE
@@ -33,7 +41,7 @@ class InvitationTest extends TestCase
 
     public function test_list_invitations_page_is_accessible_for_admin_user(): void
     {
-        $admin = User::factory()->create(['can_manage_settings' => true]);
+        $admin = $this->createAdminUser();
 
         $this->actingAs($admin);
 
@@ -65,7 +73,7 @@ class InvitationTest extends TestCase
 
     public function test_admin_list_shows_only_admin_own_invitations(): void
     {
-        $admin = User::factory()->create(['can_manage_settings' => true]);
+        $admin = $this->createAdminUser();
         $otherUser = User::factory()->create();
 
         $adminInvitation = Invitation::factory()->create([
@@ -101,7 +109,7 @@ class InvitationTest extends TestCase
 
     public function test_create_invitation_page_is_accessible_for_admin_user(): void
     {
-        $admin = User::factory()->create(['can_manage_settings' => true]);
+        $admin = $this->createAdminUser();
 
         $this->actingAs($admin);
 
@@ -135,7 +143,7 @@ class InvitationTest extends TestCase
     {
         Mail::fake();
 
-        $admin = User::factory()->create(['can_manage_settings' => true]);
+        $admin = $this->createAdminUser();
 
         $this->actingAs($admin);
 
@@ -233,7 +241,7 @@ class InvitationTest extends TestCase
     {
         Mail::fake();
 
-        $admin = User::factory()->create(['can_manage_settings' => true]);
+        $admin = $this->createAdminUser();
 
         $this->actingAs($admin);
 
@@ -455,7 +463,7 @@ class InvitationTest extends TestCase
 
     public function test_admin_can_delete_own_invitation(): void
     {
-        $admin = User::factory()->create(['can_manage_settings' => true]);
+        $admin = $this->createAdminUser();
 
         $invitation = Invitation::factory()->create([
             'user_id' => $admin->id,

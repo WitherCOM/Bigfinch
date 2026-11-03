@@ -23,13 +23,11 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Test Admin',
             'email' => 'test-admin@example.com',
-            'can_manage_settings' => true,
             'password' => bcrypt('password'),
         ])->assignRole($adminRole);
         User::factory()->create([
             'name' => 'Test Normal',
             'email' => 'test-normal@example.com',
-            'can_manage_settings' => false,
             'password' => bcrypt('password'),
         ]);
         $this->call(CurrencySeeder::class);

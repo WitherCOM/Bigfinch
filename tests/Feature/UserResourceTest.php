@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Pages\Maintenance;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\UserResource;
+use App\Models\Currency;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -80,5 +82,24 @@ class UserResourceTest extends TestCase
 
         Livewire::test(ListUsers::class)
             ->assertTableActionHidden('editRoles', $target);
+    }
+
+    public function test_settings_resources_require_permissions_instead_of_flag(): void
+    {
+        $user = User::factory()->create();
+        $this->assertFalse($user->can('viewAny', Currency::class));
+        $this->assertFalse(Maintenance::canAccess());
+
+        $user->givePermissionTo(Permission::create(['name' => 'ViewAny:Currency', 'guard_name' => 'web']));
+        $this->assertTrue($user->fresh()->can('viewAny', Currency::class));
+    }
+
+    public function test_super_admin_can_manage_settings(): void
+    {
+        $role = Role::create(['name' => config('filament-shield.super_admin.name'), 'guard_name' => 'web']);
+        $this->actingAs(User::factory()->create()->assignRole($role));
+
+        $this->assertTrue(Maintenance::canAccess());
+        $this->assertTrue(auth()->user()->can('viewAny', Currency::class));
     }
 }

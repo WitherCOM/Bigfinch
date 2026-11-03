@@ -12,13 +12,13 @@ use Filament\Support\Icons\Heroicon;
 
 class Maintenance extends Page
 {
-    protected static string | \UnitEnum | null $navigationGroup = NavGroup::ADMIN;
+    protected static string|\UnitEnum|null $navigationGroup = NavGroup::ADMIN;
 
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->can_manage_settings ?? false;
+        return auth()->user()?->can('View:Maintenance') ?? false;
     }
 
     public function content(Schema $schema): Schema

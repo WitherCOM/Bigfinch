@@ -31,7 +31,6 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
         'name',
         'email',
         'password',
-        'can_manage_settings',
     ];
 
     /**
@@ -55,7 +54,6 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'settings' => 'array',
-            'can_manage_settings' => 'boolean',
         ];
     }
 

@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Users\Tables;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
@@ -30,8 +29,6 @@ class UsersTable
                 TextColumn::make('roles.name')
                     ->label('Roles')
                     ->badge(),
-                IconColumn::make('can_manage_settings')
-                    ->boolean(),
                 TextColumn::make('created_at')
                     ->timezone($user->user_timezone)
                     ->dateTime()
