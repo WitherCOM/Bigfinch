@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Integration;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class IntegrationPolicy
 {
@@ -13,7 +12,7 @@ class IntegrationPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->can('ViewAny:Integration');
     }
 
     /**
@@ -21,7 +20,7 @@ class IntegrationPolicy
      */
     public function view(User $user, Integration $integration): bool
     {
-        return $integration->user_id === $user->id;
+        return $user->can('View:Integration') && $integration->user_id === $user->id;
     }
 
     /**
@@ -29,7 +28,7 @@ class IntegrationPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return $user->can('Create:Integration');
     }
 
     /**
@@ -37,7 +36,7 @@ class IntegrationPolicy
      */
     public function update(User $user, Integration $integration): bool
     {
-        return $integration->user_id === $user->id;
+        return $user->can('Update:Integration') && $integration->user_id === $user->id;
     }
 
     /**
@@ -45,6 +44,6 @@ class IntegrationPolicy
      */
     public function delete(User $user, Integration $integration): bool
     {
-        return $integration->user_id === $user->id;
+        return $user->can('Delete:Integration') && $integration->user_id === $user->id;
     }
 }

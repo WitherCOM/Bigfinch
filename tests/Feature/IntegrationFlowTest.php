@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class IntegrationFlowTest extends TestCase
@@ -31,6 +32,9 @@ class IntegrationFlowTest extends TestCase
         parent::setUp();
         $this->seed(CurrencySeeder::class);
         $this->user = User::factory()->create();
+        foreach (['ViewAny', 'View', 'Create', 'Update', 'Delete'] as $ability) {
+            $this->user->givePermissionTo(Permission::findOrCreate($ability.':Integration', 'web'));
+        }
         $this->user->user_timezone = 'Europe/Budapest';
         $this->user->save();
         $this->actingAs($this->user);

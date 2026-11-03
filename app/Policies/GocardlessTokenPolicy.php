@@ -12,7 +12,7 @@ class GocardlessTokenPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can_manage_settings;
+        return $user->can('ViewAny:GocardlessToken');
     }
 
     /**
@@ -20,7 +20,7 @@ class GocardlessTokenPolicy
      */
     public function view(User $user, GocardlessToken $token): bool
     {
-        return $user->can_manage_settings;
+        return $user->can('View:GocardlessToken');
     }
 
     /**
@@ -28,7 +28,7 @@ class GocardlessTokenPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can_manage_settings;
+        return $user->can('Create:GocardlessToken');
     }
 
     /**
@@ -36,7 +36,7 @@ class GocardlessTokenPolicy
      */
     public function update(User $user, GocardlessToken $token): bool
     {
-        return $user->can_manage_settings;
+        return $user->can('Update:GocardlessToken');
     }
 
     /**
@@ -44,6 +44,6 @@ class GocardlessTokenPolicy
      */
     public function delete(User $user, GocardlessToken $token): bool
     {
-        return $user->can_manage_settings;
+        return $user->can('Delete:GocardlessToken');
     }
 }

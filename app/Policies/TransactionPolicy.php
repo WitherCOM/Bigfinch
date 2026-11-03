@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Transaction;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class TransactionPolicy
 {
@@ -13,7 +12,7 @@ class TransactionPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->can('ViewAny:Transaction');
     }
 
     /**
@@ -21,7 +20,7 @@ class TransactionPolicy
      */
     public function view(User $user, Transaction $transaction): bool
     {
-        return $transaction->user_id === $user->id;
+        return $user->can('View:Transaction') && $transaction->user_id === $user->id;
     }
 
     /**
@@ -29,7 +28,7 @@ class TransactionPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return $user->can('Create:Transaction');
     }
 
     /**
@@ -37,7 +36,7 @@ class TransactionPolicy
      */
     public function update(User $user, Transaction $transaction): bool
     {
-        return ($transaction->user_id === $user->id) && !$transaction->trashed();
+        return $user->can('Update:Transaction') && ($transaction->user_id === $user->id) && ! $transaction->trashed();
     }
 
     /**
@@ -45,15 +44,14 @@ class TransactionPolicy
      */
     public function delete(User $user, Transaction $transaction): bool
     {
-        return $transaction->user_id === $user->id;
+        return $user->can('Delete:Transaction') && $transaction->user_id === $user->id;
     }
-
 
     /**
      * Determine whether the user can force delete the model.
      */
     public function forceDelete(User $user, Transaction $transaction): bool
     {
-        return $transaction->user_id === $user->id;
+        return $user->can('ForceDelete:Transaction') && $transaction->user_id === $user->id;
     }
 }

@@ -12,6 +12,7 @@ use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class TransactionTest extends TestCase
@@ -22,6 +23,11 @@ class TransactionTest extends TestCase
     {
         parent::setUp();
         $user = User::factory()->create();
+        foreach (['Transaction', 'Category'] as $model) {
+            foreach (['ViewAny', 'View', 'Create', 'Update', 'Delete', 'ForceDelete'] as $ability) {
+                $user->givePermissionTo(Permission::findOrCreate($ability.':'.$model, 'web'));
+            }
+        }
         $user->user_timezone = 'Europe/Budapest';
         $user->save();
         $this->actingAs($user);
