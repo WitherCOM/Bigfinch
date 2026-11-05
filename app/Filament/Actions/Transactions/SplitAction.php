@@ -6,6 +6,7 @@ use Filament\Actions\Action;
 use App\Models\Transaction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
@@ -14,7 +15,8 @@ class SplitAction extends Action
     public function setUp(): void
     {
         parent::setUp();
-        $this->form([
+        $this->icon(Heroicon::ArrowsRightLeft);
+        $this->schema([
             TextInput::make('value')
                 ->required()
                 ->minValue(0)

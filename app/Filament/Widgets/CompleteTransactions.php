@@ -6,6 +6,7 @@ use App\Enums\Direction;
 use App\Filament\Actions\Transactions\MergeBulkAction;
 use App\Filament\Actions\Transactions\SplitAction;
 use App\Filament\Forms\Components\ContextTagsInput;
+use App\Filament\Forms\Components\ContextTextInput;
 use App\Models\Category;
 use App\Models\Transaction;
 use Filament\Actions\Action;
@@ -16,6 +17,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
@@ -81,7 +83,8 @@ class CompleteTransactions extends TableWidget
                     ])
                     ->schema([
                         Select::make('category_id')
-                            ->required()
+                            ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE || $record->direction === Direction::INCOME)
+                            ->requiredIf('direction', [Direction::EXPENSE->value, Direction::INCOME->value])
                             ->label(__('Category'))
                             ->options(fn () => Category::query()->pluck('name', 'id')),
                         Select::make('direction')
@@ -90,11 +93,12 @@ class CompleteTransactions extends TableWidget
                             ->options(Direction::class)
                             ->enum(Direction::class),
                         TextInput::make('description'),
+                        ContextTextInput::make('merchant'),
                         ContextTagsInput::make('tags'),
                     ])
                     ->action(fn (Transaction $record, array $data) => $record->update($data)),
                 DeleteAction::make()
-                    ->icon('')
+                    ->icon(Heroicon::XMark)
                     ->modal(false)
                     ->requiresConfirmation(false)
                     ->label(__('Exclude')),
