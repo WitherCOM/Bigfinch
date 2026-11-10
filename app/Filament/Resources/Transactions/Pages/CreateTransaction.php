@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Transactions\Pages;
 
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\Transaction;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;

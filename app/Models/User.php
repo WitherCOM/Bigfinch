@@ -72,6 +72,11 @@ class User extends Authenticatable implements FilamentUser, PasskeyUser
         return $this->hasMany(Invitation::class);
     }
 
+    public function files(): HasMany
+    {
+        return $this->hasMany(File::class);
+    }
+
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);

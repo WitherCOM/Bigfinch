@@ -2,10 +2,9 @@
 
 namespace App\Filament\Resources\Transactions\Pages;
 
-use Filament\Actions\DeleteAction;
-use App\Filament\Resources\Transactions\Widgets\TransactionInfo;
 use App\Filament\Resources\Transactions\TransactionResource;
-use Filament\Actions;
+use App\Filament\Resources\Transactions\Widgets\TransactionInfo;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTransaction extends EditRecord
@@ -22,8 +21,7 @@ class EditTransaction extends EditRecord
     protected function getHeaderWidgets(): array
     {
         return [
-          TransactionInfo::class
+            TransactionInfo::class,
         ];
     }
-
 }

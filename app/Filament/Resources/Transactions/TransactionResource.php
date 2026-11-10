@@ -16,6 +16,7 @@ use App\Filament\Forms\Components\PrettyJsonField;
 use App\Filament\Resources\Transactions\Pages\CreateTransaction;
 use App\Filament\Resources\Transactions\Pages\EditTransaction;
 use App\Filament\Resources\Transactions\Pages\ListTransactions;
+use App\Filament\Resources\Transactions\RelationManagers\FilesRelationManager;
 use App\Filament\Tables\Columns\WorkingSelectColumn;
 use App\Models\Category;
 use App\Models\Transaction;
@@ -44,9 +45,10 @@ use UnitEnum;
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
-    protected static string | UnitEnum | null $navigationGroup = NavGroup::TRANSACTIONS;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static string|UnitEnum|null $navigationGroup = NavGroup::TRANSACTIONS;
+
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-cart';
 
     public static function getEloquentQuery(): Builder
     {
@@ -186,7 +188,7 @@ class TransactionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            FilesRelationManager::class,
         ];
     }
 
