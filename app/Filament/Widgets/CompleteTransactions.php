@@ -27,19 +27,21 @@ use Illuminate\Support\Facades\Auth;
 
 class CompleteTransactions extends TableWidget
 {
-    protected int | string | array $columnSpan = 2;
+    protected int|string|array $columnSpan = 2;
+
     protected static ?int $sort = 10;
 
     public function table(Table $table): Table
     {
         $user = Auth::user();
+
         return $table
             ->query(fn (): Builder => Transaction::query()
                 ->whereIn('direction', [
                     Direction::EXPENSE->value,
-                    Direction::INCOME->value
+                    Direction::INCOME->value,
                 ])
-                ->where('date','>', Carbon::now()->subMonths(2))
+                ->where('date', '>', Carbon::now()->subMonths(2))
                 ->whereNull('category_id')
             )
             ->defaultSort('date', 'desc')
@@ -48,13 +50,13 @@ class CompleteTransactions extends TableWidget
                     ->dateTime('Y-m-d H:i:s', $user->user_timezone),
                 TextColumn::make('formatted_value')
                     ->color(function (Transaction $transaction) {
-                        if ($transaction->direction == Direction::INTERNAL_TO || $transaction->direction == Direction::INTERNAL_FROM){
+                        if ($transaction->direction == Direction::INTERNAL_TO || $transaction->direction == Direction::INTERNAL_FROM) {
                             return 'info';
-                        } else if ($transaction->direction == Direction::INVESTMENT) {
+                        } elseif ($transaction->direction == Direction::INVESTMENT) {
                             return 'warning';
-                        } else if ($transaction->direction == Direction::EXPENSE) {
+                        } elseif ($transaction->direction == Direction::EXPENSE) {
                             return 'danger';
-                        } else if ($transaction->direction == Direction::INCOME) {
+                        } elseif ($transaction->direction == Direction::INCOME) {
                             return 'success';
                         } else {
                             return 'neutral';
@@ -77,15 +79,17 @@ class CompleteTransactions extends TableWidget
                     ->icon('heroicon-o-book-open')
                     ->fillForm(fn (Transaction $record): array => [
                         'description' => $record->description,
+                        'merchant' => $record->merchant,
                         'tags' => $record->tags,
                         'category_id' => $record->category_id,
                         'direction' => $record->direction,
                     ])
                     ->schema([
                         Select::make('category_id')
-                            ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE || $record->direction === Direction::INCOME)
+                            ->visible(fn (Transaction $record) => $record->direction === Direction::EXPENSE || $record->direction === Direction::INCOME)
                             ->requiredIf('direction', [Direction::EXPENSE->value, Direction::INCOME->value])
                             ->label(__('Category'))
+                            ->live()
                             ->options(fn () => Category::query()->pluck('name', 'id')),
                         Select::make('direction')
                             ->required()
@@ -105,8 +109,8 @@ class CompleteTransactions extends TableWidget
                 ActionGroup::make([
                     SplitAction::make('split')
                         ->authorize('update')
-                        ->visible(fn(Transaction $record) => $record->direction === Direction::EXPENSE)
-                ])
+                        ->visible(fn (Transaction $record) => $record->direction === Direction::EXPENSE),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -115,7 +119,7 @@ class CompleteTransactions extends TableWidget
                         ->label('Exclude'),
                     MergeBulkAction::make('merge'),
                     ForceDeleteBulkAction::make()
-                        ->visible()
+                        ->visible(),
                 ]),
             ]);
     }
